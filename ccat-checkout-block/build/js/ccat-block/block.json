@@ -1,0 +1,30 @@
+{
+  "apiVersion": 2,
+  "title": "woocommerce-gateway-ccat/ccat-block",
+  "name": "woocommerce-gateway-ccat/ccat-block",
+  "version": "1.0.0",
+  "category": "woocommerce",
+  "supports": {
+    "html": false,
+    "align": false,
+    "multiple": false,
+    "reusable": false
+  },
+  "parent": [
+    "woocommerce/checkout-contact-information-block"
+  ],
+  "attributes": {
+    "lock": {
+      "type": "object",
+      "default": {
+        "remove": true,
+        "move": true
+      }
+    },
+    "text": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "textdomain": "woocommerce-gateway-ccat"
+}
