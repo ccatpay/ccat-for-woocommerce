@@ -57,7 +57,7 @@ class WC_Gateway_CCat_Cvs_Ibon extends WC_Gateway_CCat_Cvs_Abstract {
 				'title'       => __( '付款標題', 'woocommerce-gateway-ccat' ),
 				'type'        => 'text',
 				'description' => __( '使用者選擇付款時顯示的文字', 'woocommerce-gateway-ccat' ),
-				'default'     => __( '黑貓Pay - CVS超商銀行繳款', 'woocommerce-gateway-ccat' ),
+				'default'     => __( '黑貓Pay - Ibon繳款', 'woocommerce-gateway-ccat' ),
 				'desc_tip'    => true,
 			),
 		);

@@ -1,5 +1,5 @@
 const ccatPaymentConfig = window.wc.wcSettings.getSetting('ccat_payment_credit_card_data', {});
-const ccatPaymentLabel = window.wp.htmlEntities.decodeEntities(ccatPaymentConfig.title) || window.wp.i18n.__('黑貓Pay', '黑貓Pay');
+const ccatPaymentLabel = window.wp.htmlEntities.decodeEntities(ccatPaymentConfig.title) || window.wp.i18n.__('玉山銀行', '玉山銀行');
 const ccatPaymentContent = () => {
     return window.wp.htmlEntities.decodeEntities(ccatPaymentConfig.description);
 };

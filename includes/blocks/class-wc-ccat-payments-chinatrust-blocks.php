@@ -55,7 +55,7 @@ final class WC_Gateway_CCat_Chinatrust_Blocks_Support extends AbstractPaymentMet
 		$script_url  = WC_CCat_Payments::plugin_url() . $script_path;
 
 		wp_register_script(
-			'wc-ccat-payments-blocks',
+			'wc-ccat-chinatrust-payments-blocks',
 			$script_url,
 			array(
 				'wc-blocks-registry',
@@ -68,10 +68,10 @@ final class WC_Gateway_CCat_Chinatrust_Blocks_Support extends AbstractPaymentMet
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-ccat-payments-blocks', 'woocommerce-gateway-ccat', WC_CCat_Payments::plugin_abspath() . 'languages/' );
+			wp_set_script_translations( 'wc-ccat-chinatrust-payments-blocks', 'woocommerce-gateway-ccat', WC_CCat_Payments::plugin_abspath() . 'languages/' );
 		}
 
-		return array( 'wc-ccat-payments-blocks' );
+		return array( 'wc-ccat-chinatrust-payments-blocks' );
 	}
 
 	/**

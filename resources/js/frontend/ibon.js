@@ -1,5 +1,5 @@
 const ccatIbonPaymentConfig = window.wc.wcSettings.getSetting('ccat_payment_cvs_ibon_data', {});
-const ccatIbonPaymentLabel = window.wp.htmlEntities.decodeEntities(ccatIbonPaymentConfig.title) || window.wp.i18n.__('統一金流', '統一金流');
+const ccatIbonPaymentLabel = window.wp.htmlEntities.decodeEntities(ccatIbonPaymentConfig.title) || window.wp.i18n.__('ibon', 'ibon');
 const ccatIbonPaymentContent = () => {
     return window.wp.htmlEntities.decodeEntities(ccatIbonPaymentConfig.description);
 };
