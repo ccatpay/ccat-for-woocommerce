@@ -20,7 +20,7 @@ require_once 'class-wc-gateway-ccat-abstract.php';
  * @class    WC_Gateway_CCat
  * @version  1.10.0
  */
-class WC_Gateway_CCat_UniPay extends WC_Gateway_CCat_Abstract
+class WC_Gateway_CCat_Payuni extends WC_Gateway_CCat_Abstract
 {
 
     /**
@@ -52,7 +52,7 @@ class WC_Gateway_CCat_UniPay extends WC_Gateway_CCat_Abstract
      *
      * @var string
      */
-    public $id = 'ccat_payment_uni_pay';
+    public $id = 'ccat_payment_pay_uni';
 
     /**
      * Constructor for the gateway.

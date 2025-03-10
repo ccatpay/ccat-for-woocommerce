@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
  *
  * @since 1.0.0
  */
-final class WC_Gateway_CCat_UniPay_Blocks_Support extends AbstractPaymentMethodType {
+final class WC_Gateway_CCat_Payuni_Blocks_Support extends AbstractPaymentMethodType {
 
 	/**
 	 * The gateway instance.
@@ -25,7 +25,7 @@ final class WC_Gateway_CCat_UniPay_Blocks_Support extends AbstractPaymentMethodT
 	 *
 	 * @var string
 	 */
-	protected $name = 'ccat_payment_uni_pay';
+	protected $name = 'ccat_payment_pay_uni';
 
 	/**
 	 * Initializes the payment method type.
@@ -50,11 +50,11 @@ final class WC_Gateway_CCat_UniPay_Blocks_Support extends AbstractPaymentMethodT
 	 * @return array
 	 */
 	public function get_payment_method_script_handles(): array {
-		$script_path = '/resources/js/frontend/uniPay.js';
+		$script_path = '/resources/js/frontend/payuni.js';
 		$script_url  = WC_CCat_Payments::plugin_url() . $script_path;
 
 		wp_register_script(
-			'wc-ccat-uniPay-payments-blocks',
+			'wc-ccat-payuni-payments-blocks',
 			$script_url,
 			array(
 				'wc-blocks-registry',
@@ -66,7 +66,7 @@ final class WC_Gateway_CCat_UniPay_Blocks_Support extends AbstractPaymentMethodT
 			true
 		);
 
-		return array( 'wc-ccat-uniPay-payments-blocks' );
+		return array( 'wc-ccat-payuni-payments-blocks' );
 	}
 
 	/**
