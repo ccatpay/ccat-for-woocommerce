@@ -20,7 +20,7 @@ require_once 'class-wc-gateway-ccat-abstract.php';
  * @class    WC_Gateway_CCat
  * @version  1.10.0
  */
-class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract
+class WC_Gateway_CCat_Chinatrust extends WC_Gateway_CCat_Abstract
 {
 
     /**
@@ -52,7 +52,7 @@ class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract
      *
      * @var string
      */
-    public $id = 'ccat_payment_credit_card';
+    public $id = 'ccat_payment_chinatrust';
 
     /**
      * Title
@@ -75,8 +75,8 @@ class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract
     public function __construct()
     {
 
-        $this->title = __('黑貓Pay - 信用卡(玉山銀行)', 'woocommerce-gateway-ccat');
-        $this->description = __('使用黑貓Pay信用卡(玉山銀行)付款，付款更安心。', 'woocommerce-gateway-ccat');
+        $this->title = __('黑貓Pay - 信用卡(中國信託)', 'woocommerce-gateway-ccat');
+        $this->description = __('使用黑貓Pay信用卡(中國信託)付款，付款更安心。', 'woocommerce-gateway-ccat');
         parent::__construct();
     }
 
@@ -98,7 +98,7 @@ class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract
                 'title' => __('付款標題', 'woocommerce-gateway-ccat'),
                 'type' => 'text',
                 'description' => __('使用者選擇付款時顯示的文字', 'woocommerce-gateway-ccat'),
-                'default' => __('黑貓Pay - 信用卡(玉山銀行)', 'woocommerce-gateway-ccat'),
+                'default' => __('黑貓Pay - 信用卡(中國信託)', 'woocommerce-gateway-ccat'),
                 'desc_tip' => true,
             ),
         );
@@ -111,7 +111,7 @@ class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract
      */
     public function acquirer_type(): string
     {
-        return 'esun';
+        return 'chinatrust';
     }
 
 }

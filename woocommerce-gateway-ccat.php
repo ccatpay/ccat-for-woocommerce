@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 if (!defined('WC_CCAT_PAYMENTS_VERSION')) {
-    define('WC_CCAT_PAYMENTS_VERSION', '1.10.2');
+    define('WC_CCAT_PAYMENTS_VERSION', '1.10.0');
 }
 
 /**
@@ -78,6 +78,7 @@ class WC_CCat_Payments
     {
         if (self::is_ccat_enabled()) {
             $gateways[] = 'WC_Gateway_CCat_Credit_Card';
+            $gateways[] = 'WC_Gateway_CCat_Chinatrust';
             $gateways[] = 'WC_Gateway_CCat_Payuni';
             $gateways[] = 'WC_Gateway_CCat_Cvs_Ibon';
             $gateways[] = 'WC_Gateway_CCat_Cvs_Atm';
@@ -121,6 +122,7 @@ class WC_CCat_Payments
             require_once 'includes/class-wc-gateway-ccat-abstract.php';
             require_once 'includes/class-wc-gateway-ccat-cvs-abstract.php';
             require_once 'includes/class-wc-gateway-ccat-credit-card.php';
+            require_once 'includes/class-wc-gateway-ccat-chinatrust.php';
             require_once 'includes/class-wc-gateway-ccat-payuni.php';
             require_once 'includes/class-wc-gateway-ccat-cvs-ibon.php';
             require_once 'includes/class-wc-gateway-ccat-cvs-atm.php';
@@ -176,6 +178,7 @@ class WC_CCat_Payments
     {
         if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType') && self::is_ccat_enabled()) {
             require_once 'includes/blocks/class-wc-ccat-payments-credit-card-blocks.php';
+            require_once 'includes/blocks/class-wc-ccat-payments-chinatrust-blocks.php';
             require_once 'includes/blocks/class-wc-ccat-payments-payuni-blocks.php';
             require_once 'includes/blocks/class-wc-ccat-payments-ibon-blocks.php';
             require_once 'includes/blocks/class-wc-ccat-payments-atm-blocks.php';
@@ -187,6 +190,7 @@ class WC_CCat_Payments
                 'woocommerce_blocks_payment_method_type_registration',
                 function (Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry) {
                     $payment_method_registry->register(new WC_Gateway_CCat_Credit_Card_Blocks_Support());
+                    $payment_method_registry->register(new WC_Gateway_CCat_Chinatrust_Blocks_Support());
                     $payment_method_registry->register(new WC_Gateway_CCat_Payuni_Blocks_Support());
                     $payment_method_registry->register(new WC_Gateway_CCat_Ibon_Blocks_Support());
                     $payment_method_registry->register(new WC_Gateway_CCat_Atm_Blocks_Support());
