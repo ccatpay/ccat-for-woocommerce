@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: WooCommerce CCat Payments Gateway
- * Plugin URI: https://somewherewarm.com/
+ * Plugin URI: https://www.ccat.com.tw/
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
- * Version: 1.10.0
+ * Version: 1.10.2
  *
  * Text Domain: woocommerce-gateway-ccat
  * Domain Path: /i18n/languages/
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 if (!defined('WC_CCAT_PAYMENTS_VERSION')) {
-    define('WC_CCAT_PAYMENTS_VERSION', '1.10.0');
+    define('WC_CCAT_PAYMENTS_VERSION', '1.10.2');
 }
 
 /**

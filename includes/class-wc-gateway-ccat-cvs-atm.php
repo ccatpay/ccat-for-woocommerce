@@ -113,4 +113,14 @@ class WC_Gateway_CCat_Cvs_Atm extends WC_Gateway_CCat_Cvs_Abstract
     {
         return '1';
     }
+
+    /**
+     * Retrieves the configured acquirer type for the payment gateway.
+     *
+     * @return string The acquirer type as configured in the gateway settings.
+     */
+    public function acquirer_type(): string
+    {
+        return '0';
+    }
 }

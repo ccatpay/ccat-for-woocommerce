@@ -4,7 +4,7 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 4.2
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.10.0
+Stable tag: 1.10.2
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,14 @@ CCat Payments Gateway 提供多種台灣本地支付方式：
 * 新增：支援最新版 WooCommerce 6.6
 * 改進：電子發票整合功能
 * 修正：結帳區塊顯示問題
+
+= 1.10.1 =
+
+* 新增：線上刷卡區分玉山銀、中信銀、統一金流
+
+= 1.10.2 =
+
+* 修正：文字用詞改善
 
 == Screenshots ==
 
