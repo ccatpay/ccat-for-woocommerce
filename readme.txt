@@ -1,5 +1,5 @@
-=== WooCommerce CCat Payments Gateway ===
-Contributors: sakilu
+=== ccatpay Payment for WooCommerce ===
+Contributors: ccat
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 4.2
 Tested up to: 6.6
@@ -12,7 +12,7 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 == Description ==
 
-CCat Payments Gateway 提供多種台灣本地支付方式：
+ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 信用卡支付
 * 超商代碼付款（全家/7-11/萊爾富）
@@ -29,7 +29,7 @@ CCat Payments Gateway 提供多種台灣本地支付方式：
 
 == Installation ==
 
-1. 上傳 `woocommerce-gateway-ccat` 資料夾至 `/wp-content/plugins/` 目錄
+1. 上傳 `ccat-for-woocommerce` 資料夾至 `/wp-content/plugins/` 目錄
 2. 在後台啟用插件
 3. 前往 WooCommerce > 設定 > 黑貓Pay 設定您的金流
 
@@ -39,7 +39,7 @@ CCat Payments Gateway 提供多種台灣本地支付方式：
 本插件支援 WooCommerce 3.0 以上版本。
 
 = 如何設定電子發票？ =
-前往 WooCommerce > CCat 設定 > 發票設定 啟用並設定。
+前往 WooCommerce > 設定 > 黑貓Pay > 發票設定 啟用並設定。
 
 == Changelog ==
 
