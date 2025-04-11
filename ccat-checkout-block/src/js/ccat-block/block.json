@@ -1,7 +1,7 @@
 {
   "apiVersion": 2,
-  "title": "woocommerce-gateway-ccat/ccat-block",
-  "name": "woocommerce-gateway-ccat/ccat-block",
+  "title": "ccat-for-woocommerce/ccat-block",
+  "name": "ccat-for-woocommerce/ccat-block",
   "version": "1.0.0",
   "category": "woocommerce",
   "supports": {
@@ -26,5 +26,5 @@
       "default": ""
     }
   },
-  "textdomain": "woocommerce-gateway-ccat"
+  "textdomain": "ccat-for-woocommerce"
 }

@@ -34,8 +34,8 @@ class WC_Gateway_CCat_Cvs_Ibon extends WC_Gateway_CCat_Cvs_Abstract {
 	 */
 	public function __construct() {
 
-		$this->title        = __( '黑貓Pay - Ibon繳款', 'woocommerce-gateway-ccat' );
-		$this->description  = __( '使用黑貓Pay Ibon，付款更安心。', 'woocommerce-gateway-ccat' );
+		$this->title        = __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce' );
+		$this->description  = __( '使用黑貓Pay Ibon，付款更安心。', 'ccat-for-woocommerce' );
 //		$this->redirect_url = get_site_url( null, 'ccat-ibon' );
 //		WC_CCat_Payments::log( "> set url:" . $this->redirect_url );
 		parent::__construct();
@@ -48,16 +48,16 @@ class WC_Gateway_CCat_Cvs_Ibon extends WC_Gateway_CCat_Cvs_Abstract {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'   => __( '啟用', 'woocommerce-gateway-ccat' ),
+				'title'   => __( '啟用', 'ccat-for-woocommerce' ),
 				'type'    => 'checkbox',
-				'label'   => __( '啟用', 'woocommerce-gateway-ccat' ),
+				'label'   => __( '啟用', 'ccat-for-woocommerce' ),
 				'default' => 'yes',
 			),
 			'title'   => array(
-				'title'       => __( '付款標題', 'woocommerce-gateway-ccat' ),
+				'title'       => __( '付款標題', 'ccat-for-woocommerce' ),
 				'type'        => 'text',
-				'description' => __( '使用者選擇付款時顯示的文字', 'woocommerce-gateway-ccat' ),
-				'default'     => __( '黑貓Pay - Ibon繳款', 'woocommerce-gateway-ccat' ),
+				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce' ),
+				'default'     => __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce' ),
 				'desc_tip'    => true,
 			),
 		);

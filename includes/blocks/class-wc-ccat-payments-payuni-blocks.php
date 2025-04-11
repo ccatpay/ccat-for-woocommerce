@@ -4,6 +4,7 @@
  *
  * @package WooCommerceCCatGateway
  */
+
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
 /**

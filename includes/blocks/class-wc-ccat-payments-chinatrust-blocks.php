@@ -68,7 +68,7 @@ final class WC_Gateway_CCat_Chinatrust_Blocks_Support extends AbstractPaymentMet
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-ccat-chinatrust-payments-blocks', 'woocommerce-gateway-ccat', WC_CCat_Payments::plugin_abspath() . 'languages/' );
+			wp_set_script_translations( 'wc-ccat-chinatrust-payments-blocks', 'ccat-for-woocommerce', WC_CCat_Payments::plugin_abspath() . 'languages/' );
 		}
 
 		return array( 'wc-ccat-chinatrust-payments-blocks' );

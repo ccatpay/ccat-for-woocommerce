@@ -68,7 +68,7 @@ final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMe
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-ccat-payments-blocks', 'woocommerce-gateway-ccat', WC_CCat_Payments::plugin_abspath() . 'languages/' );
+			wp_set_script_translations( 'wc-ccat-payments-blocks', 'ccat-for-woocommerce', WC_CCat_Payments::plugin_abspath() . 'languages/' );
 		}
 
 		return array( 'wc-ccat-payments-blocks' );
