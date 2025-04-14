@@ -1,8 +1,8 @@
-=== ccatpay Payment for WooCommerce ===
+=== ccat-for-woocommerce ===
 Contributors: ccat
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 8.3
 Stable tag: 1.10.3
 License: GNU General Public License v3.0
@@ -57,6 +57,7 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 = 1.10.3 =
 
+* 新增：支援最新版 WooCommerce 6.7
 * 修正：ATM、超商三段式條碼服務暫時中止
 
 == Screenshots ==
