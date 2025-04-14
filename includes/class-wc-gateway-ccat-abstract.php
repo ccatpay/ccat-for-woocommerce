@@ -541,7 +541,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 
 			case 'E':
 				$note = __( '請款完成', 'ccat-for-woocommerce' );
-				$order->update_status( 'completed' );
+				//$order->update_status( 'completed' );
 				break;
 
 			case 'F':
