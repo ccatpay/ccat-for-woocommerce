@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ccat-for-woocommerce
  * Plugin URI: https://www.ccat.com.tw/
- * Description: Adds the CCat Payments gateway to your WooCommerce website.
+ * Description: Adds the CCat Payments gateway and shipping methods to your WooCommerce website.
  * Version: 1.10.4
  *
  * Text Domain: ccat-for-woocommerce
@@ -42,6 +42,9 @@ class WC_CCat_Payments {
 		// Make the CCat Payments gateway available to WC.
 		add_filter( 'woocommerce_payment_gateways', array( __CLASS__, 'add_gateway' ) );
 
+		// 註冊黑貓物流方法.
+		add_filter( 'woocommerce_shipping_methods', array( __CLASS__, 'add_shipping_methods' ) );
+
 		// Registers WooCommerce Blocks integration.
 		add_action(
 			'woocommerce_blocks_loaded',
@@ -50,6 +53,35 @@ class WC_CCat_Payments {
 				'woocommerce_gateway_ccat_woocommerce_block_support',
 			)
 		);
+
+		// 初始化物流與支付協調器.
+		add_action( 'init', array( __CLASS__, 'init_shipping_payment_coordinator' ) );
+	}
+
+	/**
+	 * 初始化物流與支付協調器
+	 */
+	public static function init_shipping_payment_coordinator(): void {
+		require_once self::plugin_abspath() . 'includes/shipping/class-wc-ccat-shipping-payment-coordinator.php';
+		WC_CCat_Shipping_Payment_Coordinator::init();
+	}
+
+	/**
+	 * 添加黑貓物流運送方式到WooCommerce
+	 *
+	 * @param array $methods 現有運送方式.
+	 *
+	 * @return array 包含黑貓物流的運送方式
+	 */
+	public static function add_shipping_methods( array $methods ): array {
+		if ( self::is_shipping_enabled() ) {
+			$methods['wc_shipping_ccat_cod']         = 'WC_Shipping_CCat_COD';
+			$methods['wc_shipping_ccat_711_cod']     = 'WC_Shipping_CCat_711_COD';
+			$methods['wc_shipping_ccat_prepaid']     = 'WC_Shipping_CCat_Prepaid';
+			$methods['wc_shipping_ccat_711_prepaid'] = 'WC_Shipping_CCat_711_Prepaid';
+		}
+
+		return $methods;
 	}
 
 	/**
@@ -59,6 +91,17 @@ class WC_CCat_Payments {
 	 */
 	public static function is_ccat_enabled(): bool {
 		$is_enabled = get_option( 'wc_ccat_enable', 'yes' );
+
+		return 'yes' === $is_enabled;
+	}
+
+	/**
+	 * Determines if the CCat payment gateway is enabled via settings.
+	 *
+	 * @return bool True if enabled, false otherwise.
+	 */
+	public static function is_shipping_enabled(): bool {
+		$is_enabled = get_option( 'wc_ccat_shipping_enable', 'yes' );
 
 		return 'yes' === $is_enabled;
 	}
@@ -123,6 +166,15 @@ class WC_CCat_Payments {
 			// require_once 'includes/class-wc-gateway-ccat-cvs-barcode.php';
 			require_once 'includes/class-wc-gateway-ccat-app-opw.php';
 			require_once 'includes/class-wc-gateway-ccat-app-icash.php';
+		}
+
+		// 載入黑貓物流相關類別
+		if ( class_exists( 'WC_Shipping_Method' ) && self::is_shipping_enabled() ) {
+			require_once 'includes/shipping/class-wc-shipping-ccat-abstract.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-cod.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid.php';
 		}
 
 		require_once 'includes/class-wc-ccat-settings.php';

@@ -58,6 +58,13 @@ class WC_CCat_Settings {
 				'default' => 'no',
 			),
 			array(
+				'name'    => __( '啟用黑貓物流', 'ccat-for-woocommerce' ),
+				'type'    => 'checkbox',
+				'desc'    => __( '啟用或停用黑貓物流功能。', 'ccat-for-woocommerce' ),
+				'id'      => 'wc_ccat_shipping_enable',
+				'default' => 'yes',
+			),
+			array(
 				'name'    => __( '測試模式', 'ccat-for-woocommerce' ),
 				'type'    => 'checkbox',
 				'desc'    => __( '啟用測試模式以使用黑貓Pay測試環境，關閉則使用正式環境。', 'ccat-for-woocommerce' ),
