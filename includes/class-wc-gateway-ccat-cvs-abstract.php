@@ -21,6 +21,7 @@ require_once 'class-wc-gateway-ccat-abstract.php';
  * @version  1.10.0
  */
 abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
+	const ATM_BANK_ID = '_bank_id';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const ATM_VIRTUAL_ACCOUNT = '_virtual_account';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const ATM_EXPIRE_DATA = '_expire_date';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const ATM_BILL_AMOUNT = '_bill_amount';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
@@ -110,11 +111,13 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 			$order->update_meta_data( $order_no, $order_no );
 
 			if ( $this->payment_type() == '1' ) {
+				$bank_id = $response_data['bank_id'];
 				$virtual_account = sanitize_text_field( $response_data['virtual_account'] );
 				$expire_date     = sanitize_text_field( $response_data['expire_date'] );
 				$bill_amount     = intval( $response_data['bill_amount'] );
 
 				// 儲存到訂單 Meta Data
+				$order->update_meta_data( self::ATM_BANK_ID, $bank_id );
 				$order->update_meta_data( self::ATM_VIRTUAL_ACCOUNT, $virtual_account );
 				$order->update_meta_data( self::ATM_EXPIRE_DATA, $expire_date );
 				$order->update_meta_data( self::ATM_BILL_AMOUNT, $bill_amount );
@@ -135,8 +138,13 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 				);
 				$order->save();
 				WC()->cart->empty_cart();
-
+				
 				$redirect = ! empty( $response_data['short_url'] ) ? $response_data['short_url'] : $this->get_return_url( $order );
+
+				if( $this->payment_type() == '1' )
+				{
+				    $redirect = ! empty( $response_data['virtual_account'] ) ? $this->get_return_url( $order ) 	: $redirect;
+				}
 
 				return array(
 					'result'   => 'success',
