@@ -55,7 +55,10 @@ class WC_CCat_Payments {
 		);
 
 		// 初始化物流與支付協調器.
-		add_action( 'init', array( __CLASS__, 'init_shipping_payment_coordinator' ) );
+		if ( self::is_shipping_enabled() ) {
+			add_action( 'init', array( __CLASS__, 'init_shipping_payment_coordinator' ) );
+			add_action( 'woocommerce_init', array( __CLASS__, 'check_and_add_taiwan_shipping_zone' ) );
+		}
 	}
 
 	/**
@@ -96,6 +99,51 @@ class WC_CCat_Payments {
 	}
 
 	/**
+	 * 檢查並新增台灣物流區域以及相關物流方法
+	 */
+	public static function check_and_add_taiwan_shipping_zone(): void {
+		// 檢查台灣區域是否存在.
+		$taiwan_zone_exists = false;
+		$zones              = WC_Shipping_Zones::get_zones();
+
+		foreach ( $zones as $zone ) {
+			// 檢查區域名稱是否為Taiwan或台灣.
+			if ( stripos( $zone['zone_name'], 'Taiwan' ) !== false || stripos( $zone['zone_name'], '台灣' ) !== false ) {
+				$taiwan_zone_exists = true;
+				break;
+			}
+
+			// 檢查區域是否包含台灣的國家代碼.
+			if ( isset( $zone['zone_locations'] ) && is_array( $zone['zone_locations'] ) ) {
+				foreach ( $zone['zone_locations'] as $location ) {
+					if ( 'country' === $location->type && 'TW' === $location->code ) {
+						$taiwan_zone_exists = true;
+						break 2;
+					}
+				}
+			}
+		}
+
+		// 如果台灣區域不存在，則創建並添加物流方法.
+		if ( ! $taiwan_zone_exists ) {
+			// 創建新的台灣區域.
+			$new_zone = new WC_Shipping_Zone();
+			$new_zone->set_zone_name( '台灣' );
+			$new_zone->add_location( 'TW', 'country' );
+			$new_zone->save();
+
+			// 添加物流方法.
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_cod' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_cod' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_prepaid' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_prepaid' );
+
+			// 記錄日誌.
+			self::log( '已自動新增台灣物流區域並添加相關物流方法' );
+		}
+	}
+
+	/**
 	 * Determines if the CCat payment gateway is enabled via settings.
 	 *
 	 * @return bool True if enabled, false otherwise.
@@ -123,6 +171,8 @@ class WC_CCat_Payments {
 			// $gateways[] = 'WC_Gateway_CCat_Cvs_Barcode';
 			$gateways[] = 'WC_Gateway_CCat_App_Opw';
 			$gateways[] = 'WC_Gateway_CCat_App_Icash';
+			// 新增黑貓貨到付款閘道.
+			$gateways[] = 'WC_Gateway_CCat_COD';
 		}
 
 		return $gateways;
@@ -166,9 +216,11 @@ class WC_CCat_Payments {
 			// require_once 'includes/class-wc-gateway-ccat-cvs-barcode.php';
 			require_once 'includes/class-wc-gateway-ccat-app-opw.php';
 			require_once 'includes/class-wc-gateway-ccat-app-icash.php';
+			// 新增黑貓貨到付款閘道.
+			require_once 'includes/class-wc-gateway-ccat-cod.php';
 		}
 
-		// 載入黑貓物流相關類別
+		// 載入黑貓物流相關類別.
 		if ( class_exists( 'WC_Shipping_Method' ) && self::is_shipping_enabled() ) {
 			require_once 'includes/shipping/class-wc-shipping-ccat-abstract.php';
 			require_once 'includes/shipping/class-wc-shipping-ccat-cod.php';
@@ -227,6 +279,7 @@ class WC_CCat_Payments {
 			// require_once 'includes/blocks/class-wc-ccat-payments-barcode-blocks.php';
 			require_once 'includes/blocks/class-wc-ccat-payments-opw-blocks.php';
 			require_once 'includes/blocks/class-wc-ccat-payments-icash-blocks.php';
+			require_once 'includes/blocks/class-wc-ccat-payments-cod-blocks.php';
 
 			add_action(
 				'woocommerce_blocks_payment_method_type_registration',
@@ -239,6 +292,7 @@ class WC_CCat_Payments {
 					// $payment_method_registry->register( new WC_Gateway_CCat_Barcode_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Opw_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Icash_Blocks_Support() );
+					$payment_method_registry->register( new WC_Gateway_CCat_COD_Blocks_Support() );
 				}
 			);
 		}

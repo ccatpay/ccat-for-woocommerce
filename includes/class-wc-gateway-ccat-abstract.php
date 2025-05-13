@@ -10,7 +10,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
- 
+
 /**
  * Base class for CCat payment gateways, extending WooCommerce payment gateway functionality.
  */
@@ -21,12 +21,12 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	const META_RESPONSE_DATA = '_received_data'; // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const CODE_OK = 'OK'; // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const ORDER_NO = '_final_order_no'; // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
-	const META_PROCESSING             = '_meta_processing';
-	const META_INVOICE_DISCOUNT       = '_invoice_discount';
-	const META_INVOICE_APN            = '_invoice_apn';
-	const META_INVOICE_NO             = '_invoice_no';
-	const META_INVOICE_DATE           = '_invoice_date';
-	const META_INVOICE_RANDOM         = '_invoice_random';
+	const META_PROCESSING = '_meta_processing';
+	const META_INVOICE_DISCOUNT = '_invoice_discount';
+	const META_INVOICE_APN = '_invoice_apn';
+	const META_INVOICE_NO = '_invoice_no';
+	const META_INVOICE_DATE = '_invoice_date';
+	const META_INVOICE_RANDOM = '_invoice_random';
 	const META_INVOICE_ORDER_API_DATA = '_invoice_order_api_data';
 
 	/**
@@ -285,7 +285,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	/**
 	 * 加入並驗證發票資料
 	 *
-	 * @param array    $order_data 訂單資料
+	 * @param array $order_data 訂單資料
 	 * @param WC_Order $wc_order 訂單
 	 *
 	 * @return array 處理後的訂單資料
@@ -657,7 +657,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	/**
 	 * Extracts and validates the request data.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request .
 	 *
 	 * @return null|WP_Error
 	 */
@@ -700,7 +700,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	 * Saves an APN to the order metadata.
 	 *
 	 * @param WC_Order $order The WooCommerce order to which the APN data will be saved.
-	 * @param array    $data The APN data to be stored, typically received from a notification.
+	 * @param array $data The APN data to be stored, typically received from a notification.
 	 *
 	 * @return void
 	 */
@@ -738,9 +738,9 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	/**
 	 * 實作退款處理方法
 	 *
-	 * @param int    $order_id 訂單編號
-	 * @param float  $amount 退款金額（可能為 null）
-	 * @param string $reason 退款原因
+	 * @param int $order_id 訂單編號.
+	 * @param float $amount 退款金額（可能為 null）.
+	 * @param string $reason 退款原因.
 	 *
 	 * @return bool|WP_Error  成功返回 true，失敗返回錯誤物件
 	 */

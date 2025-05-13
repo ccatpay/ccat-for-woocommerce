@@ -1,6 +1,6 @@
 <?php
 /**
- * CCat Payments Blocks integration
+ * CCat PayuniCard Blocks integration
  *
  * @package WooCommerceCCatGateway
  */
@@ -8,11 +8,9 @@
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
 /**
- * CCat Payments Blocks integration
- *
- * @since 1.0.0
+ * CCat COD Blocks integration
  */
-final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMethodType {
+class WC_Gateway_CCat_COD_Blocks_Support extends AbstractPaymentMethodType {
 
 	/**
 	 * The gateway instance.
@@ -21,25 +19,15 @@ final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMe
 	 */
 	private WC_Gateway_CCat_Abstract $gateway;
 
-
 	/**
-	 * Supports
-	 *
-	 * @var array $supports
-	 */
-	public array $supports = array(
-		'products',
-	);
-
-	/**
-	 * Payment method name/id/slug.
+	 * 支付方法名稱
 	 *
 	 * @var string
 	 */
-	protected $name = 'ccat_payment_credit_card';
+	protected $name = 'ccat_cod';
 
 	/**
-	 * Initializes the payment method type.
+	 * 初始化
 	 */
 	public function initialize() {
 		$gateways      = WC()->payment_gateways->payment_gateways();
@@ -61,11 +49,11 @@ final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMe
 	 * @return array
 	 */
 	public function get_payment_method_script_handles(): array {
-		$script_path = '/resources/js/frontend/credit-card.js';
+		$script_path = '/resources/js/frontend/cod.js';
 		$script_url  = WC_CCat_Payments::plugin_url() . $script_path;
 
 		wp_register_script(
-			'wc-ccat-payments-blocks',
+			'wc-ccat-cod-blocks',
 			$script_url,
 			array(
 				'wc-blocks-registry',
@@ -78,10 +66,10 @@ final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMe
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-ccat-payments-blocks', 'ccat-for-woocommerce', WC_CCat_Payments::plugin_abspath() . 'languages/' );
+			wp_set_script_translations( 'wc-ccat-cod-blocks', 'ccat-for-woocommerce', WC_CCat_Payments::plugin_abspath() . 'languages/' );
 		}
 
-		return array( 'wc-ccat-payments-blocks' );
+		return array( 'wc-ccat-cod-blocks' );
 	}
 
 	/**

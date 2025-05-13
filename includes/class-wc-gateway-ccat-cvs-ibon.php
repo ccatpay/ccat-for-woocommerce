@@ -34,8 +34,8 @@ class WC_Gateway_CCat_Cvs_Ibon extends WC_Gateway_CCat_Cvs_Abstract {
 	 */
 	public function __construct() {
 
-		$this->title        = __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce' );
-		$this->description  = __( '使用黑貓Pay Ibon，付款更安心。', 'ccat-for-woocommerce' );
+		$this->title       = __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce' );
+		$this->description = __( '使用黑貓Pay Ibon，付款更安心。', 'ccat-for-woocommerce' );
 //		$this->redirect_url = get_site_url( null, 'ccat-ibon' );
 //		WC_CCat_Payments::log( "> set url:" . $this->redirect_url );
 		parent::__construct();
@@ -72,13 +72,12 @@ class WC_Gateway_CCat_Cvs_Ibon extends WC_Gateway_CCat_Cvs_Abstract {
 		return '0';
 	}
 
-    /**
-     * Retrieves the configured acquirer type for the payment gateway.
-     *
-     * @return string The acquirer type as configured in the gateway settings.
-     */
-    public function acquirer_type(): string
-    {
-        return '2';
-    }
+	/**
+	 * Retrieves the configured acquirer type for the payment gateway.
+	 *
+	 * @return string The acquirer type as configured in the gateway settings.
+	 */
+	public function acquirer_type(): string {
+		return '2';
+	}
 }
