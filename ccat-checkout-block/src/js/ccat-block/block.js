@@ -1,5 +1,6 @@
-import {useState} from '@wordpress/element';
+import {useState, useEffect} from '@wordpress/element';
 import {__} from '@wordpress/i18n';
+import fetchInterceptor from '../../../../fetch-interceptor';
 
 let defaultInvoiceData = {
     vehicle_type: '1',
@@ -157,14 +158,9 @@ export const Block = ({checkoutExtensionData}) => {
         </div>
     );
 };
-
-
-const originalFetch = window.fetch;
-window.fetch = async (...args) => {
-    const [resource, config] = args;
-
+const invoiceInterceptor = async (resource, config) => {
     // 檢查是否是結帳請求
-    if (resource.includes('/wc/store/v1/checkout')) {
+    if (resource.includes('/wc/store/v1/checkout') && config.body) {
         const invoiceData = sessionStorage.getItem('wc_invoice_data')
             ? JSON.parse(sessionStorage.getItem('wc_invoice_data'))
             : defaultInvoiceData;
@@ -179,5 +175,6 @@ window.fetch = async (...args) => {
         config.body = JSON.stringify(body);
     }
 
-    return originalFetch(resource, config);
+    return [resource, config];
 };
+fetchInterceptor.register(invoiceInterceptor);

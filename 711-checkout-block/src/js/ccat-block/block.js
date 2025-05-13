@@ -1,153 +1,147 @@
 import {useState, useEffect} from '@wordpress/element';
 import {__} from '@wordpress/i18n';
+import {useSelect, useDispatch} from '@wordpress/data';
+import fetchInterceptor from '../../../../fetch-interceptor';
 
-// 超商選擇器區塊
-export const Block = ({checkoutExtensionData}) => {
-    console.log('超商選擇器區塊組件渲染', checkoutExtensionData);
 
-    // 獲取配置
-    const settings = window.wc?.wcSettings?.getSetting('ccat--store-selector', {
-        shippingMethods: {},
-        labels: {
-            selectStore: '選擇7-11超商門市',
-            selectedStore: '已選擇門市',
-            changeStore: '變更超商門市',
-            storeAddress: '地址'
-        }
+export const Block = ({checkoutExtensionData, extensions}) => {
+    const [showBlock, setShowBlock] = useState(false);
+    const [storeInfo, setStoreInfo] = useState({
+        storeName: '',
+        storeId: '',
+        storeAddress: ''
     });
 
-    // 如果設定中沒有運送方法，使用測試資料
-    if (!settings.shippingMethods || Object.keys(settings.shippingMethods).length === 0) {
-        settings.shippingMethods = {
-            'wc_shipping_ccat__cod': {
-                url: 'https://emap.pcsc.com.tw/EMapSDK.aspx'
-            },
-            'wc_shipping_ccat__prepaid': {
-                url: 'https://emap.pcsc.com.tw/EMapSDK.aspx'
+    const shippingRates = useSelect((select) => {
+        const store = select('wc/store/cart');
+        return store.getCartData().shippingRates;
+    });
+
+
+    const getActiveShippingRates = (shippingRates) => {
+        if (!shippingRates.length) {
+            return [];
+        }
+
+        let activeRates = [];
+        for (let i = 0; i < shippingRates.length; i++) {
+            if (!shippingRates[i].shipping_rates) {
+                continue;
             }
-        };
-    }
-
-    // 獲取已選擇的店鋪資訊
-    const [selectedStore, setSelectedStore] = useState(() => {
-        // 嘗試從localStorage讀取已存的資料
-        try {
-            const savedStore = localStorage.getItem('ccat_selected_store');
-            return savedStore ? JSON.parse(savedStore) : null;
-        } catch (e) {
-            console.error('讀取儲存的超商資訊時出錯:', e);
-            return null;
+            for (let j = 0; j < shippingRates[i].shipping_rates.length; j++) {
+                activeRates.push(shippingRates[i].shipping_rates[j]);
+            }
         }
-    });
 
-    // 檢查是否為7-11運送方式
-    const isShipping = true; // 為了測試，先設為true，實際環境需根據選擇的運送方式判斷
+        return activeRates;
+    };
+
+    useEffect(() => {
+        // 建立攔截器函數
+        const cvsInterceptor = async (resource, config) => {
+            // 檢查是否是結帳請求
+            if (resource.includes('/wc/store/v1/checkout') && config.body && showBlock && storeInfo.storeName) {
+                // 修改請求資料
+                const body = JSON.parse(config.body);
+
+                // 添加超商資訊到請求
+                body.extensions = {
+                    ...body.extensions,
+                    'ccat_cvs_store_info': storeInfo
+                };
+
+                // 如果需要，也可以修改地址資訊
+                if (body.shipping_address) {
+                    body.shipping_address = {
+                        ...body.shipping_address,
+                        address_1: `${storeInfo.storeName} (${storeInfo.storeId})`,
+                        address_2: storeInfo.storeAddress,
+                        city: '台北市',
+                        state: '台北市',
+                        postcode: '11050',
+                        country: 'TW'
+                    };
+                }
+
+                config.body = JSON.stringify(body);
+            }
+
+            return [resource, config];
+        };
+
+        // 註冊攔截器並獲取取消函數
+        const unregister = fetchInterceptor.register(cvsInterceptor);
+
+        // 組件卸載時取消註冊
+        return () => {
+            unregister();
+        };
+    }, [showBlock, storeInfo]); // 當這些狀態變更時重新註冊攔截器
+
 
     // 處理超商選擇
-    const handleStoreSelection = (storeInfo) => {
-        // 保存選擇的超商資訊
-        setSelectedStore(storeInfo);
-
-        // 儲存到localStorage
-        try {
-            localStorage.setItem('ccat_selected_store', JSON.stringify(storeInfo));
-        } catch (e) {
-            console.error('儲存超商資訊到localStorage時出錯:', e);
-        }
-
-        // 提交到結帳數據
-        if (checkoutExtensionData && checkoutExtensionData.setExtensionData) {
-            checkoutExtensionData.setExtensionData('ccat--store-selector', {
-                storeCode: storeInfo.storeCode,
-                storeName: storeInfo.storeName,
-                storeAddress: storeInfo.storeAddress
-            });
-        }
-    };
-
-    // 打開超商選擇視窗
-    const openStoreSelector = () => {
-        // 使用第一個可用的運送方法
-        const methodConfig = Object.values(settings.shippingMethods)[0];
-        if (!methodConfig || !methodConfig.url) {
-            console.error('找不到運送方式的配置');
-            return;
-        }
-
-        // 打開新視窗進行超商選擇
-        const popup = window.open(
-            methodConfig.url,
-            'storeSelection',
-            'width=800,height=600'
-        );
-
-        // 設置視窗訊息監聽
-        const handleMessage = (event) => {
-            try {
-                if (event.data && event.data.storeInfo) {
-                    handleStoreSelection(event.data.storeInfo);
-
-                    // 關閉選擇視窗
-                    if (popup) {
-                        popup.close();
-                    }
-
-                    // 移除監聽器
-                    window.removeEventListener('message', handleMessage);
-                }
-            } catch (error) {
-                console.error('處理超商選擇訊息時出錯:', error);
-            }
+    const handleStoreSelect = (event) => {
+        // 假設這裡會從某個 API 獲取超商資訊
+        // 這只是模擬資料
+        const selectedStoreInfo = {
+            storeName: '7-11 測試門市',
+            storeId: 'TW12345',
+            storeAddress: '台北市信義區松高路123號'
         };
 
-        window.addEventListener('message', handleMessage);
+        setStoreInfo(selectedStoreInfo);
+
+        // 更新送件地址
+        // updateShippingAddress({
+        //     address_1: `${selectedStoreInfo.storeName} (${selectedStoreInfo.storeId})`,
+        //     address_2: selectedStoreInfo.storeAddress,
+        //     city: '台北市',
+        //     state: '台北市',
+        //     postcode: '11050',
+        //     country: 'TW'
+        // });
     };
 
-    // 如果不是7-11運送方式，則不顯示
-    if (!isShipping) {
-        return null;
+    useEffect(() => {
+        setShowBlock(false);
+        if (shippingRates.length) {
+            const activeRates = getActiveShippingRates(shippingRates);
+            for (let i = 0; i < activeRates.length; i++) {
+                if (!activeRates[i].rate_id) {
+                    continue;
+                }
+                if (activeRates[i].rate_id.includes("wc_shipping_ccat_711") && activeRates[i].selected) {
+                    setShowBlock(true);
+                }
+            }
+        }
+    }, [
+        shippingRates
+    ]);
+
+    if (!showBlock) {
+        return <></>
     }
 
     return (
-        <div className="wc-block-components-panel">
-            <div className="wc-block-components-panel__content">
-                <div className="ccat--store-selector-container">
-                    <h3 className="wc-block-components-title">7-11 超商取貨</h3>
+        <div className="wc-block-components-shipping-cvs-selector">
+            <h4>{__('選擇 7-11 取貨門市', 'your-text-domain')}</h4>
+            <div className="wc-block-components-shipping-cvs-selector__content">
+                <button type="button"
+                        className="wc-block-components-button"
+                        onClick={handleStoreSelect}
+                >
+                    {__('選擇門市', 'your-text-domain')}
+                </button>
 
-                    <button
-                        className="wc-block-components-button wp-element-button"
-                        onClick={openStoreSelector}
-                        style={{width: '100%', marginBottom: '10px'}}
-                    >
-                        {selectedStore ? settings.labels.changeStore : settings.labels.selectStore}
-                    </button>
-
-                    {selectedStore && (
-                        <div className="ccat-selected-store-info" style={{
-                            padding: '10px',
-                            backgroundColor: '#f8f8f8',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px'
-                        }}>
-                            <div>
-                                <strong>{settings.labels.selectedStore}:</strong>
-                                {selectedStore.storeName} ({selectedStore.storeCode})
-                            </div>
-                            <div>
-                                <strong>{settings.labels.storeAddress}:</strong>
-                                {selectedStore.storeAddress}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                {storeInfo.storeName && (
+                    <div className="wc-block-components-shipping-cvs-info">
+                        <p><strong>{__('已選擇門市：', 'your-text-domain')}</strong> {storeInfo.storeName}</p>
+                        <p><strong>{__('門市代號：', 'your-text-domain')}</strong> {storeInfo.storeId}</p>
+                        <p><strong>{__('門市地址：', 'your-text-domain')}</strong> {storeInfo.storeAddress}</p>
+                    </div>
+                )}
             </div>
         </div>
     );
-};
-
-// 添加視窗郵件處理函數
-window.handleStoreSelection = (storeInfo) => {
-    if (window.opener) {
-        window.opener.postMessage({storeInfo}, '*');
-    }
 };
