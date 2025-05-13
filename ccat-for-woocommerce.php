@@ -194,7 +194,17 @@ class WC_CCat_Payments {
 				}
 			);
 		}
-
+		if ( self::is_shipping_enabled() ) {
+			require_once '711-checkout-block/ccat-block-integration-checkout.php';
+//			require_once 'includes/class-wc-ccat-invoice-display.php';
+//			new WC_CCat_Invoice_Display();
+			add_action(
+				'woocommerce_blocks_checkout_block_registration',
+				function ( $integration_registry ) {
+					$integration_registry->register( new Ccat711_Blocks_Integration() );
+				}
+			);
+		}
 		woocommerce_store_api_register_endpoint_data(
 			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,

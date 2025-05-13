@@ -1,0 +1,26 @@
+{
+  "apiVersion": 2,
+  "title": "ccat-for-woocommerce/ccat-for-woocommerce",
+  "name": "ccat-for-woocommerce/ccat-for-woocommerce",
+  "version": "1.0.0",
+  "category": "woocommerce",
+  "supports": {
+    "html": false,
+    "align": false,
+    "multiple": false,
+    "reusable": false
+  },
+  "parent": [
+    "woocommerce/checkout-shipping-methods-block"
+  ],
+  "attributes": {
+    "lock": {
+      "type": "object",
+      "default": {
+        "remove": true,
+        "move": true
+      }
+    }
+  },
+  "textdomain": "ccat-for-woocommerce"
+}
