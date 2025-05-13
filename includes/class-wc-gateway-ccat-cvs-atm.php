@@ -59,6 +59,7 @@ class WC_Gateway_CCat_Cvs_Atm extends WC_Gateway_CCat_Cvs_Abstract {
 			return;
 		}
 
+		$bank_id  = $order->get_meta( self::ATM_BANK_ID );
 		$virtual_account  = $order->get_meta( self::ATM_VIRTUAL_ACCOUNT );
 		$payment_deadline = $order->get_meta( self::ATM_EXPIRE_DATA );
 		$bill_amount      = $order->get_meta( self::ATM_BILL_AMOUNT );
@@ -70,7 +71,7 @@ class WC_Gateway_CCat_Cvs_Atm extends WC_Gateway_CCat_Cvs_Abstract {
 				$html .= '<h2>' . esc_html__( '感謝訂購 請到ATM繳款', 'ccat-for-woocommerce' ) . '</h2>';
 			}
 
-			$html .= '<p>' . esc_html( sprintf( __( '銀行代號: 玉山銀行 %s', 'ccat-for-woocommerce' ), '808' ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '銀行代號: %s', 'ccat-for-woocommerce' ), $bank_id ) ) . '</p>';
 			$html .= '<p>' . esc_html( sprintf( __( '轉帳帳號: %s', 'ccat-for-woocommerce' ), $virtual_account ) ) . '</p>';
 			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce' ), $payment_deadline ) ) . '</p>';
 			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce' ), $bill_amount ) ) . '</p>';
@@ -115,6 +116,6 @@ class WC_Gateway_CCat_Cvs_Atm extends WC_Gateway_CCat_Cvs_Abstract {
 	 * @return string The acquirer type as configured in the gateway settings.
 	 */
 	public function acquirer_type(): string {
-		return '0';
+		return '3';
 	}
 }

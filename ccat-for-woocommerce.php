@@ -2,8 +2,8 @@
 /**
  * Plugin Name: ccat-for-woocommerce
  * Plugin URI: https://www.ccat.com.tw/
- * Description: Adds the CCat Payments gateway and shipping methods to your WooCommerce website.
- * Version: 1.10.4
+ * Description: Adds the CCat Payments gateway to your WooCommerce website.
+ * Version: 1.11.0
  *
  * Text Domain: ccat-for-woocommerce
  *
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 if ( ! defined( 'WC_CCAT_PAYMENTS_VERSION' ) ) {
-	define( 'WC_CCAT_PAYMENTS_VERSION', '1.10.4' );
+	define( 'WC_CCAT_PAYMENTS_VERSION', '1.11.0' );
 }
 
 /**
@@ -167,7 +167,7 @@ class WC_CCat_Payments {
 			$gateways[] = 'WC_Gateway_CCat_Chinatrust';
 			$gateways[] = 'WC_Gateway_CCat_Payuni';
 			$gateways[] = 'WC_Gateway_CCat_Cvs_Ibon';
-			// $gateways[] = 'WC_Gateway_CCat_Cvs_Atm';
+			$gateways[] = 'WC_Gateway_CCat_Cvs_Atm';
 			// $gateways[] = 'WC_Gateway_CCat_Cvs_Barcode';
 			$gateways[] = 'WC_Gateway_CCat_App_Opw';
 			$gateways[] = 'WC_Gateway_CCat_App_Icash';
@@ -212,7 +212,7 @@ class WC_CCat_Payments {
 			require_once 'includes/class-wc-gateway-ccat-chinatrust.php';
 			require_once 'includes/class-wc-gateway-ccat-payuni.php';
 			require_once 'includes/class-wc-gateway-ccat-cvs-ibon.php';
-			// require_once 'includes/class-wc-gateway-ccat-cvs-atm.php';
+			require_once 'includes/class-wc-gateway-ccat-cvs-atm.php';
 			// require_once 'includes/class-wc-gateway-ccat-cvs-barcode.php';
 			require_once 'includes/class-wc-gateway-ccat-app-opw.php';
 			require_once 'includes/class-wc-gateway-ccat-app-icash.php';
@@ -275,7 +275,7 @@ class WC_CCat_Payments {
 			require_once 'includes/blocks/class-wc-ccat-payments-chinatrust-blocks.php';
 			require_once 'includes/blocks/class-wc-ccat-payments-payuni-blocks.php';
 			require_once 'includes/blocks/class-wc-ccat-payments-ibon-blocks.php';
-			// require_once 'includes/blocks/class-wc-ccat-payments-atm-blocks.php';
+			require_once 'includes/blocks/class-wc-ccat-payments-atm-blocks.php';
 			// require_once 'includes/blocks/class-wc-ccat-payments-barcode-blocks.php';
 			require_once 'includes/blocks/class-wc-ccat-payments-opw-blocks.php';
 			require_once 'includes/blocks/class-wc-ccat-payments-icash-blocks.php';
@@ -288,7 +288,7 @@ class WC_CCat_Payments {
 					$payment_method_registry->register( new WC_Gateway_CCat_Chinatrust_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Payuni_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Ibon_Blocks_Support() );
-					// $payment_method_registry->register( new WC_Gateway_CCat_Atm_Blocks_Support() );
+					$payment_method_registry->register( new WC_Gateway_CCat_Atm_Blocks_Support() );
 					// $payment_method_registry->register( new WC_Gateway_CCat_Barcode_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Opw_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Icash_Blocks_Support() );
