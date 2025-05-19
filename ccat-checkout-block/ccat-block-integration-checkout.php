@@ -2,6 +2,12 @@
 
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
+/**
+ * A class responsible for integrating custom blocks into WordPress.
+ *
+ * This class handles the registration, initialization, and setup of scripts
+ * required for managing custom blocks in both the editor and frontend contexts.
+ */
 class Ccat_Blocks_Integration implements IntegrationInterface {
 
 	/**
@@ -9,7 +15,7 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 	 *
 	 * @return string
 	 */
-	public function get_name() {
+	public function get_name(): string {
 		return 'ccat-block';
 	}
 
@@ -22,6 +28,14 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 		$this->register_main_integration();
 	}
 
+	/**
+	 * Registers the main integration script for the plugin in WordPress.
+	 *
+	 * This function sets up the script required for the plugin's integration,
+	 * including its dependencies, versioning, and loading in the footer.
+	 *
+	 * @return void
+	 */
 	public function register_main_integration() {
 		$script_path       = '/build/index.js';
 		$script_url        = plugins_url( $script_path, __FILE__ );
@@ -33,17 +47,12 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat-blocks-integration', // Updated script handle
+			'ccat-blocks-integration', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
 			true
 		);
-//        wp_set_script_translations(
-//            'ccat-blocks-integration',
-//            'nx_ccat_block',
-//            __DIR__ . '/languages'
-//        );
 	}
 
 	/**
@@ -51,7 +60,7 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 	 *
 	 * @return string[]
 	 */
-	public function get_script_handles() {
+	public function get_script_handles(): array {
 		return array( 'ccat-blocks-integration', 'ccat-blocks-frontend' );
 	}
 
@@ -60,7 +69,7 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 	 *
 	 * @return string[]
 	 */
-	public function get_editor_script_handles() {
+	public function get_editor_script_handles(): array {
 		return array( 'ccat-blocks-integration', 'ccat-block-editor' );
 	}
 
@@ -69,14 +78,14 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 	 *
 	 * @return array
 	 */
-	public function get_script_data() {
+	public function get_script_data(): array {
 		return array(
 			'ccat_block-active' => true,
 		);
 	}
 
 	/**
-	 * Register scripts for date field block editor.
+	 * Register scripts for the date field block editor.
 	 *
 	 * @return void
 	 */
@@ -91,17 +100,12 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat-blocks-editor', // Updated script handle
+			'ccat-blocks-editor', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
 			true
 		);
-//        wp_set_script_translations(
-//            'ccat-blocks-editor',
-//            'nx_ccat_block',
-//            __DIR__ . '/languages'
-//        );
 	}
 
 	/**
@@ -120,27 +124,27 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat-blocks-frontend', // Updated script handle
+			'ccat-blocks-frontend', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
 			true
 		);
-//        wp_set_script_translations(
-//            'ccat-blocks-frontend',
-//            'nx_ccat_block',
-//            __DIR__ . '/languages'
-//        );
+
+		// 將數據本地化到腳本中，確保 nonce 可用.
+		wp_localize_script(
+			'ccat711-blocks-integration',
+			'ccat711BlockData',
+			$this->get_script_data()
+		);
 	}
 
 	/**
 	 * Get the file modified time as a cache buster if we're in dev mode.
 	 *
-	 * @param string $file Local path to the file.
-	 *
-	 * @return string The cache buster value to use for the given file.
+	 * @return int The cache buster value to use for the given file.
 	 */
-	protected function get_file_version() {
-		return '1.0.0';
+	protected function get_file_version(): int {
+		return time();
 	}
 }
