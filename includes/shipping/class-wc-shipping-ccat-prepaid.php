@@ -19,7 +19,6 @@ class WC_Shipping_CCat_Prepaid extends WC_Shipping_CCat_Abstract {
 	 * @param int $instance_id 運送方式實例ID.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id                 = 'wc_shipping_ccat_prepaid';
 		$this->method_title       = __( '黑貓物流宅配', 'ccat-for-woocommerce' );
 		$this->title              = __( '黑貓物流宅配', 'ccat-for-woocommerce' );
 		$this->method_description = __( '黑貓物流宅配，顧客需先完成付款', 'ccat-for-woocommerce' );

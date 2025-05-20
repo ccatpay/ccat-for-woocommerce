@@ -82,6 +82,19 @@ class WC_CCat_Payments {
 			$methods['wc_shipping_ccat_711_cod']     = 'WC_Shipping_CCat_711_COD';
 			$methods['wc_shipping_ccat_prepaid']     = 'WC_Shipping_CCat_Prepaid';
 			$methods['wc_shipping_ccat_711_prepaid'] = 'WC_Shipping_CCat_711_Prepaid';
+
+
+			// 冷藏物流方法.
+			$methods['wc_shipping_ccat_cod_refrigerated']         = 'WC_Shipping_CCat_COD_Refrigerated';
+			$methods['wc_shipping_ccat_711_cod_refrigerated']     = 'WC_Shipping_CCat_711_COD_Refrigerated';
+			$methods['wc_shipping_ccat_prepaid_refrigerated']     = 'WC_Shipping_CCat_Prepaid_Refrigerated';
+			$methods['wc_shipping_ccat_711_prepaid_refrigerated'] = 'WC_Shipping_CCat_711_Prepaid_Refrigerated';
+
+			// 冷凍物流方法.
+			$methods['wc_shipping_ccat_cod_frozen']         = 'WC_Shipping_CCat_COD_Frozen';
+			$methods['wc_shipping_ccat_711_cod_frozen']     = 'WC_Shipping_CCat_711_COD_Frozen';
+			$methods['wc_shipping_ccat_prepaid_frozen']     = 'WC_Shipping_CCat_Prepaid_Frozen';
+			$methods['wc_shipping_ccat_711_prepaid_frozen'] = 'WC_Shipping_CCat_711_Prepaid_Frozen';
 		}
 
 		return $methods;
@@ -132,11 +145,18 @@ class WC_CCat_Payments {
 			$new_zone->add_location( 'TW', 'country' );
 			$new_zone->save();
 
-			// 添加物流方法.
 			$new_zone->add_shipping_method( 'wc_shipping_ccat_cod' );
 			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_cod' );
 			$new_zone->add_shipping_method( 'wc_shipping_ccat_prepaid' );
 			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_prepaid' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_cod_refrigerated' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_cod_frozen' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_prepaid_refrigerated' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_prepaid_frozen' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_cod_refrigerated' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_cod_frozen' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_prepaid_refrigerated' );
+			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_prepaid_frozen' );
 
 			// 記錄日誌.
 			self::log( '已自動新增台灣物流區域並添加相關物流方法' );
@@ -237,6 +257,26 @@ class WC_CCat_Payments {
 			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod.php';
 			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid.php';
 			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid.php';
+
+			// 引入宅配先付款不同溫度類型.
+			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid-normal.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid-refrigerated.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid-frozen.php';
+
+			// 引入宅配貨到付款不同溫度類型.
+			require_once 'includes/shipping/class-wc-shipping-ccat-cod-normal.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-cod-refrigerated.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-cod-frozen.php';
+
+			// 引入7-11先付款不同溫度類型.
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid-normal.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid-refrigerated.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid-frozen.php';
+
+			// 引入7-11貨到付款不同溫度類型.
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod-normal.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod-refrigerated.php';
+			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod-frozen.php';
 		}
 
 		require_once 'includes/class-wc-ccat-settings.php';

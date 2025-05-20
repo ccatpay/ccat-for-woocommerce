@@ -134,8 +134,7 @@ class WC_CCat_Shipping_Payment_Coordinator {
 	 */
 	private static function is_cod_shipping_selected( array $chosen_methods ): bool {
 		foreach ( $chosen_methods as $method ) {
-			if ( false !== strpos( $method, 'wc_shipping_ccat_cod' ) ||
-				false !== strpos( $method, 'wc_shipping_ccat_711_cod' ) ) {
+			if ( false !== strpos( $method, 'cod' ) ) {
 				return true;
 			}
 		}

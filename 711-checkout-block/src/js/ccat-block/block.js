@@ -585,6 +585,36 @@ export const Block = ({checkoutExtensionData, extensions}) => {
         buttonEl.disabled = true;
         buttonEl.textContent = __('載入中...', 'your-text-domain');
 
+        // 獲取當前選擇的運送方式
+        const activeRates = getActiveShippingRates(shippingRates);
+        let selectedShippingMethod = '';
+        let storeCategory = '13'; // 預設為常溫 (13)
+
+        // 尋找當前選中的運送方式
+        for (let i = 0; i < activeRates.length; i++) {
+            if (activeRates[i].selected && activeRates[i].rate_id.includes("711")) {
+                selectedShippingMethod = activeRates[i].rate_id;
+
+                // 根據運送方式類型決定門市類別
+                if (selectedShippingMethod.includes('refrigerated')) {
+                    storeCategory = '15'; // 冷藏
+                } else if (selectedShippingMethod.includes('frozen')) {
+                    storeCategory = '14'; // 冷凍
+                } else {
+                    storeCategory = '13'; // 常溫
+                }
+
+                break;
+            }
+        }
+
+        // 如果沒有找到選中的711運送方式，使用默認值
+        if (!selectedShippingMethod) {
+            selectedShippingMethod = 'wc_shipping_ccat_711_prepaid';
+        }
+
+        console.log('選擇的運送方式:', selectedShippingMethod, '門市類別:', storeCategory);
+
         // 使用 AJAX 獲取選擇門市的 URL
         fetch('/wp-admin/admin-ajax.php', {
             method: 'POST',
@@ -594,8 +624,8 @@ export const Block = ({checkoutExtensionData, extensions}) => {
             body: new URLSearchParams({
                 action: 'get_711_store_selection_url',
                 security: ccat711BlockData?.nonce || '',
-                shipping_method: 'wc_shipping_ccat_711_prepaid',
-                store_category: '13'
+                shipping_method: selectedShippingMethod,
+                store_category: storeCategory
             })
         })
             .then(response => response.json())
@@ -754,7 +784,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                 if (!activeRates[i].rate_id) {
                     continue;
                 }
-                if (activeRates[i].rate_id.includes("wc_shipping_ccat_711") && activeRates[i].selected) {
+                if (activeRates[i].rate_id.includes("711") && activeRates[i].selected) {
                     setShowBlock(true);
 
                     // 如果切換到不同運送方式時，確認是否要保留或清除 localStorage 資料

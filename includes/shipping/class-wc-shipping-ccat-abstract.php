@@ -18,21 +18,21 @@ abstract class WC_Shipping_CCat_Abstract extends WC_Shipping_Method {
 	 *
 	 * @var bool
 	 */
-	protected $requires_payment = true;
-
-	/**
-	 * 是否需要選擇超商
-	 *
-	 * @var bool
-	 */
-	protected $requires_store_selection = false;
+	protected bool $requires_payment = true;
 
 	/**
 	 * 商店選擇URL
 	 *
 	 * @var string
 	 */
-	protected $store_selection_url = '';
+	protected string $store_selection_url = '';
+
+	/**
+	 * 溫度類型
+	 *
+	 * @var string
+	 */
+	protected string $temperature_type = 'normal';
 
 	/**
 	 * 建構函數
@@ -41,6 +41,7 @@ abstract class WC_Shipping_CCat_Abstract extends WC_Shipping_Method {
 	 */
 	public function __construct( $instance_id = 0 ) {
 		$this->instance_id = absint( $instance_id );
+		$this->id          = strtolower( static::class );
 		$this->supports    = array(
 			'shipping-zones',
 			'instance-settings',
@@ -52,6 +53,7 @@ abstract class WC_Shipping_CCat_Abstract extends WC_Shipping_Method {
 
 		// 儲存設定.
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+		parent::__construct( $instance_id );
 	}
 
 	/**
@@ -87,32 +89,5 @@ abstract class WC_Shipping_CCat_Abstract extends WC_Shipping_Method {
 		);
 
 		$this->add_rate( $rate );
-	}
-
-	/**
-	 * 檢查是否需要付款
-	 *
-	 * @return bool
-	 */
-	public function requires_payment() {
-		return $this->requires_payment;
-	}
-
-	/**
-	 * 檢查是否需要選擇超商
-	 *
-	 * @return bool
-	 */
-	public function requires_store_selection() {
-		return $this->requires_store_selection;
-	}
-
-	/**
-	 * 獲取商店選擇URL
-	 *
-	 * @return string
-	 */
-	public function get_store_selection_url() {
-		return $this->store_selection_url;
 	}
 }
