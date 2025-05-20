@@ -1,4 +1,11 @@
 <?php
+/**
+ * Ccat711_Blocks_Integration class
+ *
+ * @author   sakilu <brian@sakilu.com>
+ * @package  WooCommerce CCat Payments Gateway
+ * @since    1.0.0
+ */
 
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
@@ -23,6 +30,33 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 		$this->register_block_frontend_scripts();
 		$this->register_block_editor_scripts();
 		$this->register_main_integration();
+	}
+
+	/**
+	 * Adds custom query variables to the list of public query variables.
+	 *
+	 * @param array $vars An array of public query variables.
+	 *
+	 * @return array The modified array of public query variables.
+	 */
+	public function ccat711_add_query_vars( array $vars ): array {
+		$vars[] = 'action';
+
+		return $vars;
+	}
+
+	/**
+	 * Adds a custom rewrite rule to handle specific URL patterns and map them to a query action.
+	 *
+	 * @return void
+	 */
+	public function ccat711_add_rewrite_rules() {
+		add_rewrite_rule(
+			'^cvs-callback/?$',
+			'index.php?action=ccat711_store_callback',
+			'top'
+		);
+		flush_rewrite_rules();
 	}
 
 	/**
@@ -95,6 +129,8 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 		add_action( 'wp_ajax_get_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
 		add_action( 'wp_ajax_nopriv_get_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
 		add_action( 'template_redirect', array( $this, 'handle_store_callback' ) );
+		add_action( 'init', array( $this, 'ccat711_add_rewrite_rules' ) );
+		add_filter( 'query_vars', array( $this, 'ccat711_add_query_vars' ) );
 	}
 
 	/**
@@ -142,7 +178,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 		}
 
 		// 如果無法使用 WC_Gateway_CCat_Abstract 獲取 token，拋出異常.
-		throw new Exception( __( '無法獲取 API token，請確認已啟用 CCat 支付閘道', 'ccat-for-woocommerce' ) );
+		throw new Exception( esc_html__( '無法獲取 API token，請確認已啟用 CCat 支付閘道', 'ccat-for-woocommerce' ) );
 	}
 
 	/**
@@ -153,48 +189,45 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 	 * Temporary data is stored for use during callback handling.
 	 *
 	 * @return void Outputs JSON response containing the URL or error details.
+	 * @throws Exception Exception.
 	 */
 	public function ajax_get_711_store_selection_url() {
-	 		// 驗證 nonce
-	 		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'ccat711_store_selection_nonce' ) ) {
-	 			wp_send_json_error(
-	 				array(
-	 					'message' => __( '安全驗證失敗', 'ccat-for-woocommerce' ),
-	 				)
-	 			);
-	 			wp_die();
-	 		}
-	 		
 		// 驗證 nonce.
 		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'ccat711_store_selection_nonce' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( '安全驗證失敗', 'ccat-for-woocommerce' ),
+					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce' ),
 				)
 			);
 			wp_die();
 		}
-		
+
+		// 驗證 nonce.
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'ccat711_store_selection_nonce' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce' ),
+				)
+			);
+			wp_die();
+		}
+
 		// 獲取運送方式.
 		$shipping_method = isset( $_POST['shipping_method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_method'] ) ) : '';
+		$store_category  = isset( $_POST['store_category'] ) ? sanitize_text_field( wp_unslash( $_POST['store_category'] ) ) : '';
 
 		try {
+
 			// 創建回調網址，用於從地圖選擇頁面返回.
+			$base_id      = uniqid();
+			$random       = wp_rand( 1000000, 9999999 );
+			$temp_var     = $base_id . $random;
 			$callback_url = add_query_arg(
 				array(
 					'action' => 'ccat711_store_callback',
-					'nonce'  => wp_create_nonce( 'ccat711_store_callback_nonce' ),
 				),
-				home_url()
+				site_url( 'cvs-callback' ) // 使用自定義 URL.
 			);
-
-			// 生成臨時識別碼，用於回傳識別.
-			$temp_var = 'wc_' . wp_rand() . '_' . rand( 1000, 9999 );
-
-			// 獲取地圖類型（常溫為 13）.
-			$store_category = '13';  // 預設為常溫.
-
-
 			try {
 				// 獲取 API token.
 				$api_data = $this->get_api_data();
@@ -233,7 +266,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 
 				// 檢查回應是否包含地圖 URL.
 				if ( empty( $url ) ) {
-					throw new Exception( __( '取得超商網址錯誤', 'ccat-for-woocommerce' ) );
+					throw new Exception( esc_html__( '取得超商網址錯誤', 'ccat-for-woocommerce' ) );
 				}
 
 				// 儲存臨時變數，以便在回調時使用.
@@ -241,7 +274,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 					'ccat_temp_var_' . $temp_var,
 					array(
 						'shipping_method' => $shipping_method,
-						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : '',
+						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '',
 						'created_at'      => time(),
 					),
 					false
@@ -255,7 +288,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 				);
 
 			} catch ( Exception $e ) {
-				throw new Exception( __( 'API 請求失敗：', 'ccat-for-woocommerce' ) . $e->getMessage() );
+				throw new Exception( esc_html__( 'API 請求失敗：', 'ccat-for-woocommerce' ) . $e->getMessage() );
 			}
 		} catch ( Exception $e ) {
 			wp_send_json_error(
@@ -269,7 +302,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 	}
 
 	/**
-	 * Register scripts for date field block editor.
+	 * Register scripts for the date field block editor.
 	 *
 	 * @return void
 	 */
@@ -291,7 +324,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 			true
 		);
 
-		// 將數據本地化到腳本中，確保 nonce 可用
+		// 將數據本地化到腳本中，確保 nonce 可用.
 		wp_localize_script(
 			'ccat711-blocks-frontend',
 			'ccat711BlockData',
@@ -322,7 +355,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 			true
 		);
 
-		// 將數據本地化到腳本中，確保 nonce 可用
+		// 將數據本地化到腳本中，確保 nonce 可用.
 		wp_localize_script(
 			'ccat711-blocks-frontend',
 			'ccat711BlockData',
@@ -333,11 +366,9 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 	/**
 	 * Get the file modified time as a cache buster if we're in dev mode.
 	 *
-	 * @param string $file Local path to the file.
-	 *
-	 * @return string The cache buster value to use for the given file.
+	 * @return int The cache buster value to use for the given file.
 	 */
-	protected function get_file_version() {
+	protected function get_file_version(): int {
 		return time();
 	}
 
@@ -345,44 +376,49 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 	 * 處理從門市選擇頁面返回的回調
 	 */
 	public function handle_store_callback() {
-		if ( ! isset( $_GET['action'] ) || $_GET['action'] !== 'ccat711_store_callback' || ! isset( $_GET['nonce'] ) ) {
+		if ( ! isset( $_GET['action'] ) || 'ccat711_store_callback' !== $_GET['action'] ) {  // phpcs:ignore WordPress
 			return;
 		}
+		$temp_var = isset( $_POST['TempVar'] ) ? sanitize_text_field( wp_unslash( $_POST['TempVar'] ) ) : '';  // phpcs:ignore WordPress
+		$data     = get_option( 'ccat_temp_var_' . $temp_var );
 
-		// 驗證安全性
-		if ( ! wp_verify_nonce( $_GET['nonce'], 'ccat711_store_callback_nonce' ) ) {
-			wp_die( __( '安全驗證失敗', 'ccat-for-woocommerce' ) );
+		// check nonce myself.
+		if ( empty( $data ) ) {
+			wp_die( esc_html__( '安全驗證失敗', 'ccat-for-woocommerce' ) );
 		}
-
-		// 獲取臨時變數和門市資訊
-		$temp_var      = isset( $_GET['TempVar'] ) ? sanitize_text_field( $_GET['TempVar'] ) : '';
-		$store_name    = isset( $_GET['StoreName'] ) ? sanitize_text_field( $_GET['StoreName'] ) : '';
-		$store_id      = isset( $_GET['StoreId'] ) ? sanitize_text_field( $_GET['StoreId'] ) : '';
-		$store_address = isset( $_GET['StoreAddress'] ) ? sanitize_text_field( $_GET['StoreAddress'] ) : '';
+		// 獲取臨時變數和門市資訊.
+		$store_name    = isset( $_POST['storename'] ) ? sanitize_text_field( wp_unslash( $_POST['storename'] ) ) : ''; // phpcs:ignore WordPress
+		$store_id      = isset( $_POST['storeid'] ) ? sanitize_text_field( wp_unslash( $_POST['storeid'] ) ) : '';  // phpcs:ignore WordPress
+		$store_address = isset( $_POST['storeaddress'] ) ? sanitize_text_field( wp_unslash( $_POST['storeaddress'] ) ) : '';  // phpcs:ignore WordPress
+		$outside       = isset( $_POST['outside'] ) ? sanitize_text_field( wp_unslash( $_POST['outside'] ) ) : '0'; //  // phpcs:ignore WordPress
+		$ship          = isset( $_POST['ship'] ) ? sanitize_text_field( wp_unslash( $_POST['ship'] ) ) : '1111111'; //  // phpcs:ignore WordPress
 
 		if ( empty( $temp_var ) ) {
-			wp_die( __( '缺少識別參數', 'ccat-for-woocommerce' ) );
+			wp_die( esc_html__( '缺少識別參數', 'ccat-for-woocommerce' ) );
 		}
 
-		// 獲取保存的資訊
+		// 獲取保存的資訊.
 		$stored_data = get_option( 'ccat_temp_var_' . $temp_var );
 		if ( empty( $stored_data ) ) {
-			wp_die( __( '無效的識別參數', 'ccat-for-woocommerce' ) );
+			wp_die( esc_html__( '無效的識別參數', 'ccat-for-woocommerce' ) );
 		}
 
-		// 刪除臨時資料
+		// 刪除臨時資料.
 		delete_option( 'ccat_temp_var_' . $temp_var );
 
-		// 準備 JavaScript 回調
-		$store_data = json_encode(
+		// 準備 JavaScript 回調.
+		$store_data = wp_json_encode(
 			array(
-				'storeName'    => $store_name,
-				'storeId'      => $store_id,
-				'storeAddress' => $store_address,
+				'tempVar'      => $temp_var,      // 原本傳入之Key值，作為資訊識別用.
+				'storeId'      => $store_id,      // 門市店號.
+				'storeName'    => $store_name,    // 門市名稱.
+				'storeAddress' => $store_address, // 門市地址.
+				'outside'      => $outside,       // 判斷是否為離島 (0為本島，1為外島).
+				'ship'         => $ship,          // 配送週期 (0：不配送, 1：配送) 順序為 (日一二三四五六).
 			)
 		);
 
-		// 輸出 HTML 和 JavaScript 導回結帳頁面
+		// 輸出 HTML 和 JavaScript 導回結帳頁面.
 		echo '<!DOCTYPE html>
 		<html>
 		<head>
@@ -410,6 +446,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 								window.close();
 							}, 1000);
 						} catch(e) {
+							window.alert("調用父窗口函數失敗");
 							console.error("調用父窗口函數失敗:", e);
 							document.getElementById("manual-redirect").style.display = "block";
 						}
@@ -494,6 +531,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 				<p><strong>' . esc_html__( '選擇門市：', 'ccat-for-woocommerce' ) . '</strong> ' . esc_html( $store_name ) . '</p>
 				<p><strong>' . esc_html__( '門市代號：', 'ccat-for-woocommerce' ) . '</strong> ' . esc_html( $store_id ) . '</p>
 				<p><strong>' . esc_html__( '門市地址：', 'ccat-for-woocommerce' ) . '</strong> ' . esc_html( $store_address ) . '</p>
+				<p><strong>' . esc_html__( '位置類型：', 'ccat-for-woocommerce' ) . '</strong> ' . esc_html( intval( $outside ) ? '本島' : '外島' ) . '</p>
 			</div>
 			
 			<div id="success-message" class="message">

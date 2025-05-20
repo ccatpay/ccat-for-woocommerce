@@ -35,20 +35,6 @@ class WC_Gateway_CCat_COD extends WC_Gateway_CCat_Abstract {
 	public function __construct() {
 		$this->title       = __( '黑貓貨到付款', 'ccat-for-woocommerce' );
 		$this->description = __( '透過黑貓宅急便提供貨到付款的付款方式', 'ccat-for-woocommerce' );
-
-		add_action( 'woocommerce_thankyou', array(
-			$this,
-			'display_virtual_account_details',
-		) );
-		add_action( 'woocommerce_view_order', array(
-			$this,
-			'display_virtual_account_details',
-		) );
-		add_action( 'woocommerce_admin_order_data_after_order_details',
-			array(
-				$this,
-				'display_virtual_account_details',
-			) );
 		parent::__construct();
 	}
 
