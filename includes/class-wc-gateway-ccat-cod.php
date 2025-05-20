@@ -86,7 +86,9 @@ class WC_Gateway_CCat_COD extends WC_Gateway_CCat_Abstract {
 				'result' => 'failure',
 			);
 		}
-
+		if ( WC_CCat_Payments::is_shipping_enabled() ) {
+			$this->add_shipping_data( array(), $order );
+		}
 		// 設置訂單狀態為處理中.
 		$order->update_status(
 			'processing',

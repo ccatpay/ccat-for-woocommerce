@@ -69,6 +69,7 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 			if ( ! filter_var( $payer_email, FILTER_VALIDATE_EMAIL ) ) {
 				throw new Exception( esc_html__( '信箱格式錯誤或沒有填寫', 'ccat-for-woocommerce' ) );
 			}
+			
 			$order_no  = $this->generate_unique_order_number( $order );
 			$post_data = array(
 				'cmd'                  => self::CMD_COCS_ORDER_APPEND,
@@ -88,6 +89,9 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 			);
 			if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
+			}
+			if ( WC_CCat_Payments::is_shipping_enabled() ) {
+				$this->add_shipping_data( $post_data, $order );
 			}
 			$args = array(
 				'body'    => wp_json_encode( $post_data ),

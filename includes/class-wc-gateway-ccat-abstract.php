@@ -29,6 +29,14 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	const META_INVOICE_RANDOM         = '_invoice_random';
 	const META_INVOICE_ORDER_API_DATA = '_invoice_order_api_data';
 
+	// 711超商門市資訊相關常數.
+	const META_STORE_ID      = '_ccat_store_id';       // 門市代號.
+	const META_STORE_NAME    = '_ccat_store_name';     // 門市名稱.
+	const META_STORE_ADDRESS = '_ccat_store_address';  // 門市地址.
+	const META_OUTSIDE       = '_ccat_outside';        // 外島註記.
+	const META_SHIP          = '_ccat_ship';           // 運送資訊.
+
+
 	/**
 	 * Title
 	 *
@@ -281,34 +289,63 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 			: get_option( 'wc_ccat_api_key', '' );
 	}
 
+	/**
+	 * 加入並驗證發票資料
+	 *
+	 * @param array    $order_data 訂單資料.
+	 * @param WC_Order $wc_order 訂單.
+	 *
+	 * @throws Exception Exception.
+	 */
+	protected function add_shipping_data( array $order_data, WC_Order $wc_order ) {
+		// 取得 JSON 資料.
+		if ( ! WC_CCat_Payments::is_shipping_enabled() ) {
+			return null;
+		}
+		$shipping_method = $wc_order->get_shipping_method();
+		if ( false !== stripos( $shipping_method, '711' ) ) {
+			return null;
+		}
+
+		$raw_data   = file_get_contents( 'php://input' );
+		$post_data  = json_decode( $raw_data, true );
+		$store_info = $post_data['extensions']['ccat_711_store_info'] ?? array();
+
+		if ( empty( $store_info ) || empty( $store_info['storeId'] ) ) {
+			throw new Exception( esc_html__( '請選取超商門市', 'ccat-for-woocommerce' ) );
+		}
+		// 將超商資訊儲存到訂單中.
+		$wc_order->update_meta_data( self::META_STORE_ID, sanitize_text_field( $store_info['storeId'] ) );
+		$wc_order->update_meta_data( self::META_STORE_NAME, sanitize_text_field( $store_info['storeName'] ) );
+		$wc_order->update_meta_data( self::META_STORE_ADDRESS, sanitize_text_field( $store_info['storeAddress'] ) );
+		$wc_order->update_meta_data( self::META_OUTSIDE, sanitize_text_field( $store_info['outside'] ) );
+		$wc_order->update_meta_data( self::META_SHIP, sanitize_text_field( $store_info['ship'] ) );
+		$wc_order->save();
+		return null;
+	}
 
 	/**
 	 * 加入並驗證發票資料
 	 *
-	 * @param array    $order_data 訂單資料
-	 * @param WC_Order $wc_order 訂單
+	 * @param array    $order_data 訂單資料.
+	 * @param WC_Order $wc_order 訂單.
 	 *
-	 * @return array 處理後的訂單資料
-	 * @throws Exception
+	 * @return array 處理後的訂單資料.
+	 * @throws Exception Exception.
 	 */
-	protected function add_invoice_data( $order_data, $wc_order ): array {
-		// 取得 JSON 資料
+	protected function add_invoice_data( array $order_data, WC_Order $wc_order ): array {
+		// 取得 JSON 資料.
 		$raw_data         = file_get_contents( 'php://input' );
 		$post_data        = json_decode( $raw_data, true );
 		$invoice_data_raw = $post_data['extensions']['ccat_invoice_data'] ?? array();
-		WC_CCat_Payments::log( __LINE__ . ' $post_data:' . print_r( $post_data, true ) );
-		WC_CCat_Payments::log( __LINE__ . ' $invoice_data_raw:' . print_r( $invoice_data_raw, true ) );
-
 		if ( ! empty( $invoice_data_raw ) ) {
-			// 訂單基本資料
-			WC_CCat_Payments::log( __LINE__ . ' invoice_data_raw:' . print_r( $invoice_data_raw, true ) );
 			$billing_data = $post_data['billing_address'] ?? array();
 
-			// 初始化發票資料
+			// 初始化發票資料.
 			$invoice_data = array(
-				'b2c'            => '1', // 預設開立電子發票
-				'print_invoice'  => '0', // 預設不列印
-				'donate_invoice' => '0', // 預設不捐贈
+				'b2c'            => '1', // 預設開立電子發票.
+				'print_invoice'  => '0', // 預設不列印.
+				'donate_invoice' => '0', // 預設不捐贈.
 				'product_name'   => wp_strip_all_tags( $this->get_order_items_name( $wc_order ) ),
 				'payer_name'     => sanitize_text_field( $billing_data['first_name'] . ' ' . $billing_data['last_name'] ),
 				'payer_postcode' => sanitize_text_field( $billing_data['postcode'] ),
@@ -317,21 +354,21 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				'payer_email'    => sanitize_email( $billing_data['email'] ),
 			);
 
-			// 基本驗證：發票類型
+			// 基本驗證：發票類型.
 			$vehicle_type = sanitize_text_field( $invoice_data_raw['vehicle_type'] ?? '' );
 			if ( empty( $vehicle_type ) ) {
-				throw new Exception( __( '請選擇發票類型', 'woocommerce' ) );
+				throw new Exception( esc_html__( '請選擇發票類型', 'woocommerce' ) );
 			}
 
-			// 依發票類型處理
+			// 依發票類型處理.
 			switch ( $vehicle_type ) {
-				case '1': // 個人雲端發票
+				case '1': // 個人雲端發票.
 					$cloud_type = sanitize_text_field( $invoice_data_raw['cloud_invoice_type'] ?? '' );
 					if ( empty( $cloud_type ) ) {
-						throw new Exception( __( '請選擇載具類型', 'woocommerce' ) );
+						throw new Exception( esc_html__( '請選擇載具類型', 'woocommerce' ) );
 					}
 
-					// 轉換載具類型為 API 格式
+					// 轉換載具類型為 API 格式.
 					switch ( $cloud_type ) {
 						case 'member':
 							$invoice_data['vehicle_type'] = '1';
@@ -340,7 +377,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 							$invoice_data['vehicle_type'] = '2';
 							$barcode                      = sanitize_text_field( $invoice_data_raw['vehicle_barcode'] ?? '' );
 							if ( ! preg_match( '/^\/[0-9A-Z.+\-]{7}$/', $barcode ) ) {
-								throw new Exception( __( '手機條碼格式不正確，應為 "/" 開頭加上7碼英數字', 'woocommerce' ) );
+								throw new Exception( esc_html__( '手機條碼格式不正確，應為 "/" 開頭加上7碼英數字', 'woocommerce' ) );
 							}
 							$invoice_data['vehicle_barcode'] = $barcode;
 							break;
@@ -348,31 +385,31 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 							$invoice_data['vehicle_type'] = '3';
 							$cert_number                  = sanitize_text_field( $invoice_data_raw['certificate_number'] ?? '' );
 							if ( ! preg_match( '/^[A-Z]{2}[0-9]{14}$/', $cert_number ) ) {
-								throw new Exception( __( '自然人憑證格式不正確', 'woocommerce' ) );
+								throw new Exception( esc_html__( '自然人憑證格式不正確', 'woocommerce' ) );
 							}
 							$invoice_data['vehicle_barcode'] = $cert_number;
 							break;
 					}
 					break;
 
-				case '2': // 發票捐贈
+				case '2': // 發票捐贈.
 					$invoice_data['donate_invoice'] = '1';
-					$love_code                      = sanitize_text_field( $invoice_data_raw['love_code'] ?? '919' ); // 預設創世基金會
+					$love_code                      = sanitize_text_field( $invoice_data_raw['love_code'] ?? '919' ); // 預設創世基金會.
 					if ( ! empty( $love_code ) && ! preg_match( '/^[0-9]{3,7}$/', $love_code ) ) {
-						throw new Exception( __( '請輸入有效的愛心碼', 'woocommerce' ) );
+						throw new Exception( esc_html__( '請輸入有效的愛心碼', 'woocommerce' ) );
 					}
 					$invoice_data['love_code'] = $love_code;
 					break;
 
-				case '3': // 公司發票
+				case '3': // 公司發票.
 					$bill_no = sanitize_text_field( $invoice_data_raw['buyer_bill_no'] ?? '' );
 					if ( ! $this->validate_tax_number( $bill_no ) ) {
-						throw new Exception( __( '統一編號格式不正確', 'woocommerce' ) );
+						throw new Exception( esc_html__( '統一編號格式不正確', 'woocommerce' ) );
 					}
 
 					$title = sanitize_text_field( $invoice_data_raw['buyer_invoice_title'] ?? '' );
 					if ( empty( $title ) || mb_strlen( $title ) < 2 ) {
-						throw new Exception( __( '請輸入發票抬頭', 'woocommerce' ) );
+						throw new Exception( esc_html__( '請輸入發票抬頭', 'woocommerce' ) );
 					}
 
 					$invoice_data['buyer_bill_no']       = $bill_no;
@@ -380,7 +417,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 					break;
 
 				default:
-					throw new Exception( __( '無效的發票類型', 'woocommerce' ) );
+					throw new Exception( esc_html__( '無效的發票類型', 'woocommerce' ) );
 			}
 			$wc_order->update_meta_data( self::META_INVOICE_ORDER_API_DATA, $invoice_data );
 		} else {
@@ -389,21 +426,21 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				$invoice_data = $saved_invoice_data;
 			}
 		}
-		WC_CCat_Payments::log( __LINE__ . ' invoice_data:' . print_r( $invoice_data, true ) );
 
 		return ! empty( $invoice_data ) ? array_merge( $order_data, $invoice_data ) : $order_data;
 	}
 
+
 	/**
-	 * 取得訂單品項名稱
+	 * Retrieves the concatenated names and quantities of items in an order.
 	 *
-	 * @param WC_Order $WC_Order
+	 * @param WC_Order $w_c_order The order object containing the items.
 	 *
-	 * @return string
+	 * @return string A string containing the names and quantities of the items, truncated if exceeding 60 characters.
 	 */
-	protected function get_order_items_name( WC_Order $WC_Order ): string {
+	protected function get_order_items_name( WC_Order $w_c_order ): string {
 		$names = array();
-		foreach ( $WC_Order->get_items() as $item ) {
+		foreach ( $w_c_order->get_items() as $item ) {
 			$names[] = $item->get_name() . 'x' . $item->get_quantity();
 		}
 		$result = implode( '、', $names );
@@ -412,13 +449,13 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * 驗證統一編號
+	 * 驗證統一編號.
 	 *
-	 * @param string $number
+	 * @param string $number 統一編號.
 	 *
 	 * @return bool
 	 */
-	private function validate_tax_number( $number ) {
+	private function validate_tax_number( string $number ): bool {
 		if ( ! preg_match( '/^[0-9]{8}$/', $number ) ) {
 			return false;
 		}
@@ -456,9 +493,10 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 			'b2c'              => '0',
 		);
 		if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
-			WC_CCat_Payments::log( 'before add_post_data:' . print_r( $post_data, true ) );
 			$post_data = $this->add_invoice_data( $post_data, $order );
-			WC_CCat_Payments::log( 'after add_post_data:' . print_r( $post_data, true ) );
+		}
+		if ( WC_CCat_Payments::is_shipping_enabled() ) {
+			$this->add_shipping_data( $post_data, $order );
 		}
 		$args     = array(
 			'body'    => wp_json_encode( $post_data ),
@@ -477,14 +515,10 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				array( 'source' => 'api-error' )
 			);
 
-			throw new Exception( esc_html( __( 'Api error. try again later.', 'ccat-for-woocommerce' ) ) );
+			throw new Exception( esc_html__( 'Api error. try again later.', 'ccat-for-woocommerce' ) );
 		}
 
 		$response_body = wp_remote_retrieve_body( $response );
-		if ( $this->is_test_mode() ) {
-			WC_CCat_Payments::log( 'request:' . print_r( $post_data, true ) );
-			WC_CCat_Payments::log( 'response:' . print_r( $response_body, true ) );
-		}
 		$response_data = json_decode( $response_body, true );
 
 		$order->update_meta_data( self::META_RESPONSE_DATA, $response_body );
@@ -492,7 +526,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 
 		if ( isset( $response_data['status'] ) && self::CODE_OK === $response_data['status'] ) {
 			$this->add_apn_notification( $order, $response_data );
-			$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::PENDING, __( 'Awaiting payment', 'ccat-for-woocommerce' ) );
+			$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::PENDING, esc_html__( 'Awaiting payment', 'ccat-for-woocommerce' ) );
 			WC()->cart->empty_cart();
 
 			return array(
@@ -500,7 +534,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				'redirect' => $response_data['url'],
 			);
 		} else {
-			$error_message = $response_data['msg'] ?? __( 'Unknown Error.', 'ccat-for-woocommerce' );
+			$error_message = $response_data['msg'] ?? esc_html__( 'Unknown Error.', 'ccat-for-woocommerce' );
 			delete_transient( 'api_access_token' );
 			throw new Exception( esc_html( 'Error: ' . $error_message ) );
 		}
@@ -526,7 +560,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 
 		switch ( $status ) {
 			case 'B':
-				$note = __( '授權完成', 'ccat-for-woocommerce' );
+				$note = esc_html__( '授權完成', 'ccat-for-woocommerce' );
 				$order->set_payment_method( $this );
 				$order->update_meta_data( self::ORDER_NO, $data['order_no'] );
 				$order->save();
@@ -534,71 +568,70 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				break;
 
 			case 'O':
-				$note = __( '請款作業中', 'ccat-for-woocommerce' );
+				$note = esc_html__( '請款作業中', 'ccat-for-woocommerce' );
 				$order->update_meta_data( self::META_PROCESSING, 1 );
 				$order->save();
 				break;
 
 			case 'E':
-				$note = __( '請款完成', 'ccat-for-woocommerce' );
-				// $order->update_status( 'completed' );
+				$note = esc_html__( '請款完成', 'ccat-for-woocommerce' );
 				break;
 
 			case 'F':
-				$note = __( '授權失敗', 'ccat-for-woocommerce' );
+				$note = esc_html__( '授權失敗', 'ccat-for-woocommerce' );
 				$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::FAILED );
 				break;
 
 			case 'D':
-				$note = __( '訂單已逾期', 'ccat-for-woocommerce' );
+				$note = esc_html__( '訂單已逾期', 'ccat-for-woocommerce' );
 				break;
 
 			case 'P':
-				$note = __( '請款失敗', 'ccat-for-woocommerce' );
+				$note = esc_html__( '請款失敗', 'ccat-for-woocommerce' );
 				$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::FAILED );
 				break;
 
 			case 'M':
-				$note = __( '取消交易完成', 'ccat-for-woocommerce' );
+				$note = esc_html__( '取消交易完成', 'ccat-for-woocommerce' );
 				$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::CANCELLED );
 				break;
 
 			case 'N':
-				$note = __( '取消交易失敗', 'ccat-for-woocommerce' );
+				$note = esc_html__( '取消交易失敗', 'ccat-for-woocommerce' );
 				break;
 
 			case 'Q':
-				$note = __( '取消授權完成', 'ccat-for-woocommerce' );
+				$note = esc_html__( '取消授權完成', 'ccat-for-woocommerce' );
 				$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::CANCELLED );
 				break;
 
 			case 'R':
-				$note = __( '取消授權失敗', 'ccat-for-woocommerce' );
+				$note = esc_html__( '取消授權失敗', 'ccat-for-woocommerce' );
 				break;
 
 			case 'I':
-				$note = __( '開立發票通知', 'ccat-for-woocommerce' );
+				$note = esc_html__( '開立發票通知', 'ccat-for-woocommerce' );
 				break;
 
 			case 'J':
-				$note = __( '開立發票折讓通知', 'ccat-for-woocommerce' );
+				$note = esc_html__( '開立發票折讓通知', 'ccat-for-woocommerce' );
 				break;
 
 			default:
-				$note = __( '未知狀態碼: ', 'ccat-for-woocommerce' ) . $status;
+				$note = esc_html__( '未知狀態碼: ', 'ccat-for-woocommerce' ) . esc_html( $status );
 				break;
 		}
 
 		$order->add_order_note( $note );
 
-		// 處理發票資訊
+		// 處理發票資訊.
 		if ( isset( $data['invoice_no'] ) ) {
-			// 基本發票資訊
+			// 基本發票資訊.
 			$order->update_meta_data( self::META_INVOICE_NO, sanitize_text_field( $data['invoice_no'] ) );
 			$order->update_meta_data( self::META_INVOICE_DATE, sanitize_text_field( $data['invoice_date'] ) );
 			$order->update_meta_data( self::META_INVOICE_RANDOM, sanitize_text_field( $data['random_number'] ) );
 
-			// 儲存完整發票資料
+			// 儲存完整發票資料.
 			$invoice_data = array(
 				'print_invoice'   => sanitize_text_field( $data['print_invoice'] ?? '0' ),
 				'vehicle_type'    => sanitize_text_field( $data['vehicle_type'] ?? '' ),
@@ -611,7 +644,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				'created_at'      => current_time( 'mysql' ),
 			);
 
-			// 如果有折讓資訊
+			// 如果有折讓資訊.
 			if ( ! empty( $data['invoice_discount_no'] ) ) {
 				$invoice_data['invoice_discount_no'] = sanitize_text_field( $data['invoice_discount_no'] );
 				$order->update_meta_data( self::META_INVOICE_DISCOUNT, $data['invoice_discount_no'] );
@@ -620,7 +653,8 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 			$order->update_meta_data( self::META_INVOICE_APN, $invoice_data );
 
 			$note = sprintf(
-				__( '已收到電子發票通知，發票號碼：%1$s，開立日期：%2$s，隨機碼：%3$s', 'woocommerce' ),
+			/* translators: %1$s: Invoice number, %2$s: Invoice date, %3$s: Random code. */
+				esc_html__( '已收到電子發票通知，發票號碼：%1$s，開立日期：%2$s，隨機碼：%3$s', 'woocommerce' ),
 				$data['invoice_no'],
 				$data['invoice_date'],
 				$data['random_number']
@@ -722,14 +756,23 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 		$order->save();
 	}
 
+	/**
+	 * Generates a unique order number based on the current date, order ID, and payment attempt count.
+	 *
+	 * @param WC_Order $order The order object for which the unique order number is being generated.
+	 *
+	 * @return string A unique order number string combining the date, order ID, and attempt count.
+	 */
 	protected function generate_unique_order_number( WC_Order $order ): string {
 		$attempt = (int) $order->get_meta( '_payment_attempt_count' );
 		$order->update_meta_data( '_payment_attempt_count', $attempt + 1 );
 		$order->save();
 
+		$datetime = new DateTime( 'now', new DateTimeZone( 'Asia/Taipei' ) );
+
 		return sprintf(
 			'CCAT%s%06d%02d',
-			date( 'Ymd' ),
+			$datetime->format( 'Ymd' ),
 			$order->get_id(),
 			$attempt
 		);
@@ -747,11 +790,11 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return new WP_Error( 'invalid_order', '找不到訂單' );
+			return new WP_Error( 'invalid_order', esc_html__( '找不到訂單', 'ccat-for-woocommerce' ) );
 		}
 
 		if ( $amount <= 0 ) {
-			return new WP_Error( 'invalid_amount', '無效的退款金額' );
+			return new WP_Error( 'invalid_amount', esc_html__( '無效的退款金額', 'ccat-for-woocommerce' ) );
 		}
 
 		$api_token  = $this->get_payment_api_token();
@@ -791,7 +834,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
-					return new WP_Error( 'api_response_error', __( 'Json Decode Fail.', 'ccat-for-woocommerce' ) );
+					return new WP_Error( 'api_response_error', esc_html__( 'Json Decode Fail.', 'ccat-for-woocommerce' ) );
 				}
 				$status = $response_data['status'] ?? null;
 				$msg    = $response_data['msg'] ?? '';
@@ -871,7 +914,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				);
 
 				if ( is_wp_error( $response ) ) {
-					return new WP_Error( 'api_connection_error', __( 'API 請求失敗: ', 'ccat-for-woocommerce' ) . $response->get_error_message() );
+					return new WP_Error( 'api_connection_error', esc_html__( 'API 請求失敗: ', 'ccat-for-woocommerce' ) . esc_html( $response->get_error_message() ) );
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
@@ -880,24 +923,29 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
-					return new WP_Error( 'api_response_error', __( 'JSON Decode Fail.', 'ccat-for-woocommerce' ) );
+					return new WP_Error( 'api_response_error', esc_html__( 'JSON Decode Fail.', 'ccat-for-woocommerce' ) );
 				}
 
 				$status = $response_data['status'] ?? null;
 				if ( 'OK' !== $status ) {
 					$msg = $response_data['msg'] ?? '';
 
-					return new WP_Error( 'api_response_error', __( 'API error: ', 'ccat-for-woocommerce' ) . $msg );
+					return new WP_Error( 'api_response_error', esc_html__( 'API error: ', 'ccat-for-woocommerce' ) . esc_html( $msg ) );
 				}
 
 				return true;
 			}
 
-			return new WP_Error( 'refund_failed', '退款處理失敗' );
+			return new WP_Error( 'refund_failed', esc_html__( '退款處理失敗', 'ccat-for-woocommerce' ) );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'refund_error', $e->getMessage() );
 		}
 	}
 
+	/**
+	 * Retrieves the type of acquirer associated with the implementation.
+	 *
+	 * @return string A string representing the acquirer type.
+	 */
 	abstract public function acquirer_type(): string;
 }

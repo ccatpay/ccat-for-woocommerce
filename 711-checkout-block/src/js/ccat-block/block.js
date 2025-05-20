@@ -522,8 +522,7 @@ const cvsInterceptor = async (resource, config) => {
 
     return [resource, config];
 };
-
-fetchInterceptor.register(cvsInterceptor);
+window.fetchInterceptor.register(cvsInterceptor);
 
 
 export const Block = ({checkoutExtensionData, extensions}) => {

@@ -12,17 +12,40 @@ const fetchInterceptor = (function () {
         async function interceptedFetch(...args) {
             let [resource, config] = args;
 
+            console.log('攔截到請求:', resource, config);
+
+            // 確保 config 存在
+            config = config || {};
+
             // 依序執行所有攔截器
             for (const interceptor of interceptors) {
                 try {
+                    console.log('執行攔截器:', interceptor.name || '匿名攔截器');
+
                     const result = await interceptor(resource, config);
                     if (result) {
                         [resource, config] = result;
+                        console.log('攔截器修改後的資源和配置:', resource, config);
+                    } else {
+                        console.log('攔截器未修改請求');
                     }
                 } catch (error) {
                     console.error('執行攔截器時發生錯誤:', error);
                 }
             }
+
+            // 如果是 checkout 請求，記錄最終請求內容
+            if (resource.includes('/wc/store/v1/checkout') && config.body) {
+                try {
+                    const bodyObj = JSON.parse(config.body);
+                    console.log('最終結帳請求資料:', bodyObj);
+                    console.log('extensions 內容:', bodyObj.extensions);
+                } catch (e) {
+                    console.error('無法解析請求體:', e);
+                }
+            }
+
+            console.log('調用原始 fetch 方法');
 
             // 呼叫原始 fetch
             return originalFetch(resource, config);
@@ -51,7 +74,6 @@ const fetchInterceptor = (function () {
                 }
 
                 interceptors.push(interceptor);
-                return () => this.unregister(interceptor); // 返回取消註冊的函數
             },
 
             // 取消註冊攔截器
@@ -63,11 +85,6 @@ const fetchInterceptor = (function () {
                 }
                 return false;
             },
-
-            // 取得攔截器數量 (用於測試)
-            getInterceptorCount: function () {
-                return interceptors.length;
-            }
         };
     }
 
@@ -84,5 +101,4 @@ const fetchInterceptor = (function () {
     };
 })();
 
-// 導出獲取實例的方法
-export default fetchInterceptor.getInstance();
+window.fetchInterceptor = fetchInterceptor.getInstance();

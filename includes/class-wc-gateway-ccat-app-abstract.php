@@ -67,6 +67,9 @@ abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
 			if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
 			}
+			if ( WC_CCat_Payments::is_shipping_enabled() ) {
+				$this->add_shipping_data( $post_data, $order );
+			}
 			$args = array(
 				'body'    => wp_json_encode( $post_data ),
 				'headers' => array(

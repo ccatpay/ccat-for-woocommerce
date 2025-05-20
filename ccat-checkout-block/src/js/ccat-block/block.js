@@ -177,4 +177,4 @@ const invoiceInterceptor = async (resource, config) => {
 
     return [resource, config];
 };
-fetchInterceptor.register(invoiceInterceptor);
+window.fetchInterceptor.register(invoiceInterceptor);
