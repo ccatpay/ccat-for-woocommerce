@@ -142,9 +142,9 @@ class Ccat_Blocks_Integration implements IntegrationInterface {
 	/**
 	 * Get the file modified time as a cache buster if we're in dev mode.
 	 *
-	 * @return int The cache buster value to use for the given file.
+	 * @return string The cache buster value to use for the given file.
 	 */
-	protected function get_file_version(): int {
-		return time();
+	protected function get_file_version(): string {
+		return WC_CCAT_PAYMENTS_VERSION;
 	}
 }

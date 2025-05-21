@@ -219,8 +219,8 @@ class WC_CCat_Payments {
 		}
 		if ( self::is_shipping_enabled() ) {
 			require_once '711-checkout-block/class-ccat711-blocks-integration.php';
-//			require_once 'includes/class-wc-ccat-invoice-display.php';
-//			new WC_CCat_Invoice_Display();
+			require_once 'includes/class-wc-ccat-shipping-display.php';
+			new WC_CCat_Shipping_Display();
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {

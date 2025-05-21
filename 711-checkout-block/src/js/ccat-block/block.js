@@ -565,12 +565,13 @@ export const Block = ({checkoutExtensionData, extensions}) => {
         stateRef.storeInfo = storeInfo;
         const shippingFieldsContainer = document.querySelector('.wc-block-checkout__shipping-fields');
         if (shippingFieldsContainer) {
+            // 有BUG 暫時註解. 官方不提供關閉預設地址的功能
             if (showBlock) {
                 // 如果選擇超商運送且已選擇門市，隱藏地址欄位
-                shippingFieldsContainer.style.display = 'none';
+                // shippingFieldsContainer.style.display = 'none';
             } else {
                 // 否則顯示地址欄位
-                shippingFieldsContainer.style.display = 'block';
+                // shippingFieldsContainer.style.display = 'block';
             }
         }
     }, [showBlock, storeInfo]); // 當這些狀態變更時重新註冊攔截器
