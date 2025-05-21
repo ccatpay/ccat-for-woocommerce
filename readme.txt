@@ -1,5 +1,5 @@
 === ccat-for-woocommerce ===
-Contributors: ccat
+Contributors: ccatpay
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.7
