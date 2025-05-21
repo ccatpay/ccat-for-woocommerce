@@ -139,7 +139,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 	 * @return array 授權 token.
 	 * @throws Exception 如果無法獲取 token.
 	 */
-	private function get_api_data(): array {
+	public static function get_api_data(): array {
 		// 使用 WC_Gateway_CCat_Abstract 中的 get_payment_api_token 方法.
 
 		// 從 WooCommerce 獲取啟用的支付閘道.
@@ -202,101 +202,11 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 			wp_die();
 		}
 
-		// 驗證 nonce.
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'ccat711_store_selection_nonce' ) ) {
-			wp_send_json_error(
-				array(
-					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce' ),
-				)
-			);
-			wp_die();
-		}
-
 		// 獲取運送方式.
 		$shipping_method = isset( $_POST['shipping_method'] ) ? sanitize_text_field( wp_unslash( $_POST['shipping_method'] ) ) : '';
 		$store_category  = isset( $_POST['store_category'] ) ? sanitize_text_field( wp_unslash( $_POST['store_category'] ) ) : '';
 
-		try {
-
-			// 創建回調網址，用於從地圖選擇頁面返回.
-			$base_id      = uniqid();
-			$random       = wp_rand( 1000000, 9999999 );
-			$temp_var     = $base_id . $random;
-			$callback_url = add_query_arg(
-				array(
-					'action' => 'ccat711_store_callback',
-				),
-				site_url( 'cvs-callback' ) // 使用自定義 URL.
-			);
-			try {
-				// 獲取 API token.
-				$api_data = $this->get_api_data();
-
-				// API 端點.
-				$api_url = $api_data[1] . 'api/Logistics/OpenMap';
-
-				// 準備請求資料.
-				$request_data = array(
-					'ServiceId'     => $api_data[2],
-					'ReturnUrl'     => $callback_url,
-					'TempVar'       => $temp_var,
-					'StoreCategory' => $store_category,
-				);
-
-				// 發送 API 請求.
-				$response = wp_remote_post(
-					$api_url,
-					array(
-						'headers' => array(
-							'Content-Type'  => 'application/json',
-							'Authorization' => 'Bearer ' . $api_data[0],
-						),
-						'body'    => wp_json_encode( $request_data ),
-						'timeout' => 30,
-					)
-				);
-
-				// 檢查回應.
-				if ( is_wp_error( $response ) ) {
-					throw new Exception( $response->get_error_message() );
-				}
-
-				$body = wp_remote_retrieve_body( $response );
-				$url  = json_decode( $body, true );
-
-				// 檢查回應是否包含地圖 URL.
-				if ( empty( $url ) ) {
-					throw new Exception( esc_html__( '取得超商網址錯誤', 'ccat-for-woocommerce' ) );
-				}
-
-				// 儲存臨時變數，以便在回調時使用.
-				update_option(
-					'ccat_temp_var_' . $temp_var,
-					array(
-						'shipping_method' => $shipping_method,
-						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '',
-						'created_at'      => time(),
-					),
-					false
-				);
-
-				// 返回地圖 URL.
-				wp_send_json_success(
-					array(
-						'url' => $url,
-					)
-				);
-
-			} catch ( Exception $e ) {
-				throw new Exception( esc_html__( 'API 請求失敗：', 'ccat-for-woocommerce' ) . $e->getMessage() );
-			}
-		} catch ( Exception $e ) {
-			wp_send_json_error(
-				array(
-					'message' => $e->getMessage(),
-				)
-			);
-		}
+		self::openMapForStore( $store_category, $shipping_method );
 
 		wp_die();
 	}
@@ -552,5 +462,100 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 		</html>';
 
 		exit;
+	}
+
+
+	/**
+	 * Opens a map interface for selecting a store based on the provided store category and shipping method.
+	 * Sends an API request to retrieve a map URL and handles various stages, including callback setup
+	 * and temporary storage of relevant data.
+	 *
+	 * @param string $store_category The category of the store to filter the map selection (e.g., convenience store type).
+	 * @param string $shipping_method The shipping method associated with the store selection.
+	 *
+	 * @return void void
+	 */
+	public static function openMapForStore( string $store_category, string $shipping_method ): void {
+		try {
+
+			// 創建回調網址，用於從地圖選擇頁面返回.
+			$base_id      = uniqid();
+			$random       = wp_rand( 1000000, 9999999 );
+			$temp_var     = $base_id . $random;
+			$callback_url = add_query_arg(
+				array(
+					'action' => 'ccat711_store_callback',
+				),
+				site_url( 'cvs-callback' ) // 使用自定義 URL.
+			);
+			try {
+				// 獲取 API token.
+				$api_data = self::get_api_data();
+
+				// API 端點.
+				$api_url = $api_data[1] . 'api/Logistics/OpenMap';
+
+				// 準備請求資料.
+				$request_data = array(
+					'ServiceId'     => $api_data[2],
+					'ReturnUrl'     => $callback_url,
+					'TempVar'       => $temp_var,
+					'StoreCategory' => $store_category,
+				);
+
+				// 發送 API 請求.
+				$response = wp_remote_post(
+					$api_url,
+					array(
+						'headers' => array(
+							'Content-Type'  => 'application/json',
+							'Authorization' => 'Bearer ' . $api_data[0],
+						),
+						'body'    => wp_json_encode( $request_data ),
+						'timeout' => 30,
+					)
+				);
+
+				// 檢查回應.
+				if ( is_wp_error( $response ) ) {
+					throw new Exception( $response->get_error_message() );
+				}
+
+				$body = wp_remote_retrieve_body( $response );
+				$url  = json_decode( $body, true );
+
+				// 檢查回應是否包含地圖 URL.
+				if ( empty( $url ) ) {
+					throw new Exception( esc_html__( '取得超商網址錯誤', 'ccat-for-woocommerce' ) );
+				}
+
+				// 儲存臨時變數，以便在回調時使用.
+				update_option(
+					'ccat_temp_var_' . $temp_var,
+					array(
+						'shipping_method' => $shipping_method,
+						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '', // phpcs:ignore WordPress
+						'created_at'      => time(),
+					),
+					false
+				);
+
+				// 返回地圖 URL.
+				wp_send_json_success(
+					array(
+						'url' => $url,
+					)
+				);
+
+			} catch ( Exception $e ) {
+				throw new Exception( esc_html__( 'API 請求失敗：', 'ccat-for-woocommerce' ) . $e->getMessage() );
+			}
+		} catch ( Exception $e ) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage(),
+				)
+			);
+		}
 	}
 }
