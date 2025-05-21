@@ -192,7 +192,10 @@ class WC_CCat_Payments {
 			$gateways[] = 'WC_Gateway_CCat_App_Opw';
 			$gateways[] = 'WC_Gateway_CCat_App_Icash';
 			// 新增黑貓貨到付款閘道.
-			$gateways[] = 'WC_Gateway_CCat_COD';
+			$gateways[] = 'WC_Gateway_CCat_COD_Cash';
+			$gateways[] = 'WC_Gateway_CCat_COD_Mobile';
+			$gateways[] = 'WC_Gateway_CCat_COD_711';
+			$gateways[] = 'WC_Gateway_CCat_COD_Card';
 		}
 
 		return $gateways;
@@ -247,7 +250,11 @@ class WC_CCat_Payments {
 			require_once 'includes/class-wc-gateway-ccat-app-opw.php';
 			require_once 'includes/class-wc-gateway-ccat-app-icash.php';
 			// 新增黑貓貨到付款閘道.
-			require_once 'includes/class-wc-gateway-ccat-cod.php';
+			require_once 'includes/class-wc-gateway-ccat-cod-abstract.php';
+			require_once 'includes/class-wc-gateway-ccat-cod-cash.php';
+			require_once 'includes/class-wc-gateway-ccat-cod-card.php';
+			require_once 'includes/class-wc-gateway-ccat-cod-mobile.php';
+			require_once 'includes/class-wc-gateway-ccat-cod-711.php';
 		}
 
 		// 載入黑貓物流相關類別.

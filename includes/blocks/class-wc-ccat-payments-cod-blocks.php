@@ -24,7 +24,7 @@ class WC_Gateway_CCat_COD_Blocks_Support extends AbstractPaymentMethodType {
 	 *
 	 * @var string
 	 */
-	protected $name = 'ccat_cod';
+	protected $name = 'ccat_cod_card';
 
 	/**
 	 * 初始化

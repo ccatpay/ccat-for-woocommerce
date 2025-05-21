@@ -20,14 +20,14 @@ require_once 'class-wc-gateway-ccat-cvs-abstract.php';
  * @class    WC_Gateway_CCat_COD
  * @version  1.10.4
  */
-class WC_Gateway_CCat_COD extends WC_Gateway_CCat_Abstract {
+class WC_Gateway_CCat_COD_Abstract extends WC_Gateway_CCat_Abstract {
 
 	/**
 	 * Unique id for the gateway.
 	 *
 	 * @var string
 	 */
-	public $id = 'ccat_cod';
+	public $id = '';
 
 	/**
 	 * 初始化黑貓貨到付款支付閘道
@@ -36,27 +36,6 @@ class WC_Gateway_CCat_COD extends WC_Gateway_CCat_Abstract {
 		$this->title       = __( '黑貓貨到付款', 'ccat-for-woocommerce' );
 		$this->description = __( '透過黑貓宅急便提供貨到付款的付款方式', 'ccat-for-woocommerce' );
 		parent::__construct();
-	}
-
-	/**
-	 * 初始化設定表單欄位
-	 */
-	public function init_form_fields(): void {
-		$this->form_fields = array(
-			'enabled' => array(
-				'title'   => __( '啟用/停用', 'ccat-for-woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( '啟用黑貓貨到付款', 'ccat-for-woocommerce' ),
-				'default' => 'yes',
-			),
-			'title'   => array(
-				'title'       => __( '付款標題', 'ccat-for-woocommerce' ),
-				'type'        => 'text',
-				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce' ),
-				'default'     => __( '黑貓貨到付款', 'ccat-for-woocommerce' ),
-				'desc_tip'    => true,
-			),
-		);
 	}
 
 	/**

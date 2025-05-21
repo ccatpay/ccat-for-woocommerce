@@ -24,8 +24,6 @@ class WC_CCat_Shipping_Payment_Coordinator {
 				__CLASS__,
 				'filter_payment_gateways_by_shipping',
 			),
-			10,
-			1
 		);
 		add_filter(
 			'woocommerce_rest_api_get_setting_payment_gateways',
@@ -68,15 +66,37 @@ class WC_CCat_Shipping_Payment_Coordinator {
 
 		// 根據物流方式類型過濾支付方式.
 		if ( $is_cod_shipping ) {
-			// 如果選擇了貨到付款物流，只允許使用貨到付款支付方式.
+			// 檢查是否選擇了711的物流方式.
+			$is_711_shipping = false;
+			foreach ( $chosen_shipping_methods as $method ) {
+				if ( false !== strpos( $method, '711' ) ) {
+					$is_711_shipping = true;
+					break;
+				}
+			}
+
+			if ( $is_711_shipping ) {
+				// 如果選擇了711相關物流，只允許使用711貨到付款支付方式.
+				foreach ( $available_gateways as $id => $gateway ) {
+					if ( 'ccat_cod_711' !== $id ) {
+						unset( $available_gateways[ $id ] );
+					}
+				}
+			} else {
+				// 如果選擇了非711的貨到付款物流，允許使用其他貨到付款支付方式.
+				foreach ( $available_gateways as $id => $gateway ) {
+					if ( ! in_array( $id, array( 'ccat_cod_card', 'ccat_cod_cash', 'ccat_cod_mobile' ), true ) ) {
+						unset( $available_gateways[ $id ] );
+					}
+				}
+			}
+		} else {
+			// 如果選擇了非貨到付款物流，排除所有貨到付款支付方式.
 			foreach ( $available_gateways as $id => $gateway ) {
-				if ( 'ccat_cod' !== $id ) {
+				if ( strpos( $id, 'cod' ) !== false ) {
 					unset( $available_gateways[ $id ] );
 				}
 			}
-		} elseif ( isset( $available_gateways['ccat_cod'] ) ) {
-			// 如果選擇了非貨到付款物流，排除貨到付款支付方式.
-			unset( $available_gateways['ccat_cod'] );
 		}
 
 		return $available_gateways;
@@ -104,22 +124,38 @@ class WC_CCat_Shipping_Payment_Coordinator {
 
 		// 檢查選擇的物流方式是否為貨到付款類型.
 		$is_cod_shipping = self::is_cod_shipping_selected( $chosen_shipping_methods );
-
-		// 根據物流方式類型過濾支付方式.
 		if ( $is_cod_shipping ) {
-			// 如果選擇了貨到付款物流，只允許使用貨到付款支付方式.
-			return array_filter(
-				$payment_gateways,
-				function ( $gateway ) {
-					return 'ccat_cod' === $gateway;
+			$is_711_shipping = false;
+			foreach ( $chosen_shipping_methods as $method ) {
+				if ( false !== strpos( $method, '711' ) ) {
+					$is_711_shipping = true;
+					break;
 				}
-			);
+			}
+
+			if ( $is_711_shipping ) {
+				// 如果選擇了711相關物流，只允許使用711貨到付款支付方式.
+				return array_filter(
+					$payment_gateways,
+					function ( $gateway ) {
+						return 'ccat_cod_711' === $gateway;
+					}
+				);
+			} else {
+				// 如果選擇了非711的貨到付款物流，允許使用其他貨到付款支付方式.
+				return array_filter(
+					$payment_gateways,
+					function ( $gateway ) {
+						return in_array( $gateway, array( 'ccat_cod_card', 'ccat_cod_cash', 'ccat_cod_mobile' ), true );
+					}
+				);
+			}
 		} else {
-			// 如果選擇了非貨到付款物流，排除貨到付款支付方式.
+			// 如果選擇了非貨到付款物流，排除所有貨到付款支付方式.
 			return array_filter(
 				$payment_gateways,
 				function ( $gateway ) {
-					return 'ccat_cod' !== $gateway;
+					return strpos( $gateway, 'cod' ) === false;
 				}
 			);
 		}
