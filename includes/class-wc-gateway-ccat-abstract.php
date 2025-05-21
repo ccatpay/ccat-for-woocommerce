@@ -320,7 +320,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 			// 基本驗證：發票類型
 			$vehicle_type = sanitize_text_field( $invoice_data_raw['vehicle_type'] ?? '' );
 			if ( empty( $vehicle_type ) ) {
-				throw new Exception( __( '請選擇發票類型', 'woocommerce' ) );
+				throw new Exception( esc_html ( __( '請選擇發票類型', 'ccat-for-woocommerce' ) ) );
 			}
 
 			// 依發票類型處理
@@ -328,7 +328,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				case '1': // 個人雲端發票
 					$cloud_type = sanitize_text_field( $invoice_data_raw['cloud_invoice_type'] ?? '' );
 					if ( empty( $cloud_type ) ) {
-						throw new Exception( __( '請選擇載具類型', 'woocommerce' ) );
+						throw new Exception( esc_html ( __( '請選擇載具類型', 'ccat-for-woocommerce' ) ) );
 					}
 
 					// 轉換載具類型為 API 格式
@@ -340,7 +340,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 							$invoice_data['vehicle_type'] = '2';
 							$barcode                      = sanitize_text_field( $invoice_data_raw['vehicle_barcode'] ?? '' );
 							if ( ! preg_match( '/^\/[0-9A-Z.+\-]{7}$/', $barcode ) ) {
-								throw new Exception( __( '手機條碼格式不正確，應為 "/" 開頭加上7碼英數字', 'woocommerce' ) );
+								throw new Exception( esc_html ( __( '手機條碼格式不正確，應為 "/" 開頭加上7碼英數字', 'ccat-for-woocommerce' ) ) );
 							}
 							$invoice_data['vehicle_barcode'] = $barcode;
 							break;
@@ -348,7 +348,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 							$invoice_data['vehicle_type'] = '3';
 							$cert_number                  = sanitize_text_field( $invoice_data_raw['certificate_number'] ?? '' );
 							if ( ! preg_match( '/^[A-Z]{2}[0-9]{14}$/', $cert_number ) ) {
-								throw new Exception( __( '自然人憑證格式不正確', 'woocommerce' ) );
+								throw new Exception( esc_html ( __( '自然人憑證格式不正確', 'ccat-for-woocommerce' ) ) );
 							}
 							$invoice_data['vehicle_barcode'] = $cert_number;
 							break;
@@ -359,7 +359,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 					$invoice_data['donate_invoice'] = '1';
 					$love_code                      = sanitize_text_field( $invoice_data_raw['love_code'] ?? '919' ); // 預設創世基金會
 					if ( ! empty( $love_code ) && ! preg_match( '/^[0-9]{3,7}$/', $love_code ) ) {
-						throw new Exception( __( '請輸入有效的愛心碼', 'woocommerce' ) );
+						throw new Exception( esc_html ( __( '請輸入有效的愛心碼', 'ccat-for-woocommerce' ) ) );
 					}
 					$invoice_data['love_code'] = $love_code;
 					break;
@@ -367,12 +367,12 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				case '3': // 公司發票
 					$bill_no = sanitize_text_field( $invoice_data_raw['buyer_bill_no'] ?? '' );
 					if ( ! $this->validate_tax_number( $bill_no ) ) {
-						throw new Exception( __( '統一編號格式不正確', 'woocommerce' ) );
+						throw new Exception( esc_html ( __( '統一編號格式不正確', 'ccat-for-woocommerce' ) ) );
 					}
 
 					$title = sanitize_text_field( $invoice_data_raw['buyer_invoice_title'] ?? '' );
 					if ( empty( $title ) || mb_strlen( $title ) < 2 ) {
-						throw new Exception( __( '請輸入發票抬頭', 'woocommerce' ) );
+						throw new Exception( esc_html ( __( '請輸入發票抬頭', 'ccat-for-woocommerce' ) ) );
 					}
 
 					$invoice_data['buyer_bill_no']       = $bill_no;
@@ -380,7 +380,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 					break;
 
 				default:
-					throw new Exception( __( '無效的發票類型', 'woocommerce' ) );
+					throw new Exception( esc_html ( __( '無效的發票類型', 'ccat-for-woocommerce' ) ) );
 			}
 			$wc_order->update_meta_data( self::META_INVOICE_ORDER_API_DATA, $invoice_data );
 		} else {
@@ -620,7 +620,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 			$order->update_meta_data( self::META_INVOICE_APN, $invoice_data );
 
 			$note = sprintf(
-				__( '已收到電子發票通知，發票號碼：%1$s，開立日期：%2$s，隨機碼：%3$s', 'woocommerce' ),
+				__( '已收到電子發票通知，發票號碼：%1$s，開立日期：%2$s，隨機碼：%3$s', 'ccat-for-woocommerce' ),
 				$data['invoice_no'],
 				$data['invoice_date'],
 				$data['random_number']
