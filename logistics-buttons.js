@@ -614,34 +614,131 @@ jQuery(function ($) {
 
         // 顯示載入中狀態
         button.prop('disabled', true);
-        button.text(ccat_logistics_params.loadingText);
+        button.text("Loading..");
 
-        // 實際創建物流訂單的 AJAX 請求
-        // 根據您的需求實現這部分...
-
-        // 暫時恢復按鈕狀態
-        setTimeout(function () {
+        // 顯示確認對話框
+        if (!confirm('確定要建立物流訂單嗎？')) {
+            // 如果用戶取消，恢復按鈕狀態
             button.prop('disabled', false);
             button.text(originalText);
-        }, 1000);
+            return;
+        }
+    
+        // 實際創建物流訂單的 AJAX 請求
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'create_logistics_order',
+                nonce: nonce,
+                order_id: orderId
+            },
+            success: function (response) {
+                if (response.success) {
+                    // 顯示成功訊息
+                    alert(response.data.message || '物流訂單建立成功');
+                    
+                    // 顯示託運單號
+                    if (response.data.obt_number) {
+                        const orderDetails = $('#order-details');
+                        if (orderDetails.length) {
+                            // 如果有託運單號顯示區域，更新內容
+                            const obtNumberDisplay = orderDetails.find('.obt-number');
+                            if (obtNumberDisplay.length) {
+                                obtNumberDisplay.text(response.data.obt_number);
+                            } else {
+                                // 如果沒有，添加一個新的
+                                orderDetails.append('<p class="obt-number-container">託運單號: <span class="obt-number">' + response.data.obt_number + '</span></p>');
+                            }
+                        }
+                    }
+                    
+                    // 刷新頁面以顯示更新
+                    window.location.reload();
+                } else {
+                    // 顯示錯誤訊息
+                    console.log(response.data);
+                    alert(response.data.message || '建立物流訂單失敗');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('建立物流訂單時發生錯誤:', error);
+                alert('建立物流訂單時發生錯誤，請稍後再試');
+            },
+            complete: function () {
+                // 恢復按鈕狀態
+                button.prop('disabled', false);
+                button.text(originalText);
+            }
+        });
     });
 
     // 下載託運單按鈕點擊事件
     $('.download-shipping-label').on('click', function (e) {
         e.preventDefault();
 
-        const orderId = $(this).data('order-id');
         const button = $(this);
         const originalText = button.text();
-
+    
         // 顯示載入中狀態
         button.prop('disabled', true);
-        button.text(ccat_logistics_params.loadingText);
+        button.text('Loading...');
+    
+        // 呼叫AJAX下載託運單
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'download_shipping_label',
+                order_id: order_id,
+                nonce: nonce
+            },
+            xhrFields: {
+                responseType: 'blob' // 接收二進制數據.
+            },
+            success: function(response, textStatus, xhr) {
+                button.prop('disabled', false).text(originalText);
+                const contentType = xhr.getResponseHeader('content-type');
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    // 解析JSON錯誤訊息
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        try {
+                            const errorData = JSON.parse(reader.result);
+                            alert('下載失敗: ' + (errorData.message || '未知錯誤'));
+                        } catch (e) {
+                            alert('下載失敗: 未知錯誤');
+                        }
+                    };
+                    reader.readAsText(response);
+                    return;
+                }
 
-        // 暫時恢復按鈕狀態
-        setTimeout(function () {
-            button.prop('disabled', false);
-            button.text(originalText);
-        }, 1000);
+                // 創建Blob URL並下載
+                const blob = new Blob([response], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = '託運單.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            },
+            error: function(xhr) {
+                // 恢復按鈕狀態
+                button.prop('disabled', false).text(originalText);
+
+                // 顯示錯誤訊息
+                try {
+                    const errorData = JSON.parse(xhr.responseText);
+                    alert('下載失敗: ' + (errorData.message || '未知錯誤'));
+                } catch (e) {
+                    alert('下載失敗: 伺服器錯誤');
+                }
+            }
+        });
     });
 });

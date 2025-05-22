@@ -108,6 +108,36 @@ class WC_CCat_Settings {
 				'id'   => 'wc_ccat_test_chk_code',
 			),
 			array(
+				'name' => __( '寄件人設定', 'ccat-for-woocommerce' ),
+				'type' => 'title',
+				'desc' => __( '黑貓物流寄件人相關資訊', 'ccat-for-woocommerce' ),
+				'id'   => 'wc_ccat_sender_section_title',
+			),
+			array(
+				'name' => __( '寄件人姓名', 'ccat-for-woocommerce' ),
+				'type' => 'text',
+				'desc' => __( '請輸入寄件人姓名', 'ccat-for-woocommerce' ),
+				'id'   => 'woocommerce_ccat_sender_name',
+			),
+			array(
+				'name' => __( '寄件人電話', 'ccat-for-woocommerce' ),
+				'type' => 'text',
+				'desc' => __( '請輸入寄件人市話', 'ccat-for-woocommerce' ),
+				'id'   => 'woocommerce_ccat_sender_tel',
+			),
+			array(
+				'name' => __( '寄件人手機', 'ccat-for-woocommerce' ),
+				'type' => 'text',
+				'desc' => __( '請輸入寄件人手機號碼', 'ccat-for-woocommerce' ),
+				'id'   => 'woocommerce_ccat_sender_mobile',
+			),
+			array(
+				'name' => __( '寄件人地址', 'ccat-for-woocommerce' ),
+				'type' => 'text',
+				'desc' => __( '請輸入寄件人詳細地址', 'ccat-for-woocommerce' ),
+				'id'   => 'woocommerce_ccat_sender_address',
+			),
+			array(
 				'type' => 'sectionend',
 				'id'   => 'wc_ccat_settings_section_end',
 			),

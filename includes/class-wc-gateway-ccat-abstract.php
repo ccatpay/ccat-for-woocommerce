@@ -302,8 +302,13 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 		if ( ! WC_CCat_Payments::is_shipping_enabled() ) {
 			return null;
 		}
-		$shipping_method = $wc_order->get_shipping_method();
-		if ( false !== stripos( $shipping_method, '711' ) ) {
+		$shipping_method_id = '';
+		$shipping_methods   = $wc_order->get_shipping_methods();
+		foreach ( $shipping_methods as $shipping_method ) {
+			$shipping_method_id = $shipping_method->get_method_id();
+			break; // 只取第一個運送方法.
+		}
+		if ( false === stripos( $shipping_method_id, '711' ) ) {
 			return null;
 		}
 
