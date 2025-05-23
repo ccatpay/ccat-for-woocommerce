@@ -40,9 +40,6 @@ class WC_CCat_Shipping_Display {
 	 * 初始化 hooks
 	 */
 	public function __construct() {
-		// 前台訂單詳細頁面.
-		add_action( 'woocommerce_order_details_after_order_table', array( $this, 'display_invoice_info' ) );
-
 		// 後台訂單詳細頁面.
 		add_action(
 			'woocommerce_admin_order_data_after_shipping_address',
