@@ -84,7 +84,6 @@ class WC_CCat_Payments {
 			$methods['wc_shipping_ccat_prepaid']     = 'WC_Shipping_CCat_Prepaid';
 			$methods['wc_shipping_ccat_711_prepaid'] = 'WC_Shipping_CCat_711_Prepaid';
 
-
 			// 冷藏物流方法.
 			$methods['wc_shipping_ccat_cod_refrigerated']         = 'WC_Shipping_CCat_COD_Refrigerated';
 			$methods['wc_shipping_ccat_711_cod_refrigerated']     = 'WC_Shipping_CCat_711_COD_Refrigerated';
@@ -118,12 +117,14 @@ class WC_CCat_Payments {
 	public static function check_and_add_taiwan_shipping_zone(): void {
 		// 檢查台灣區域是否存在.
 		$taiwan_zone_exists = false;
+		$taiwan_zone_id     = null;
 		$zones              = WC_Shipping_Zones::get_zones();
 
 		foreach ( $zones as $zone ) {
 			// 檢查區域名稱是否為Taiwan或台灣.
 			if ( stripos( $zone['zone_name'], 'Taiwan' ) !== false || stripos( $zone['zone_name'], '台灣' ) !== false ) {
 				$taiwan_zone_exists = true;
+				$taiwan_zone_id     = $zone['id'];
 				break;
 			}
 
@@ -132,35 +133,59 @@ class WC_CCat_Payments {
 				foreach ( $zone['zone_locations'] as $location ) {
 					if ( 'country' === $location->type && 'TW' === $location->code ) {
 						$taiwan_zone_exists = true;
+						$taiwan_zone_id     = $zone['id'];
 						break 2;
 					}
 				}
 			}
 		}
 
-		// 如果台灣區域不存在，則創建並添加物流方法.
-		if ( ! $taiwan_zone_exists ) {
-			// 創建新的台灣區域.
-			$new_zone = new WC_Shipping_Zone();
-			$new_zone->set_zone_name( '台灣' );
-			$new_zone->add_location( 'TW', 'country' );
-			$new_zone->save();
+		// 定義所有需要添加的物流方法.
+		$shipping_methods = array(
+			'wc_shipping_ccat_cod',
+			'wc_shipping_ccat_711_cod',
+			'wc_shipping_ccat_prepaid',
+			'wc_shipping_ccat_711_prepaid',
+			'wc_shipping_ccat_cod_refrigerated',
+			'wc_shipping_ccat_cod_frozen',
+			'wc_shipping_ccat_prepaid_refrigerated',
+			'wc_shipping_ccat_prepaid_frozen',
+			'wc_shipping_ccat_711_cod_refrigerated',
+			'wc_shipping_ccat_711_cod_frozen',
+			'wc_shipping_ccat_711_prepaid_refrigerated',
+			'wc_shipping_ccat_711_prepaid_frozen',
+		);
 
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_cod' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_cod' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_prepaid' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_prepaid' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_cod_refrigerated' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_cod_frozen' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_prepaid_refrigerated' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_prepaid_frozen' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_cod_refrigerated' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_cod_frozen' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_prepaid_refrigerated' );
-			$new_zone->add_shipping_method( 'wc_shipping_ccat_711_prepaid_frozen' );
+		if ( $taiwan_zone_exists ) {
+			// 如果台灣區域已存在，獲取該區域.
+			$zone = new WC_Shipping_Zone( $taiwan_zone_id );
 
-			// 記錄日誌.
-			self::log( '已自動新增台灣物流區域並添加相關物流方法' );
+			// 獲取現有的物流方法.
+			$existing_methods = $zone->get_shipping_methods();
+			$existing_method_ids = array();
+
+			// 收集現有物流方法的 ID
+			foreach ( $existing_methods as $existing_method ) {
+				$existing_method_ids[] = $existing_method->id;
+			}
+
+			// 添加尚未存在的物流方法.
+			foreach ( $shipping_methods as $method_id ) {
+				if ( ! in_array( $method_id, $existing_method_ids, true ) ) {
+					$zone->add_shipping_method( $method_id );
+				}
+			}
+		} else {
+			// 如果台灣區域不存在，則創建新區域.
+			$zone = new WC_Shipping_Zone();
+			$zone->set_zone_name( '台灣' );
+			$zone->add_location( 'TW', 'country' );
+			$zone->save();
+
+			// 添加所有物流方法
+			foreach ( $shipping_methods as $method_id ) {
+				$zone->add_shipping_method( $method_id );
+			}
 		}
 	}
 
