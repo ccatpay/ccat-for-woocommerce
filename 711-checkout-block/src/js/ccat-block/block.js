@@ -1,7 +1,43 @@
 import {useState, useEffect} from '@wordpress/element';
 import {__} from '@wordpress/i18n';
 import {useSelect} from '@wordpress/data';
+import {cartStore} from '@woocommerce/block-data';
+
 import fetchInterceptor from '../../../../fetch-interceptor';
+
+
+/**
+ * 選取門市後更新運送地址
+ *
+ * @param {Object} storeInfo 門市信息
+ * @return {Promise} 更新結果的 Promise
+ */
+function updateStoreShippingAddress(storeInfo) {
+    // 使用 cartStore 的 dispatch 方法
+    const {setShippingAddress} = wp.data.dispatch(cartStore);
+
+    // 從門市地址解析城市和區域
+    const addressInfo = parseAddress(storeInfo.storeAddress || '');
+
+    // 獲取當前購物車數據
+    const currentCartData = wp.data.select(cartStore).getCartData();
+    const currentShippingAddress = currentCartData?.shippingAddress || {};
+    // 準備更新的地址數據
+    const updatedAddress = {
+        ...currentShippingAddress, // 保留原有數據
+        address_1: `${storeInfo.storeName} (${storeInfo.storeId})`,
+        address_2: storeInfo.storeAddress, // 街道地址
+        city: addressInfo.city || currentShippingAddress.city, // 縣市
+        state: addressInfo.district || currentShippingAddress.state, // 鄉鎮市區
+        postcode: addressInfo.city && addressInfo.district ?
+            getPostcodeByAddress(addressInfo.city, addressInfo.district) || '00000' :
+            currentShippingAddress.postcode, // 郵遞區號
+        country: 'TW'
+    };
+
+    // 更新本地地址
+    setShippingAddress(updatedAddress);
+}
 
 // 獲取全局設置的腳本數據
 const ccat711BlockData = window.ccat711BlockData || {};
@@ -483,8 +519,6 @@ function getPostcodeByAddress(city, district) {
 const cvsInterceptor = async (resource, config) => {
     // 檢查是否是結帳請求
     if (resource.includes('/wc/store/v1/checkout') && config.body && stateRef.showBlock && stateRef.storeInfo.storeName) {
-        console.log('超商攔截器執行中', stateRef);
-
         try {
             // 修改請求資料
             const body = JSON.parse(config.body);
@@ -494,27 +528,7 @@ const cvsInterceptor = async (resource, config) => {
                 ...body.extensions,
                 'ccat_711_store_info': stateRef.storeInfo
             };
-
-            // 如果需要，也可以修改地址資訊
-            if (body.shipping_address) {
-                const addressInfo = parseAddress(stateRef.storeInfo.storeAddress);
-
-                // 修改送貨地址
-                body.shipping_address = {
-                    ...body.shipping_address,
-                    address_1: `${stateRef.storeInfo.storeName} (${stateRef.storeInfo.storeId})`,
-                    address_2: stateRef.storeInfo.storeAddress, // 街道地址
-                    city: addressInfo.city || body.shipping_address.city, // 縣市
-                    state: addressInfo.district || body.shipping_address.state, // 鄉鎮市區
-                    postcode: getPostcodeByAddress ?
-                        getPostcodeByAddress(addressInfo.city, addressInfo.district) || '00000' :
-                        body.shipping_address.postcode, // 郵遞區號
-                    country: 'TW'
-                };
-            }
-
             config.body = JSON.stringify(body);
-            console.log('攔截器修改後的資料', body);
         } catch (error) {
             console.error('超商攔截器處理失敗:', error);
         }
@@ -574,6 +588,9 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                 // shippingFieldsContainer.style.display = 'block';
             }
         }
+        if (storeInfo.storeName) {
+            updateStoreShippingAddress(storeInfo);
+        }
     }, [showBlock, storeInfo]); // 當這些狀態變更時重新註冊攔截器
 
 
@@ -612,8 +629,6 @@ export const Block = ({checkoutExtensionData, extensions}) => {
         if (!selectedShippingMethod) {
             selectedShippingMethod = 'wc_shipping_ccat_711_prepaid';
         }
-
-        console.log('選擇的運送方式:', selectedShippingMethod, '門市類別:', storeCategory);
 
         // 使用 AJAX 獲取選擇門市的 URL
         fetch('/wp-admin/admin-ajax.php', {
@@ -755,8 +770,6 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                 // 恢復按鈕狀態
                 buttonEl.disabled = false;
                 buttonEl.textContent = originalText;
-
-                console.error('請求門市選擇網址時發生錯誤:', error);
                 alert('請求門市選擇網址時發生錯誤，請稍後再試');
             });
     };
