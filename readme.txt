@@ -73,6 +73,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 修正：改善一些程式語法
 
+= 2.0.0 =
+
+* 新增：黑貓宅配、快速到店
+
 == Screenshots ==
 
 1. 付款設定畫面
