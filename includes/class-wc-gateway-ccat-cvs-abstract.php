@@ -44,14 +44,11 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 		$datetime = new DateTime( 'now', new DateTimeZone( 'Asia/Taipei' ) );
 		$order    = wc_get_order( $order_id );
 
-		$api_url   = $this->get_base_url() . 'api/Collect';
-		$api_token = $this->get_payment_api_token();
-
 		try {
-			$payer_name     = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
-			$payer_postcode = $order->get_billing_postcode();
-			$payer_address  = $order->get_billing_address_1();
-			$payer_mobile   = $order->get_billing_phone();
+			$payer_name     = trim( $order->get_shipping_last_name() . ' ' . $order->get_shipping_first_name() );
+			$payer_postcode = $order->get_shipping_postcode();
+			$payer_address  = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
+			$payer_mobile   = $order->get_shipping_phone();
 			$payer_email    = $order->get_billing_email();
 
 			if ( empty( $payer_name ) ) {
@@ -69,6 +66,8 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 			if ( ! filter_var( $payer_email, FILTER_VALIDATE_EMAIL ) ) {
 				throw new Exception( esc_html__( '信箱格式錯誤或沒有填寫', 'ccat-for-woocommerce' ) );
 			}
+			$api_url   = $this->get_base_url() . 'api/Collect';
+			$api_token = $this->get_payment_api_token();
 			
 			$order_no  = $this->generate_unique_order_number( $order );
 			$post_data = array(
@@ -115,7 +114,7 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 			$order->update_meta_data( $order_no, $order_no );
 
 			if ( $this->payment_type() == '1' ) {
-				$bank_id = $response_data['bank_id'];
+				$bank_id         = $response_data['bank_id'];
 				$virtual_account = sanitize_text_field( $response_data['virtual_account'] );
 				$expire_date     = sanitize_text_field( $response_data['expire_date'] );
 				$bill_amount     = intval( $response_data['bill_amount'] );
@@ -142,12 +141,11 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 				);
 				$order->save();
 				WC()->cart->empty_cart();
-				
+
 				$redirect = ! empty( $response_data['short_url'] ) ? $response_data['short_url'] : $this->get_return_url( $order );
 
-				if( $this->payment_type() == '1' )
-				{
-				    $redirect = ! empty( $response_data['virtual_account'] ) ? $this->get_return_url( $order ) 	: $redirect;
+				if ( $this->payment_type() == '1' ) {
+					$redirect = ! empty( $response_data['virtual_account'] ) ? $this->get_return_url( $order ) : $redirect;
 				}
 
 				return array(
@@ -161,7 +159,10 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 			}
 		} catch ( Exception $e ) {
 			wc_add_notice( $e->getMessage(), 'error' );
-			throw new Exception( esc_html( $e->getMessage() ) );
+			return array(
+				'result'   => 'failure',
+				'messages' => $e->getMessage(),
+			);
 		}
 	}
 

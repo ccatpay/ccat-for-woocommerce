@@ -584,7 +584,10 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 		} else {
 			$error_message = $response_data['msg'] ?? esc_html__( 'Unknown Error.', 'ccat-for-woocommerce' );
 			delete_transient( 'api_access_token' );
-			throw new Exception( esc_html( 'Error: ' . $error_message ) );
+			return array(
+				'result'   => 'failure',
+				'messages' => $error_message,
+			);
 		}
 	}
 
