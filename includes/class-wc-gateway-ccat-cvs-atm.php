@@ -75,7 +75,7 @@ class WC_Gateway_CCat_Cvs_Atm extends WC_Gateway_CCat_Cvs_Abstract {
 			$html .= '<p>' . esc_html( sprintf( __( '轉帳帳號: %s', 'ccat-for-woocommerce' ), $virtual_account ) ) . '</p>';
 			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce' ), $payment_deadline ) ) . '</p>';
 			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce' ), $bill_amount ) ) . '</p>';
-			echo esc_html( $html );
+			echo $html;
 		}
 	}
 

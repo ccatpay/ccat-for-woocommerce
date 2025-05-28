@@ -144,7 +144,7 @@ class WC_Gateway_CCat_Cvs_Barcode extends WC_Gateway_CCat_Cvs_Abstract {
             }
         </style>';
 
-			echo esc_html( $html );
+			echo $html;
 		}
 	}
 
