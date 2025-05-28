@@ -1,10 +1,11 @@
 <?php
 /**
- * Plugin Name: ccat-for-woocommerce
- * Plugin URI: https://www.ccat.com.tw/
+ * Plugin Name: ccatpay Payment for WooCommerce
+ * Plugin URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
- * Version: 2.0.2
+ * Version: 2.0.3
  * Author: ccatpay
+ * Author URI: https://www.ccat.com.tw/
  * Text Domain: ccat-for-woocommerce
  *
  * Requires at least: 6.6
@@ -24,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 if ( ! defined( 'WC_CCAT_PAYMENTS_VERSION' ) ) {
-	define( 'WC_CCAT_PAYMENTS_VERSION', '2.0.2' );
+	define( 'WC_CCAT_PAYMENTS_VERSION', '2.0.3' );
 }
 
 /**
