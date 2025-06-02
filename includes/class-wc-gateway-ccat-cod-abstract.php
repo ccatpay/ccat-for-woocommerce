@@ -33,8 +33,8 @@ class WC_Gateway_CCat_COD_Abstract extends WC_Gateway_CCat_Abstract {
 	 * 初始化黑貓貨到付款支付閘道
 	 */
 	public function __construct() {
-		$this->title       = __( '黑貓貨到付款', 'ccat-for-woocommerce' );
-		$this->description = __( '透過黑貓宅急便提供貨到付款的付款方式', 'ccat-for-woocommerce' );
+		$this->title                    = $this->get_option( 'title' );
+		$this->description              = $this->get_option( 'description' );
 		parent::__construct();
 	}
 
