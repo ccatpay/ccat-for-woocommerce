@@ -523,70 +523,79 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 		$datetime = new DateTime( 'now', new DateTimeZone( 'Asia/Taipei' ) );
 		$order    = wc_get_order( $order_id );
 
-		$api_url   = $this->get_base_url() . 'api/Collect';
-		$api_token = $this->get_payment_api_token();
-		$order_no  = $this->generate_unique_order_number( $order );
-		$post_data = array(
-			'cmd'              => self::CMD_COCS_ORDER_APPEND,
-			'cust_id'          => $this->get_account(),
-			'cust_order_no'    => $order_no,
-			'order_amount'     => $order->get_total(),
-			'order_detail'     => 'Order #' . $order->get_id(),
-			'acquirer_type'    => $this->acquirer_type(),
-			'limit_product_id' => '',
-			// phpcs:ignore Generic.Functions.DateTime.DiscouragedFunction
-			'send_time'        => $datetime->format( 'Y-m-d H:i:s' ),
-			'success_url'      => '',
-			'apn_url'          => $this->get_apn_url(),
-			'b2c'              => '0',
-		);
-		if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
-			$post_data = $this->add_invoice_data( $post_data, $order );
-		}
-		if ( WC_CCat_Payments::is_shipping_enabled() ) {
-			$this->add_shipping_data( $post_data, $order );
-		}
-		$args     = array(
-			'body'    => wp_json_encode( $post_data ),
-			'headers' => array(
-				'Content-Type'  => 'application/json',
-				'Authorization' => 'Bearer ' . $api_token,
-			),
-			'method'  => 'POST',
-			'timeout' => 45,
-		);
-		$response = wp_remote_post( $api_url, $args );
-		if ( is_wp_error( $response ) ) {
-			$logger = wc_get_logger();
-			$logger->error(
-				'API call failed: ' . $response->get_error_message(),
-				array( 'source' => 'api-error' )
+		try {
+
+			$api_url   = $this->get_base_url() . 'api/Collect';
+			$api_token = $this->get_payment_api_token();
+			$order_no  = $this->generate_unique_order_number( $order );
+			$post_data = array(
+				'cmd'              => self::CMD_COCS_ORDER_APPEND,
+				'cust_id'          => $this->get_account(),
+				'cust_order_no'    => $order_no,
+				'order_amount'     => $order->get_total(),
+				'order_detail'     => 'Order #' . $order->get_id(),
+				'acquirer_type'    => $this->acquirer_type(),
+				'limit_product_id' => '',
+				// phpcs:ignore Generic.Functions.DateTime.DiscouragedFunction
+				'send_time'        => $datetime->format( 'Y-m-d H:i:s' ),
+				'success_url'      => '',
+				'apn_url'          => $this->get_apn_url(),
+				'b2c'              => '0',
 			);
-
-			throw new Exception( esc_html__( 'Api error. try again later.', 'ccat-for-woocommerce' ) );
-		}
-
-		$response_body = wp_remote_retrieve_body( $response );
-		$response_data = json_decode( $response_body, true );
-
-		$order->update_meta_data( self::META_RESPONSE_DATA, $response_body );
-		$order->update_meta_data( $response_data['cust_order_no'], $response_data['cust_order_no'] );
-
-		if ( isset( $response_data['status'] ) && self::CODE_OK === $response_data['status'] ) {
-			$this->add_apn_notification( $order, $response_data );
-			$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::PENDING, esc_html__( 'Awaiting payment', 'ccat-for-woocommerce' ) );
-			WC()->cart->empty_cart();
-
-			return array(
-				'result'   => 'success',
-				'redirect' => $response_data['url'],
+			if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
+				$post_data = $this->add_invoice_data( $post_data, $order );
+			}
+			if ( WC_CCat_Payments::is_shipping_enabled() ) {
+				$this->add_shipping_data( $post_data, $order );
+			}
+			$args     = array(
+				'body'    => wp_json_encode( $post_data ),
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_token,
+				),
+				'method'  => 'POST',
+				'timeout' => 45,
 			);
-		} else {
-			$error_message = $response_data['msg'] ?? esc_html__( 'Unknown Error.', 'ccat-for-woocommerce' );
-			delete_transient( 'api_access_token' );
+			$response = wp_remote_post( $api_url, $args );
+			if ( is_wp_error( $response ) ) {
+				$logger = wc_get_logger();
+				$logger->error(
+					'API call failed: ' . $response->get_error_message(),
+					array( 'source' => 'api-error' )
+				);
+
+				throw new Exception( esc_html__( 'Api error. try again later.', 'ccat-for-woocommerce' ) );
+			}
+
+			$response_body = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $response_body, true );
+
+			$order->update_meta_data( self::META_RESPONSE_DATA, $response_body );
+			$order->update_meta_data( $response_data['cust_order_no'], $response_data['cust_order_no'] );
+
+			if ( isset( $response_data['status'] ) && self::CODE_OK === $response_data['status'] ) {
+				$this->add_apn_notification( $order, $response_data );
+				$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::PENDING, esc_html__( 'Awaiting payment', 'ccat-for-woocommerce' ) );
+				WC()->cart->empty_cart();
+
+				return array(
+					'result'   => 'success',
+					'redirect' => $response_data['url'],
+				);
+			} else {
+				$error_message = $response_data['msg'] ?? esc_html__( 'Unknown Error.', 'ccat-for-woocommerce' );
+				delete_transient( 'api_access_token' );
+				return array(
+					'result'   => 'failure',
+					'messages' => $error_message,
+				);
+			}
+		} catch ( Exception $e ) {
+			wc_add_notice( $e->getMessage(), 'error' );
 			return array(
 				'result'   => 'failure',
-				'messages' => $error_message,
+				'messages' => $e->getMessage(),
 			);
 		}
 	}
