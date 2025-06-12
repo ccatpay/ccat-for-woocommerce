@@ -1,10 +1,11 @@
 === ccat-for-woocommerce ===
 Contributors: ccatpay
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
+Author: ccatpay
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 8.3
-Stable tag: 2.0.2
+Stable tag: 2.0.4
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -88,6 +89,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 = 2.0.3 =
 
 * 修正：提醒託運單格式，黑貓快速到店(711取貨)對應A4三模託運單，黑貓宅配則是對應A4二模託運單。
+
+= 2.0.4 =
+
+* 修正：文字調整，物流訂單 更改為 物流託運單。
 
 == Screenshots ==
 
