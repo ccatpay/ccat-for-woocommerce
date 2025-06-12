@@ -447,7 +447,7 @@ class WC_CCat_Shipping_Display {
 				// 尚未列印過，顯示建立物流訂單按鈕.
 				if ( ! $has_printed ) {
 					echo '<button type="button" class="button create-logistics-order" data-order-id="' . esc_attr( $order->get_id() ) . '">' .
-						esc_html__( '建立物流訂單', 'ccat-for-woocommerce' ) .
+						esc_html__( '建立物流託運單', 'ccat-for-woocommerce' ) .
 						'</button>';
 				}
 
@@ -458,11 +458,22 @@ class WC_CCat_Shipping_Display {
 						'</button>';
 				}
 
+				// 提醒託運單格式
+				if ( $this->is_convenience_store_shipping( $order ) ) {
+					echo '<p class="ccat-logistics-notice">' .
+						esc_html__( '建立物流託運單後，黑貓快速到店(7-11取貨)，將產生A4三模託運單。', 'ccat-for-woocommerce' ) .
+						'</p>';
+				} else {
+					echo '<p class="ccat-logistics-notice">' .
+						esc_html__( '建立物流託運單後，黑貓宅配將產生A4二模託運單。', 'ccat-for-woocommerce' ) .
+						'</p>';
+				}
+
 				echo '</div>';
 			} else {
 				// 顯示未付款提示訊息.
 				echo '<p class="ccat-logistics-notice">' .
-					esc_html__( '請完成付款後，系統將自動開放物流訂單建立功能。', 'ccat-for-woocommerce' ) .
+					esc_html__( '請完成付款後，系統將自動開放物流託運單建立功能。', 'ccat-for-woocommerce' ) .
 					'</p>';
 			}
 			echo '</div>';

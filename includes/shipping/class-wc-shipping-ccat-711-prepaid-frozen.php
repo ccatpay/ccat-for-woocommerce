@@ -21,8 +21,8 @@ class WC_Shipping_CCat_711_Prepaid_Frozen extends WC_Shipping_CCat_711_Prepaid {
 	public function __construct( $instance_id = 0 ) {
 		parent::__construct( $instance_id );
 		$this->temperature_type   = 'frozen';
-		$this->method_title       = __( '黑貓物流(冷凍) 7-11取貨', 'ccat-for-woocommerce' );
-		$this->title              = __( '黑貓物流(冷凍) 7-11取貨', 'ccat-for-woocommerce' );
-		$this->method_description = __( '黑貓物流低溫冷凍 7-11取貨，顧客需先完成付款並選擇超商門市', 'ccat-for-woocommerce' );
+		$this->method_title       = __( '黑貓快速到店(冷凍) 7-11取貨', 'ccat-for-woocommerce' );
+		$this->title              = __( '黑貓快速到店(冷凍) 7-11取貨', 'ccat-for-woocommerce' );
+		$this->method_description = __( '黑貓快速到店低溫冷凍 7-11取貨，顧客需先完成付款並選擇超商門市', 'ccat-for-woocommerce' );
 	}
 }

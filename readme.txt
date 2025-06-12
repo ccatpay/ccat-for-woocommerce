@@ -85,11 +85,16 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 新增：支援最新版 WordPress 6.8、WooCommerce 9.8
 
+= 2.0.3 =
+
+* 修正：提醒託運單格式，黑貓快速到店(711取貨)對應A4三模託運單，黑貓宅配則是對應A4二模託運單。
+
 == Screenshots ==
 
 1. 付款設定畫面
 2. 結帳頁面展示
 3. 電子發票設定
+4. 運送方式設定畫面
 
 == Support ==
 

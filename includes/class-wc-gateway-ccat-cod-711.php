@@ -32,8 +32,8 @@ class WC_Gateway_CCat_COD_711 extends WC_Gateway_CCat_COD_Abstract {
 	 * 初始化超商711貨到付款支付閘道
 	 */
 	public function __construct() {
-		$this->title       = __( '超商711貨到付款', 'ccat-for-woocommerce' );
-		$this->description = __( '透過黑貓宅急便提供711超商貨到付款方式', 'ccat-for-woocommerce' );
+		$this->title       = __( '黑貓快速到店711取貨付款', 'ccat-for-woocommerce' );
+		$this->description = __( '透過黑貓宅急便提供711超商門市取貨付款的方式', 'ccat-for-woocommerce' );
 		parent::__construct();
 	}
 
@@ -45,14 +45,14 @@ class WC_Gateway_CCat_COD_711 extends WC_Gateway_CCat_COD_Abstract {
 			'enabled' => array(
 				'title'   => __( '啟用/停用', 'ccat-for-woocommerce' ),
 				'type'    => 'checkbox',
-				'label'   => __( '啟用超商711貨到付款', 'ccat-for-woocommerce' ),
+				'label'   => __( '啟用超商711取貨付款', 'ccat-for-woocommerce' ),
 				'default' => 'yes',
 			),
 			'title'   => array(
 				'title'       => __( '付款標題', 'ccat-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce' ),
-				'default'     => __( '超商711貨到付款', 'ccat-for-woocommerce' ),
+				'default'     => __( '黑貓快速到店711取貨付款', 'ccat-for-woocommerce' ),
 				'desc_tip'    => true,
 			),
 		);
@@ -61,8 +61,8 @@ class WC_Gateway_CCat_COD_711 extends WC_Gateway_CCat_COD_Abstract {
 	/**
 	 * 定義支付類型
 	 *
-	 * @return string 支付類型代碼
-	 */
+		* @return string 支付類型代碼
+		*/
 	public function payment_type(): string {
 		return '711';
 	}

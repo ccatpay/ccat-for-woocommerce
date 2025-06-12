@@ -32,7 +32,7 @@ class WC_Gateway_CCat_COD_Mobile extends WC_Gateway_CCat_COD_Abstract {
 	 * 初始化黑貓宅配貨到付款(手機支付)支付閘道
 	 */
 	public function __construct() {
-		$this->title       = __( '宅配貨到付款(手機支付)', 'ccat-for-woocommerce' );
+		$this->title       = __( '黑貓宅配貨到付款(手機支付)', 'ccat-for-woocommerce' );
 		$this->description = __( '透過黑貓宅急便提供貨到手機支付方式', 'ccat-for-woocommerce' );
 		parent::__construct();
 	}

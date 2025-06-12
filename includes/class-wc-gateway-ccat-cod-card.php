@@ -32,8 +32,8 @@ class WC_Gateway_CCat_COD_Card extends WC_Gateway_CCat_COD_Abstract {
 	 * 初始化黑貓宅配貨到付款(刷卡)支付閘道
 	 */
 	public function __construct() {
-		$this->title       = __( '宅配貨到付款(刷卡)', 'ccat-for-woocommerce' );
-		$this->description = __( '透過黑貓宅急便提供貨到刷卡付款方式', 'ccat-for-woocommerce' );
+		$this->title       = __( '黑貓宅配貨到付款(刷卡)', 'ccat-for-woocommerce' );
+		$this->description = __( '透過黑貓宅急便提供宅配貨到刷卡付款方式', 'ccat-for-woocommerce' );
 		parent::__construct();
 	}
 
@@ -52,7 +52,7 @@ class WC_Gateway_CCat_COD_Card extends WC_Gateway_CCat_COD_Abstract {
 				'title'       => __( '付款標題', 'ccat-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce' ),
-				'default'     => __( '宅配貨到付款(刷卡)', 'ccat-for-woocommerce' ),
+				'default'     => __( '黑貓宅配貨到付款(刷卡)', 'ccat-for-woocommerce' ),
 				'desc_tip'    => true,
 			),
 		);

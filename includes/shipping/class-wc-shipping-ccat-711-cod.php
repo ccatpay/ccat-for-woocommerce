@@ -19,9 +19,9 @@ class WC_Shipping_CCat_711_COD extends WC_Shipping_CCat_Abstract {
 	 * @param int $instance_id 運送方式實例ID.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->method_title       = __( '黑貓物流(常溫) 7-11貨到付款', 'ccat-for-woocommerce' );
-		$this->title              = __( '黑貓物流(常溫) 7-11貨到付款', 'ccat-for-woocommerce' );
-		$this->method_description = __( '黑貓物流常溫 7-11貨到付款，顧客需選擇超商門市', 'ccat-for-woocommerce' );
+		$this->method_title       = __( '黑貓快速到店(常溫) 7-11取貨付款', 'ccat-for-woocommerce' );
+		$this->title              = __( '黑貓快速到店(常溫) 7-11取貨付款', 'ccat-for-woocommerce' );
+		$this->method_description = __( '黑貓快速到店常溫 7-11取貨付款，顧客需選擇超商門市', 'ccat-for-woocommerce' );
 
 		// 設定不需要預付款，但需要選擇商店.
 		$this->requires_payment = false;

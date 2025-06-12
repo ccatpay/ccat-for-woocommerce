@@ -19,9 +19,9 @@ class WC_Shipping_CCat_COD extends WC_Shipping_CCat_Abstract {
 	 * @param int $instance_id 運送方式實例ID.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->method_title       = __( '黑貓物流(常溫) 宅配貨到付款', 'ccat-for-woocommerce' );
-		$this->title              = __( '黑貓物流(常溫) 宅配貨到付款', 'ccat-for-woocommerce' );
-		$this->method_description = __( '黑貓物流常溫 宅配貨到付款，顧客收到商品時才付款', 'ccat-for-woocommerce' );
+		$this->method_title       = __( '黑貓宅配(常溫) 貨到付款', 'ccat-for-woocommerce' );
+		$this->title              = __( '黑貓宅配(常溫) 貨到付款', 'ccat-for-woocommerce' );
+		$this->method_description = __( '黑貓宅配常溫商品 貨到付款，顧客收到商品時才付款', 'ccat-for-woocommerce' );
 
 		// 設定不需要預付款.
 		$this->requires_payment = false;
