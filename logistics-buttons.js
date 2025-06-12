@@ -617,7 +617,7 @@ jQuery(function ($) {
         button.text("Loading..");
 
         // 顯示確認對話框
-        if (!confirm('確定要建立物流訂單嗎？')) {
+        if (!confirm('確定要建立物流託運單嗎？')) {
             // 如果用戶取消，恢復按鈕狀態
             button.prop('disabled', false);
             button.text(originalText);
@@ -637,7 +637,7 @@ jQuery(function ($) {
             success: function (response) {
                 if (response.success) {
                     // 顯示成功訊息
-                    alert(response.data.message || '物流訂單建立成功');
+                    alert(response.data.message || '物流託運單建立成功');
                     
                     // 顯示託運單號
                     if (response.data.obt_number) {
@@ -659,12 +659,12 @@ jQuery(function ($) {
                 } else {
                     // 顯示錯誤訊息
                     console.log(response.data);
-                    alert(response.data.message || '建立物流訂單失敗');
+                    alert(response.data.message || '建立物流託運單失敗');
                 }
             },
             error: function (xhr, status, error) {
-                console.error('建立物流訂單時發生錯誤:', error);
-                alert('建立物流訂單時發生錯誤，請稍後再試');
+                console.error('建立物流託運單時發生錯誤:', error);
+                alert('建立物流託運單時發生錯誤，請稍後再試');
             },
             complete: function () {
                 // 恢復按鈕狀態

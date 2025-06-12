@@ -139,7 +139,7 @@ class WC_CCat_Shipping_Display {
 
 			wp_send_json_success(
 				array(
-					'message'    => __( '物流訂單建立成功', 'ccat-for-woocommerce' ),
+					'message'    => __( '物流託運單建立成功', 'ccat-for-woocommerce' ),
 					'obt_number' => $obt_number,
 					'file_no'    => $file_no,
 				)
@@ -149,7 +149,7 @@ class WC_CCat_Shipping_Display {
 				array(
 					'message' => sprintf(
 					/* translators: %s: API 錯誤訊息 */
-						__( '建立物流訂單失敗: %s', 'ccat-for-woocommerce' ),
+						__( '建立物流託運單失敗: %s', 'ccat-for-woocommerce' ),
 						$result['Message']
 					),
 				)
@@ -293,7 +293,7 @@ class WC_CCat_Shipping_Display {
 			// 宅配託運單資料.
 			$order_data = array(
 				'OBTNumber'        => '',
-				'OrderId'          => $order->get_order_number(),
+				'OrderId'          => sprintf( 'TCAT%s%d', date( 'Ymd' ), $order->get_order_number() ),
 				'Thermosphere'     => $thermosphere,
 				'Spec'             => $spec,
 				'RecipientName'    => $recipient_name,
