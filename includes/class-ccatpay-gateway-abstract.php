@@ -292,7 +292,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	/**
 	 * 檢查電話號碼是否為有效的台灣電話格式
 	 *
-	 * @param string $phone 電話號碼
+	 * @param string $phone 電話號碼.
 	 *
 	 * @return bool 是否為有效的台灣電話格式
 	 */

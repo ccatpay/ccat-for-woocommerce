@@ -61,8 +61,8 @@ class CCATPAY_Gateway_COD_711 extends CCATPAY_Gateway_COD_Abstract {
 	/**
 	 * 定義支付類型
 	 *
-		* @return string 支付類型代碼
-		*/
+	 * @return string 支付類型代碼
+	 */
 	public function payment_type(): string {
 		return '711';
 	}

@@ -80,7 +80,7 @@ class CCATPAY_Gateway_Credit_Card extends CCATPAY_Gateway_Abstract {
 
 
 	/**
-	 * Initialise Gateway Settings Form Fields.
+	 * Initialize Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
@@ -108,5 +108,4 @@ class CCATPAY_Gateway_Credit_Card extends CCATPAY_Gateway_Abstract {
 	public function acquirer_type(): string {
 		return 'esun';
 	}
-
 }

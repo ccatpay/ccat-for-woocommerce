@@ -1,4 +1,11 @@
 <?php
+/**
+ * CCATPAY_Gateway_Abstract class
+ *
+ * @author   sakilu <brian@sakilu.com>
+ * @package  WooCommerce CCat Payments Gateway
+ * @since    1.0.0
+ */
 
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 

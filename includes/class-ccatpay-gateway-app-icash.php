@@ -40,7 +40,7 @@ class CCATPAY_Gateway_App_Icash extends CCATPAY_Gateway_App_Abstract {
 	}
 
 	/**
-	 * Initialise Gateway Settings Form Fields.
+	 * Initialize Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(

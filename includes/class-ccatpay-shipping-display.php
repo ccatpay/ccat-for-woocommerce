@@ -458,7 +458,7 @@ class CCATPAY_Shipping_Display {
 						'</button>';
 				}
 
-				// 提醒託運單格式
+				// 提醒託運單格式.
 				if ( $this->is_convenience_store_shipping( $order ) ) {
 					echo '<p class="ccat-logistics-notice">' .
 						esc_html__( '建立物流託運單後，黑貓快速到店(7-11取貨)，將產生A4三模託運單。', 'ccat-for-woocommerce' ) .

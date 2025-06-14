@@ -1,4 +1,10 @@
 <?php
+/**
+ * 黑貓物流
+ *
+ * @package WooCommerceCCatGateway
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }

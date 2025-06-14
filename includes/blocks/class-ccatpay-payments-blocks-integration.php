@@ -1,9 +1,17 @@
 <?php
+/**
+ * CCATPAY_Gateway_Blocks_Integration
+ *
+ * @package WooCommerceCCatGateway
+ */
 
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
 define( 'ORDD_BLOCK_VERSION', '1.0.0' );
 
+/**
+ * Integration class handling the registration and management of block scripts and data.
+ */
 class CCATPAY_Gateway_Blocks_Integration implements IntegrationInterface {
 
 	/**
@@ -29,7 +37,7 @@ class CCATPAY_Gateway_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_script_handles() {
-		return array( 'checkout-block-frontend' ); // Updated script handle
+		return array( 'checkout-block-frontend' ); // Updated script handle.
 	}
 
 	/**
@@ -38,7 +46,7 @@ class CCATPAY_Gateway_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_editor_script_handles() {
-		return array( 'date-field-block-editor' ); // Updated script handle
+		return array( 'date-field-block-editor' ); // Updated script handle.
 	}
 
 	/**
@@ -67,7 +75,7 @@ class CCATPAY_Gateway_Blocks_Integration implements IntegrationInterface {
 			);
 
 		wp_register_script(
-			'date-field-block-editor', // Updated script handle
+			'date-field-block-editor', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],

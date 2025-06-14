@@ -70,12 +70,18 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 		}
 	}
 
+
 	/**
-	 * 顯示條碼付款資訊
+	 * Displays detailed barcode information for a specific order.
 	 *
-	 * @param $order_id
+	 * This function retrieves barcode data, payment deadlines, and bill amounts
+	 * stored as order metadata and renders HTML with JS barcode generation to display the barcodes.
+	 *
+	 * @param int $order_id The ID of the order for which barcode details are displayed.
+	 *
+	 * @return void Outputs the generated HTML for the barcode details or returns early if conditions are not met.
 	 */
-	public function display_barcode_details( $order_id ) {
+	public function display_barcode_details( int $order_id ) {
 		$order = wc_get_order( $order_id );
 
 		if ( $order->get_payment_method() !== $this->id ) {
@@ -91,11 +97,11 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 			$html           = '';
 			$current_action = current_filter();
 
-			if ( $current_action !== 'woocommerce_admin_order_data_after_order_details' ) {
+			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
 				$html .= '<h2>' . esc_html__( '感謝您的訂購，請使用三段條碼付款', 'ccat-for-woocommerce' ) . '</h2>';
 			}
 
-			// 條碼容器
+			// 條碼容器.
 			$html .= '<div class="barcode-container">';
 			$html .= '<div class="barcode-item">';
 			$html .= '<p>' . esc_html__( '條碼 1:', 'ccat-for-woocommerce' ) . '</p>';
@@ -116,7 +122,7 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce' ), $payment_deadline ) ) . '</p>';
 			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d 元', 'ccat-for-woocommerce' ), $bill_amount ) ) . '</p>';
 
-			// 加入條碼生成的 JavaScript
+			// 加入條碼生成的 JavaScript.
 			$html .= '<script type="text/javascript">
             jQuery(document).ready(function($) {
                 if (typeof JsBarcode !== "undefined") {
@@ -142,7 +148,7 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
             });
         </script>';
 
-			// 加入樣式
+			// 加入樣式.
 			$html .= '<style>
             .barcode-container {
                 margin: 20px 0;

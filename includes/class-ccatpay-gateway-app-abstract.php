@@ -53,7 +53,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 
 			// 準備新的 API 參數.
 			$post_data = array(
-				'cmd'           => self::CMD_COCS_ORDER_APPEND,  // 固定值
+				'cmd'           => self::CMD_COCS_ORDER_APPEND,  // 固定值.
 				'cust_id'       => $this->get_account(),
 				'cust_order_no' => $order_no,
 				'order_amount'  => $order->get_total(),
@@ -81,10 +81,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 			);
 
 			$response = wp_remote_post( $api_url, $args );
-			if ( $this->is_test_mode() ) {
-				CCATPAY_Payments::log( 'request:' . print_r( $post_data, true ) );
-				CCATPAY_Payments::log( 'response:' . $response );
-			}
+
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( esc_html__( 'Api error. Try again later.', 'ccat-for-woocommerce' ) );
 			}
@@ -98,10 +95,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 					'Token:' . $api_token,
 					array( 'source' => 'api-error' )
 				);
-				$logger->error(
-					'Post:' . print_r( $post_data, true ) . ' Response:' . $response_body,
-					array( 'source' => 'api-error' )
-				);
+
 				throw new Exception( $response_data['msg'] ?? __( 'Unknown Error.', 'ccat-for-woocommerce' ) );
 			}
 
@@ -135,12 +129,15 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 	 */
 	abstract public function payment_type(): string;
 
+
 	/**
-	 * Extracts and validates the request data.
+	 * Validates payment data received from a callback request.
+	 * Ensures that all required fields are present, verifies checksum integrity,
+	 * and checks the transaction status.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request The incoming REST request containing payment data in the body.
 	 *
-	 * @return null|WP_Error
+	 * @return WP_Error|null Returns an instance of WP_Error if validation fails; otherwise, null.
 	 */
 	protected function handle_payment_validation( WP_REST_Request $request ): ?WP_Error {
 		$body = $request->get_body();
@@ -198,7 +195,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 			return new WP_Error( 400, 'Checksum verification failed' );
 		}
 
-		if ( $data['ret'] !== 'OK' ) {
+		if ( 'OK' !== $data['ret'] ) {
 			return new WP_Error( 400, 'Transaction not successful' );
 		}
 
@@ -208,9 +205,9 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 	/**
 	 * 實作退款處理方法
 	 *
-	 * @param int $order_id 訂單編號
-	 * @param float $amount 退款金額（可能為 null）
-	 * @param string $reason 退款原因
+	 * @param int    $order_id 訂單編號.
+	 * @param float  $amount 退款金額（可能為 null）.
+	 * @param string $reason 退款原因.
 	 *
 	 * @return bool|WP_Error  成功返回 true，失敗返回錯誤物件
 	 */
@@ -220,7 +217,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 			return new WP_Error( 'invalid_order', '找不到訂單' );
 		}
 
-		if ( $amount != $order->get_total() ) {
+		if ( $amount !== $order->get_total() ) {
 			return new WP_Error( 'invalid_amount', '統一金流只支援全額退款' );
 		}
 
@@ -324,6 +321,11 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 		}
 	}
 
+	/**
+	 * Retrieves the acquirer type associated with the payment.
+	 *
+	 * @return string Returns the type of payment used for the transaction.
+	 */
 	public function acquirer_type(): string {
 		return $this->payment_type();
 	}

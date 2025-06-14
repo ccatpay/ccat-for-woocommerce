@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-cod-abstract.php';
+require_once 'class-ccatpay-gateway-cod-abstract.php';
 
 /**
  * CCat 黑貓宅配貨到付款(手機支付)支付閘道.

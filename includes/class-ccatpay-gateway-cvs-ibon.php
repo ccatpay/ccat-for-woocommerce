@@ -36,14 +36,12 @@ class CCATPAY_Gateway_Cvs_Ibon extends CCATPAY_Gateway_Cvs_Abstract {
 
 		$this->title       = __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce' );
 		$this->description = __( '使用黑貓Pay Ibon，付款更安心。', 'ccat-for-woocommerce' );
-//		$this->redirect_url = get_site_url( null, 'ccat-ibon' );
-//		WC_CCat_Payments::log( "> set url:" . $this->redirect_url );
 		parent::__construct();
 	}
 
 
 	/**
-	 * Initialise Gateway Settings Form Fields.
+	 * Initialize Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(

@@ -66,7 +66,7 @@ class CCATPAY_Gateway_Payuni extends CCATPAY_Gateway_Abstract {
 
 
 	/**
-	 * Initialise Gateway Settings Form Fields.
+	 * Initialize Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(

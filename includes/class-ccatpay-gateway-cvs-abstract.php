@@ -68,7 +68,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 			}
 			$api_url   = $this->get_base_url() . 'api/Collect';
 			$api_token = $this->get_payment_api_token();
-			
+
 			$order_no  = $this->generate_unique_order_number( $order );
 			$post_data = array(
 				'cmd'                  => self::CMD_COCS_ORDER_APPEND,
@@ -113,20 +113,20 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 			$order->update_meta_data( self::META_RESPONSE_DATA, $response_body );
 			$order->update_meta_data( $order_no, $order_no );
 
-			if ( $this->payment_type() == '1' ) {
+			if ( $this->payment_type() === '1' ) {
 				$bank_id         = $response_data['bank_id'];
 				$virtual_account = sanitize_text_field( $response_data['virtual_account'] );
 				$expire_date     = sanitize_text_field( $response_data['expire_date'] );
 				$bill_amount     = intval( $response_data['bill_amount'] );
 
-				// 儲存到訂單 Meta Data
+				// 儲存到訂單 Meta Data.
 				$order->update_meta_data( self::ATM_BANK_ID, $bank_id );
 				$order->update_meta_data( self::ATM_VIRTUAL_ACCOUNT, $virtual_account );
 				$order->update_meta_data( self::ATM_EXPIRE_DATA, $expire_date );
 				$order->update_meta_data( self::ATM_BILL_AMOUNT, $bill_amount );
 			}
 
-			if ( $this->payment_type() == '2' ) {
+			if ( $this->payment_type() === '2' ) {
 				$order->update_meta_data( self::ATM_BILL_BARCODE_1, $response_data['st_barcode1'] );
 				$order->update_meta_data( self::ATM_BILL_BARCODE_2, $response_data['st_barcode2'] );
 				$order->update_meta_data( self::ATM_BILL_BARCODE_3, $response_data['st_barcode3'] );
@@ -144,7 +144,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 
 				$redirect = ! empty( $response_data['short_url'] ) ? $response_data['short_url'] : $this->get_return_url( $order );
 
-				if ( $this->payment_type() == '1' ) {
+				if ( $this->payment_type() === '1' ) {
 					$redirect = ! empty( $response_data['virtual_account'] ) ? $this->get_return_url( $order ) : $redirect;
 				}
 
@@ -235,6 +235,11 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 		return new WP_REST_Response( 'OK', 200 );
 	}
 
+	/**
+	 * Retrieves the acquirer type identifier.
+	 *
+	 * @return string The acquirer type identifier as a string.
+	 */
 	public function acquirer_type(): string {
 		return '0';
 	}

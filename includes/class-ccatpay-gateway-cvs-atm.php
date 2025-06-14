@@ -36,30 +36,45 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 
 		$this->title       = __( '黑貓Pay - ATM繳款', 'ccat-for-woocommerce' );
 		$this->description = __( '使用黑貓Pay ATM，付款更安心。', 'ccat-for-woocommerce' );
-		add_action( 'woocommerce_thankyou', array(
-			$this,
-			'display_virtual_account_details',
-		) );
-		add_action( 'woocommerce_view_order', array(
-			$this,
-			'display_virtual_account_details',
-		) );
-		add_action( 'woocommerce_admin_order_data_after_order_details',
+		add_action(
+			'woocommerce_thankyou',
 			array(
 				$this,
 				'display_virtual_account_details',
-			) );
+			)
+		);
+		add_action(
+			'woocommerce_view_order',
+			array(
+				$this,
+				'display_virtual_account_details',
+			)
+		);
+		add_action(
+			'woocommerce_admin_order_data_after_order_details',
+			array(
+				$this,
+				'display_virtual_account_details',
+			)
+		);
 
 		parent::__construct();
 	}
 
-	public function display_virtual_account_details( $order_id ) {
+	/**
+	 * Displays the virtual account details for an order.
+	 *
+	 * @param int $order_id The ID of the order for which to display the virtual account details.
+	 *
+	 * @return void
+	 */
+	public function display_virtual_account_details( int $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( $order->get_payment_method() !== $this->id ) {
 			return;
 		}
 
-		$bank_id  = $order->get_meta( self::ATM_BANK_ID );
+		$bank_id          = $order->get_meta( self::ATM_BANK_ID );
 		$virtual_account  = $order->get_meta( self::ATM_VIRTUAL_ACCOUNT );
 		$payment_deadline = $order->get_meta( self::ATM_EXPIRE_DATA );
 		$bill_amount      = $order->get_meta( self::ATM_BILL_AMOUNT );
@@ -67,7 +82,7 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 		if ( $virtual_account && $payment_deadline ) {
 			$html           = '';
 			$current_action = current_filter();
-			if ( $current_action !== 'woocommerce_admin_order_data_after_order_details' ) {
+			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
 				$html .= '<h2>' . esc_html__( '感謝訂購 請到ATM繳款', 'ccat-for-woocommerce' ) . '</h2>';
 			}
 
@@ -81,7 +96,7 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 
 
 	/**
-	 * Initialise Gateway Settings Form Fields.
+	 * Initialize Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
