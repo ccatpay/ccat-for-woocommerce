@@ -1,0 +1,207 @@
+<?php
+/**
+ * CCATPAY_Gateway_Cvs_Barcode class
+ *
+ * @author   sakilu <brian@sakilu.com>
+ * @package  WooCommerce CCat Payments Gateway
+ * @since    1.0.0
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+require_once 'class-ccatpay-gateway-cvs-abstract.php';
+
+/**
+ * CCat Gateway.
+ *
+ * @class    CCATPAY_Gateway_Cvs_Barcode
+ * @version  1.0
+ */
+class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
+
+	/**
+	 * Unique id for the gateway.
+	 *
+	 * @var string
+	 */
+	public $id = 'ccat_payment_cvs_barcode';
+
+	/**
+	 * Constructor for the gateway.
+	 */
+	public function __construct() {
+
+		$this->title       = __( '黑貓Pay - 三段式條碼', WC_CCAT_PAYMENTS_DOMAIN );
+		$this->description = __( '使用黑貓Pay 三段式條碼，付款更安心。', WC_CCAT_PAYMENTS_DOMAIN );
+		// 在結帳感謝頁面和訂單詳情中附加條碼相關訊息.
+		add_action( 'woocommerce_thankyou', array( $this, 'display_barcode_details' ) );
+		add_action( 'woocommerce_view_order', array( $this, 'display_barcode_details' ) );
+
+		// 在 WooCommerce 後台訂單詳情顯示條碼資料.
+		add_action( 'woocommerce_admin_order_data_after_order_details', array( $this, 'display_barcode_details' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_barcode_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_barcode_scripts' ) );
+
+		parent::__construct();
+	}
+
+	/**
+	 * Enqueues the required JavaScript libraries for rendering barcodes.
+	 *
+	 * This method ensures that the JsBarcode library is loaded when viewing the
+	 * order received page, the view order page, or when accessing the WordPress admin interface.
+	 *
+	 * @return void
+	 */
+	public function enqueue_barcode_scripts() {
+		if ( is_order_received_page() || is_view_order_page() || is_admin() ) {
+			$script_path = '/resources/js/frontend/JsBarcode.all.min.js';
+			$script_url  = CCATPAY_Payments::plugin_url() . $script_path;
+			wp_enqueue_script(
+				'jsbarcode',
+				$script_url,
+				array(),
+				'3.11.6',
+				true
+			);
+		}
+	}
+
+
+	/**
+	 * Displays detailed barcode information for a specific order.
+	 *
+	 * This function retrieves barcode data, payment deadlines, and bill amounts
+	 * stored as order metadata and renders HTML with JS barcode generation to display the barcodes.
+	 *
+	 * @param int $order_id The ID of the order for which barcode details are displayed.
+	 *
+	 * @return void Outputs the generated HTML for the barcode details or returns early if conditions are not met.
+	 */
+	public function display_barcode_details( int $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		if ( $order->get_payment_method() !== $this->id ) {
+			return;
+		}
+
+		$barcode1         = $order->get_meta( self::ATM_BILL_BARCODE_1 );
+		$barcode2         = $order->get_meta( self::ATM_BILL_BARCODE_2 );
+		$barcode3         = $order->get_meta( self::ATM_BILL_BARCODE_3 );
+		$payment_deadline = $order->get_meta( self::ATM_EXPIRE_DATA );
+		$bill_amount      = $order->get_meta( self::ATM_BILL_AMOUNT );
+		if ( $barcode1 && $barcode2 && $barcode3 && $payment_deadline && $bill_amount ) {
+			$html           = '';
+			$current_action = current_filter();
+
+			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
+				$html .= '<h2>' . esc_html__( '感謝您的訂購，請使用三段條碼付款', WC_CCAT_PAYMENTS_DOMAIN ) . '</h2>';
+			}
+
+			// 條碼容器.
+			$html .= '<div class="barcode-container">';
+			$html .= '<div class="barcode-item">';
+			$html .= '<p>' . esc_html__( '條碼 1:', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>';
+			$html .= '<svg id="barcode1" data-value="' . esc_attr( $barcode1 ) . '"></svg>';
+			$html .= '</div>';
+
+			$html .= '<div class="barcode-item">';
+			$html .= '<p>' . esc_html__( '條碼 2:', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>';
+			$html .= '<svg id="barcode2" data-value="' . esc_attr( $barcode2 ) . '"></svg>';
+			$html .= '</div>';
+
+			$html .= '<div class="barcode-item">';
+			$html .= '<p>' . esc_html__( '條碼 3:', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>';
+			$html .= '<svg id="barcode3" data-value="' . esc_attr( $barcode3 ) . '"></svg>';
+			$html .= '</div>';
+			$html .= '</div>';
+
+			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', WC_CCAT_PAYMENTS_DOMAIN ), $payment_deadline ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d 元', WC_CCAT_PAYMENTS_DOMAIN ), $bill_amount ) ) . '</p>';
+
+			// 加入條碼生成的 JavaScript.
+			$html .= '<script type="text/javascript">
+            jQuery(document).ready(function($) {
+                if (typeof JsBarcode !== "undefined") {
+                    JsBarcode("#barcode1", $("#barcode1").data("value"), {
+                        format: "code128",
+                        width: 2,
+                        height: 100,
+                        displayValue: true
+                    });
+                    JsBarcode("#barcode2", $("#barcode2").data("value"), {
+                        format: "code128",
+                        width: 2,
+                        height: 100,
+                        displayValue: true
+                    });
+                    JsBarcode("#barcode3", $("#barcode3").data("value"), {
+                        format: "code128",
+                        width: 2,
+                        height: 100,
+                        displayValue: true
+                    });
+                }
+            });
+        </script>';
+
+			// 加入樣式.
+			$html .= '<style>
+            .barcode-container {
+                margin: 20px 0;
+            }
+            .barcode-item {
+                margin-bottom: 15px;
+            }
+            .barcode-item svg {
+                max-width: 100%;
+                height: auto;
+            }
+        </style>';
+
+			echo $html;
+		}
+	}
+
+	/**
+	 * Initialise Gateway Settings Form Fields.
+	 */
+	public function init_form_fields() {
+		$this->form_fields = array(
+			'enabled' => array(
+				'title'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
+				'type'    => 'checkbox',
+				'label'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
+				'default' => 'yes',
+			),
+			'title'   => array(
+				'title'       => __( '付款標題', WC_CCAT_PAYMENTS_DOMAIN ),
+				'type'        => 'text',
+				'description' => __( '使用者選擇付款時顯示的文字', WC_CCAT_PAYMENTS_DOMAIN ),
+				'default'     => __( '黑貓Pay - 三段式條碼', WC_CCAT_PAYMENTS_DOMAIN ),
+				'desc_tip'    => true,
+			),
+		);
+	}
+
+	/**
+	 * Retrieves the configured payment type for the payment gateway.
+	 *
+	 * @return string The payment type as configured in the gateway settings.
+	 */
+	public function payment_type(): string {
+		return '2';
+	}
+
+	/**
+	 * Retrieves the configured acquirer type for the payment gateway.
+	 *
+	 * @return string The acquirer type as configured in the gateway settings.
+	 */
+	public function acquirer_type(): string {
+		return '0';
+	}
+}

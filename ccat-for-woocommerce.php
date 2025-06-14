@@ -26,13 +26,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! defined( 'WC_CCAT_PAYMENTS_VERSION' ) ) {
 	define( 'WC_CCAT_PAYMENTS_VERSION', '2.0.4' );
 }
+if ( ! defined( 'WC_CCAT_PAYMENTS_DOMAIN' ) ) {
+	define( 'WC_CCAT_PAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
+}
+if ( ! defined( 'WC_CCAT_PAYMENTS_PREFIX' ) ) {
+	define( 'WC_CCAT_PAYMENTS_PREFIX', 'ccatpay-for-woocommerce' );
+}
+
 
 /**
  * WC CCat Payment gateway plugin class.
  *
  * @class WC_CCat_Payments
  */
-class WC_CCat_Payments {
+class CCATPAY_Payments {
 	/**
 	 * Plugin bootstrapping.
 	 */
@@ -66,8 +73,8 @@ class WC_CCat_Payments {
 	 * 初始化物流與支付協調器
 	 */
 	public static function init_shipping_payment_coordinator(): void {
-		require_once self::plugin_abspath() . 'includes/shipping/class-wc-ccat-shipping-payment-coordinator.php';
-		WC_CCat_Shipping_Payment_Coordinator::init();
+		require_once self::plugin_abspath() . 'includes/shipping/class-ccatpay-shipping-payment-coordinator.php';
+		CCATPAY_Shipping_Payment_Coordinator::init();
 	}
 
 	/**
@@ -79,22 +86,22 @@ class WC_CCat_Payments {
 	 */
 	public static function add_shipping_methods( array $methods ): array {
 		if ( self::is_shipping_enabled() ) {
-			$methods['wc_shipping_ccat_cod']         = 'WC_Shipping_CCat_COD';
-			$methods['wc_shipping_ccat_711_cod']     = 'WC_Shipping_CCat_711_COD';
-			$methods['wc_shipping_ccat_prepaid']     = 'WC_Shipping_CCat_Prepaid';
-			$methods['wc_shipping_ccat_711_prepaid'] = 'WC_Shipping_CCat_711_Prepaid';
+			$methods['ccatpay_shipping_cod']         = 'CCATPAY_Shipping_COD';
+			$methods['ccatpay_shipping_711_cod']     = 'CCATPAY_Shipping_711_COD';
+			$methods['ccatpay_shipping_prepaid']     = 'CCATPAY_Shipping_Prepaid';
+			$methods['ccatpay_shipping_711_prepaid'] = 'CCATPAY_Shipping_711_Prepaid';
 
 			// 冷藏物流方法.
-			$methods['wc_shipping_ccat_cod_refrigerated']         = 'WC_Shipping_CCat_COD_Refrigerated';
-			$methods['wc_shipping_ccat_711_cod_refrigerated']     = 'WC_Shipping_CCat_711_COD_Refrigerated';
-			$methods['wc_shipping_ccat_prepaid_refrigerated']     = 'WC_Shipping_CCat_Prepaid_Refrigerated';
-			$methods['wc_shipping_ccat_711_prepaid_refrigerated'] = 'WC_Shipping_CCat_711_Prepaid_Refrigerated';
+			$methods['ccatpay_shipping_cod_refrigerated']         = 'CCATPAY_Shipping_COD_Refrigerated';
+			$methods['ccatpay_shipping_711_cod_refrigerated']     = 'CCATPAY_Shipping_711_COD_Refrigerated';
+			$methods['ccatpay_shipping_prepaid_refrigerated']     = 'CCATPAY_Shipping_Prepaid_Refrigerated';
+			$methods['ccatpay_shipping_711_prepaid_refrigerated'] = 'CCATPAY_Shipping_711_Prepaid_Refrigerated';
 
 			// 冷凍物流方法.
-			$methods['wc_shipping_ccat_cod_frozen']         = 'WC_Shipping_CCat_COD_Frozen';
-			$methods['wc_shipping_ccat_711_cod_frozen']     = 'WC_Shipping_CCat_711_COD_Frozen';
-			$methods['wc_shipping_ccat_prepaid_frozen']     = 'WC_Shipping_CCat_Prepaid_Frozen';
-			$methods['wc_shipping_ccat_711_prepaid_frozen'] = 'WC_Shipping_CCat_711_Prepaid_Frozen';
+			$methods['ccatpay_shipping_cod_frozen']         = 'CCATPAY_Shipping_COD_Frozen';
+			$methods['ccatpay_shipping_711_cod_frozen']     = 'CCATPAY_Shipping_711_COD_Frozen';
+			$methods['ccatpay_shipping_prepaid_frozen']     = 'CCATPAY_Shipping_Prepaid_Frozen';
+			$methods['ccatpay_shipping_711_prepaid_frozen'] = 'CCATPAY_Shipping_711_Prepaid_Frozen';
 		}
 
 		return $methods;
@@ -106,7 +113,7 @@ class WC_CCat_Payments {
 	 * @return bool True if enabled, false otherwise.
 	 */
 	public static function is_ccat_enabled(): bool {
-		$is_enabled = get_option( 'wc_ccat_enable', 'yes' );
+		$is_enabled = get_option( WC_CCAT_PAYMENTS_PREFIX . '_enable', 'yes' );
 
 		return 'yes' === $is_enabled;
 	}
@@ -142,18 +149,18 @@ class WC_CCat_Payments {
 
 		// 定義所有需要添加的物流方法.
 		$shipping_methods = array(
-			'wc_shipping_ccat_cod',
-			'wc_shipping_ccat_711_cod',
-			'wc_shipping_ccat_prepaid',
-			'wc_shipping_ccat_711_prepaid',
-			'wc_shipping_ccat_cod_refrigerated',
-			'wc_shipping_ccat_cod_frozen',
-			'wc_shipping_ccat_prepaid_refrigerated',
-			'wc_shipping_ccat_prepaid_frozen',
-			'wc_shipping_ccat_711_cod_refrigerated',
-			'wc_shipping_ccat_711_cod_frozen',
-			'wc_shipping_ccat_711_prepaid_refrigerated',
-			'wc_shipping_ccat_711_prepaid_frozen',
+			'ccatpay_shipping_cod',
+			'ccatpay_shipping_711_cod',
+			'ccatpay_shipping_prepaid',
+			'ccatpay_shipping_711_prepaid',
+			'ccatpay_shipping_cod_refrigerated',
+			'ccatpay_shipping_cod_frozen',
+			'ccatpay_shipping_prepaid_refrigerated',
+			'ccatpay_shipping_prepaid_frozen',
+			'ccatpay_shipping_711_cod_refrigerated',
+			'ccatpay_shipping_711_cod_frozen',
+			'ccatpay_shipping_711_prepaid_refrigerated',
+			'ccatpay_shipping_711_prepaid_frozen',
 		);
 
 		if ( $taiwan_zone_exists ) {
@@ -161,10 +168,10 @@ class WC_CCat_Payments {
 			$zone = new WC_Shipping_Zone( $taiwan_zone_id );
 
 			// 獲取現有的物流方法.
-			$existing_methods = $zone->get_shipping_methods();
+			$existing_methods    = $zone->get_shipping_methods();
 			$existing_method_ids = array();
 
-			// 收集現有物流方法的 ID
+			// 收集現有物流方法的 ID.
 			foreach ( $existing_methods as $existing_method ) {
 				$existing_method_ids[] = $existing_method->id;
 			}
@@ -182,7 +189,7 @@ class WC_CCat_Payments {
 			$zone->add_location( 'TW', 'country' );
 			$zone->save();
 
-			// 添加所有物流方法
+			// 添加所有物流方法.
 			foreach ( $shipping_methods as $method_id ) {
 				$zone->add_shipping_method( $method_id );
 			}
@@ -195,7 +202,7 @@ class WC_CCat_Payments {
 	 * @return bool True if enabled, false otherwise.
 	 */
 	public static function is_shipping_enabled(): bool {
-		$is_enabled = get_option( 'wc_ccat_shipping_enable', 'yes' );
+		$is_enabled = get_option( WC_CCAT_PAYMENTS_PREFIX . '_shipping_enable', 'yes' );
 
 		return 'yes' === $is_enabled;
 	}
@@ -209,19 +216,18 @@ class WC_CCat_Payments {
 	 */
 	public static function add_gateway( array $gateways ): array {
 		if ( self::is_ccat_enabled() ) {
-			$gateways[] = 'WC_Gateway_CCat_Credit_Card';
-			$gateways[] = 'WC_Gateway_CCat_Chinatrust';
-			$gateways[] = 'WC_Gateway_CCat_Payuni';
-			$gateways[] = 'WC_Gateway_CCat_Cvs_Ibon';
-			$gateways[] = 'WC_Gateway_CCat_Cvs_Atm';
-			// $gateways[] = 'WC_Gateway_CCat_Cvs_Barcode';
-			$gateways[] = 'WC_Gateway_CCat_App_Opw';
-			$gateways[] = 'WC_Gateway_CCat_App_Icash';
+			$gateways[] = 'CCATPAY_Gateway_Credit_Card';
+			$gateways[] = 'CCATPAY_Gateway_Chinatrust';
+			$gateways[] = 'CCATPAY_Gateway_Payuni';
+			$gateways[] = 'CCATPAY_Gateway_Cvs_Ibon';
+			$gateways[] = 'CCATPAY_Gateway_Cvs_Atm';
+			$gateways[] = 'CCATPAY_Gateway_App_Opw';
+			$gateways[] = 'CCATPAY_Gateway_App_Icash';
 			// 新增黑貓貨到付款閘道.
-			$gateways[] = 'WC_Gateway_CCat_COD_Cash';
-			$gateways[] = 'WC_Gateway_CCat_COD_Mobile';
-			$gateways[] = 'WC_Gateway_CCat_COD_711';
-			$gateways[] = 'WC_Gateway_CCat_COD_Card';
+			$gateways[] = 'CCATPAY_Gateway_COD_Cash';
+			$gateways[] = 'CCATPAY_Gateway_COD_Mobile';
+			$gateways[] = 'CCATPAY_Gateway_COD_711';
+			$gateways[] = 'CCATPAY_Gateway_COD_Card';
 		}
 
 		return $gateways;
@@ -231,89 +237,87 @@ class WC_CCat_Payments {
 	 * Plugin includes.
 	 */
 	public static function includes(): void {
-		$is_invoice_enabled = 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' );
+		$is_invoice_enabled = 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' );
 		if ( $is_invoice_enabled ) {
-			require_once 'ccat-checkout-block/ccat-block-integration-checkout.php';
-			require_once 'includes/class-wc-ccat-invoice-display.php';
-			new WC_CCat_Invoice_Display();
+			require_once 'ccat-checkout-block/ccatpay-block-integration-checkout.php';
+			require_once 'includes/class-ccatpay-invoice-display.php';
+			new CCATPAY_Invoice_Display();
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
-					$integration_registry->register( new Ccat_Blocks_Integration() );
+					$integration_registry->register( new CCATPAY_Blocks_Integration() );
 				}
 			);
 		}
 		if ( self::is_shipping_enabled() ) {
-			require_once '711-checkout-block/class-ccat711-blocks-integration.php';
-			require_once 'includes/class-wc-ccat-shipping-display.php';
-			new WC_CCat_Shipping_Display();
+			require_once '711-checkout-block/class-ccatpay-711-blocks-integration.php';
+			require_once 'includes/class-ccatpay-shipping-display.php';
+			new CCATPAY_Shipping_Display();
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
-					$integration_registry->register( new Ccat711_Blocks_Integration() );
+					$integration_registry->register( new CCATPAY_711_Blocks_Integration() );
 				}
 			);
 		}
 		woocommerce_store_api_register_endpoint_data(
 			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,
-				'namespace'       => 'ccat-for-woocommerce',
+				'namespace'       => WC_CCAT_PAYMENTS_DOMAIN,
 				'data_callback'   => array( __CLASS__, 'get_invoice_data' ),
 				'schema_callback' => array( __CLASS__, 'get_invoice_schema' ),
 			)
 		);
 
-		// Make the WC_Gateway_CCat class available.
 		if ( class_exists( 'WC_Payment_Gateway' ) && self::is_ccat_enabled() ) {
-			require_once 'includes/class-wc-gateway-ccat-abstract.php';
-			require_once 'includes/class-wc-gateway-ccat-cvs-abstract.php';
-			require_once 'includes/class-wc-gateway-ccat-credit-card.php';
-			require_once 'includes/class-wc-gateway-ccat-chinatrust.php';
-			require_once 'includes/class-wc-gateway-ccat-payuni.php';
-			require_once 'includes/class-wc-gateway-ccat-cvs-ibon.php';
-			require_once 'includes/class-wc-gateway-ccat-cvs-atm.php';
-			// require_once 'includes/class-wc-gateway-ccat-cvs-barcode.php';
-			require_once 'includes/class-wc-gateway-ccat-app-opw.php';
-			require_once 'includes/class-wc-gateway-ccat-app-icash.php';
+			require_once 'includes/class-ccatpay-gateway-abstract.php';
+			require_once 'includes/class-ccatpay-gateway-cvs-abstract.php';
+			require_once 'includes/class-ccatpay-gateway-credit-card.php';
+			require_once 'includes/class-ccatpay-gateway-chinatrust.php';
+			require_once 'includes/class-ccatpay-gateway-payuni.php';
+			require_once 'includes/class-ccatpay-gateway-cvs-ibon.php';
+			require_once 'includes/class-ccatpay-gateway-cvs-atm.php';
+			require_once 'includes/class-ccatpay-gateway-app-opw.php';
+			require_once 'includes/class-ccatpay-gateway-app-icash.php';
 			// 新增黑貓貨到付款閘道.
-			require_once 'includes/class-wc-gateway-ccat-cod-abstract.php';
-			require_once 'includes/class-wc-gateway-ccat-cod-cash.php';
-			require_once 'includes/class-wc-gateway-ccat-cod-card.php';
-			require_once 'includes/class-wc-gateway-ccat-cod-mobile.php';
-			require_once 'includes/class-wc-gateway-ccat-cod-711.php';
+			require_once 'includes/class-ccatpay-gateway-cod-abstract.php';
+			require_once 'includes/class-ccatpay-gateway-cod-cash.php';
+			require_once 'includes/class-ccatpay-gateway-cod-card.php';
+			require_once 'includes/class-ccatpay-gateway-cod-mobile.php';
+			require_once 'includes/class-ccatpay-gateway-cod-711.php';
 		}
 
 		// 載入黑貓物流相關類別.
 		if ( class_exists( 'WC_Shipping_Method' ) && self::is_shipping_enabled() ) {
-			require_once 'includes/shipping/class-wc-shipping-ccat-abstract.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-cod.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-abstract.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-cod.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-cod.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-prepaid.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid.php';
 
 			// 引入宅配先付款不同溫度類型.
-			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid-normal.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid-refrigerated.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-prepaid-frozen.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-prepaid-normal.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-prepaid-refrigerated.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-prepaid-frozen.php';
 
 			// 引入宅配貨到付款不同溫度類型.
-			require_once 'includes/shipping/class-wc-shipping-ccat-cod-normal.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-cod-refrigerated.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-cod-frozen.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-cod-normal.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-cod-refrigerated.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-cod-frozen.php';
 
 			// 引入7-11先付款不同溫度類型.
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid-normal.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid-refrigerated.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-prepaid-frozen.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid-normal.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid-refrigerated.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid-frozen.php';
 
 			// 引入7-11貨到付款不同溫度類型.
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod-normal.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod-refrigerated.php';
-			require_once 'includes/shipping/class-wc-shipping-ccat-711-cod-frozen.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-cod-normal.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-cod-refrigerated.php';
+			require_once 'includes/shipping/class-ccatpay-shipping-711-cod-frozen.php';
 		}
 
-		require_once 'includes/class-wc-ccat-settings.php';
-		WC_CCat_Settings::init();
+		require_once 'includes/class-ccatpay-settings.php';
+		CCATPAY_Settings::init();
 	}
 
 	/**
@@ -354,32 +358,30 @@ class WC_CCat_Payments {
 	 */
 	public static function woocommerce_gateway_ccat_woocommerce_block_support(): void {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) && self::is_ccat_enabled() ) {
-			require_once 'includes/blocks/class-wc-ccat-payments-credit-card-blocks.php';
-			require_once 'includes/blocks/class-wc-ccat-payments-chinatrust-blocks.php';
-			require_once 'includes/blocks/class-wc-ccat-payments-payuni-blocks.php';
-			require_once 'includes/blocks/class-wc-ccat-payments-ibon-blocks.php';
-			require_once 'includes/blocks/class-wc-ccat-payments-atm-blocks.php';
-			// require_once 'includes/blocks/class-wc-ccat-payments-barcode-blocks.php';
-			require_once 'includes/blocks/class-wc-ccat-payments-opw-blocks.php';
-			require_once 'includes/blocks/class-wc-ccat-payments-icash-blocks.php';
-			require_once 'includes/blocks/class-wc-ccat-payments-cod-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-credit-card-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-chinatrust-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-payuni-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-ibon-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-atm-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-opw-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-icash-blocks.php';
+			require_once 'includes/blocks/class-ccatpay-payments-cod-blocks.php';
 
 			add_action(
 				'woocommerce_blocks_payment_method_type_registration',
 				function ( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-					$payment_method_registry->register( new WC_Gateway_CCat_Credit_Card_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_Chinatrust_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_Payuni_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_Ibon_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_Atm_Blocks_Support() );
-					// $payment_method_registry->register( new WC_Gateway_CCat_Barcode_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_Opw_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_Icash_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_COD_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Credit_Card_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Chinatrust_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Payuni_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Ibon_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Atm_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Opw_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Icash_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_COD_Blocks_Support() );
 				}
 			);
 		}
 	}
 }
 
-WC_CCat_Payments::init();
+CCATPAY_Payments::init();

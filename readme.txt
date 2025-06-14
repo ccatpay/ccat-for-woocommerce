@@ -1,3 +1,4 @@
+
 === ccat-for-woocommerce ===
 Contributors: ccatpay
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
@@ -93,6 +94,13 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 = 2.0.4 =
 
 * 修正：文字調整，物流訂單 更改為 物流託運單。
+
+== Third-party Resources ==
+
+1. JsBarcode - https://github.com/lindell/JsBarcode
+   Version: 3.11.6
+   License: MIT
+   本地副本包含在 resources/js/frontend/JsBarcode.all.min.js
 
 == Screenshots ==
 
