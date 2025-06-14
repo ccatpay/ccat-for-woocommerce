@@ -627,7 +627,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
 
         // 如果沒有找到選中的711運送方式，使用默認值
         if (!selectedShippingMethod) {
-            selectedShippingMethod = 'wc_shipping_ccat_711_prepaid';
+            selectedShippingMethod = 'ccatpay_shipping_711_prepaid';
         }
 
         // 使用 AJAX 獲取選擇門市的 URL
@@ -657,7 +657,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                     const pendingMessage = document.createElement('div');
                     pendingMessage.className = 'wc-block-components-notice-banner is-info';
                     pendingMessage.style.marginTop = '10px';
-                    pendingMessage.innerHTML = `<span>${__('請在新開啟的視窗中選擇門市...', 'your-text-domain')}</span>`;
+                    pendingMessage.innerHTML = `<span>${__('請在新開啟的視窗中選擇門市...', 'ccat-for-woocommerce')}</span>`;
 
                     const noticeContainer = buttonEl.closest('.wc-block-components-shipping-cvs-selector__content');
                     const existingNotice = noticeContainer.querySelector('.wc-block-components-notice-banner');
@@ -680,7 +680,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                         const successMessage = document.createElement('div');
                         successMessage.className = 'wc-block-components-notice-banner is-success';
                         successMessage.style.marginTop = '10px';
-                        successMessage.innerHTML = `<span>${__('已成功選擇門市', 'your-text-domain')}</span>`;
+                        successMessage.innerHTML = `<span>${__('已成功選擇門市', 'ccat-for-woocommerce')}</span>`;
 
                         container.insertBefore(successMessage, container.querySelector('.wc-block-components-shipping-cvs-info') || null);
 

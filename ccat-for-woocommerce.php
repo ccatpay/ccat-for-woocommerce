@@ -26,6 +26,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! defined( 'WC_CCAT_PAYMENTS_VERSION' ) ) {
 	define( 'WC_CCAT_PAYMENTS_VERSION', '2.0.4' );
 }
+if ( ! defined( 'WC_CCAT_PAYMENTS_DOMAIN' ) ) {
+	define( 'WC_CCAT_PAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
+}
+if ( ! defined( 'WC_CCAT_PAYMENTS_PREFIX' ) ) {
+	define( 'WC_CCAT_PAYMENTS_PREFIX', 'ccatpay-for-wc' );
+}
+
 
 /**
  * WC CCat Payment gateway plugin class.
@@ -256,7 +263,7 @@ class CCATPAY_Payments {
 		woocommerce_store_api_register_endpoint_data(
 			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,
-				'namespace'       => 'ccat-for-woocommerce',
+				'namespace'       => WC_CCAT_PAYMENTS_DOMAIN,
 				'data_callback'   => array( __CLASS__, 'get_invoice_data' ),
 				'schema_callback' => array( __CLASS__, 'get_invoice_schema' ),
 			)

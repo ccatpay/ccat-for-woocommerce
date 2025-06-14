@@ -52,19 +52,19 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 			$payer_email    = $order->get_billing_email();
 
 			if ( empty( $payer_name ) ) {
-				throw new Exception( esc_html__( '姓名為必填', 'ccat-for-woocommerce' ) );
+				throw new Exception( esc_html__( '姓名為必填', WC_CCAT_PAYMENTS_DOMAIN ) );
 			}
 			if ( empty( $payer_postcode ) ) {
-				throw new Exception( esc_html__( '郵遞區號為必填', 'ccat-for-woocommerce' ) );
+				throw new Exception( esc_html__( '郵遞區號為必填', WC_CCAT_PAYMENTS_DOMAIN ) );
 			}
 			if ( empty( $payer_address ) ) {
-				throw new Exception( esc_html__( '地址為必填', 'ccat-for-woocommerce' ) );
+				throw new Exception( esc_html__( '地址為必填', WC_CCAT_PAYMENTS_DOMAIN ) );
 			}
 			if ( empty( $payer_mobile ) ) {
-				throw new Exception( esc_html__( '手機為必填', 'ccat-for-woocommerce' ) );
+				throw new Exception( esc_html__( '手機為必填', WC_CCAT_PAYMENTS_DOMAIN ) );
 			}
 			if ( ! filter_var( $payer_email, FILTER_VALIDATE_EMAIL ) ) {
-				throw new Exception( esc_html__( '信箱格式錯誤或沒有填寫', 'ccat-for-woocommerce' ) );
+				throw new Exception( esc_html__( '信箱格式錯誤或沒有填寫', WC_CCAT_PAYMENTS_DOMAIN ) );
 			}
 			$api_url   = $this->get_base_url() . 'api/Collect';
 			$api_token = $this->get_payment_api_token();
@@ -105,7 +105,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 			$response = wp_remote_post( $api_url, $args );
 
 			if ( is_wp_error( $response ) ) {
-				throw new Exception( esc_html( __( 'Api error. Try again later.', 'ccat-for-woocommerce' ) ) );
+				throw new Exception( esc_html( __( 'Api error. Try again later.', WC_CCAT_PAYMENTS_DOMAIN ) ) );
 			}
 
 			$response_body = wp_remote_retrieve_body( $response );
@@ -137,7 +137,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 				$this->add_apn_notification( $order, $response_data );
 				$order->update_status(
 					Automattic\WooCommerce\Enums\OrderStatus::PENDING,
-					__( 'Awaiting payment', 'ccat-for-woocommerce' )
+					__( 'Awaiting payment', WC_CCAT_PAYMENTS_DOMAIN )
 				);
 				$order->save();
 				WC()->cart->empty_cart();
@@ -153,7 +153,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 					'redirect' => $redirect,
 				);
 			} else {
-				$error_message = $response_data['msg'] ?? __( 'Unknown Error.', 'ccat-for-woocommerce' );
+				$error_message = $response_data['msg'] ?? __( 'Unknown Error.', WC_CCAT_PAYMENTS_DOMAIN );
 				delete_transient( 'api_access_token' );
 				throw new Exception( $error_message );
 			}
@@ -193,40 +193,40 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 
 		switch ( $status ) {
 			case 'A':
-				$note = __( '等待繳款人繳納', 'ccat-for-woocommerce' );
+				$note = __( '等待繳款人繳納', WC_CCAT_PAYMENTS_DOMAIN );
 				$order->update_status( 'pending' );
 				break;
 
 			case 'B':
-				$note = __( '繳款人已繳納', 'ccat-for-woocommerce' );
+				$note = __( '繳款人已繳納', WC_CCAT_PAYMENTS_DOMAIN );
 				$order->set_payment_method( $this );
 				$order->payment_complete();
 				break;
 
 			case 'C':
-				$note = __( '契客註定註銷', 'ccat-for-woocommerce' );
+				$note = __( '契客註定註銷', WC_CCAT_PAYMENTS_DOMAIN );
 				$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::CANCELLED );
 				break;
 
 			case 'D':
-				$note = __( '已過期繳款單', 'ccat-for-woocommerce' );
+				$note = __( '已過期繳款單', WC_CCAT_PAYMENTS_DOMAIN );
 				$order->update_status( Automattic\WooCommerce\Enums\OrderStatus::CANCELLED );
 				break;
 
 			case 'E':
-				$note = __( '已預約撥款給契客', 'ccat-for-woocommerce' );
+				$note = __( '已預約撥款給契客', WC_CCAT_PAYMENTS_DOMAIN );
 				break;
 
 			case 'I':
-				$note = __( '開立發票通知', 'ccat-for-woocommerce' );
+				$note = __( '開立發票通知', WC_CCAT_PAYMENTS_DOMAIN );
 				break;
 
 			case 'J':
-				$note = __( '開立發票折讓單號通知', 'ccat-for-woocommerce' );
+				$note = __( '開立發票折讓單號通知', WC_CCAT_PAYMENTS_DOMAIN );
 				break;
 
 			default:
-				$note = __( '未知狀態碼: ', 'ccat-for-woocommerce' ) . $status;
+				$note = __( '未知狀態碼: ', WC_CCAT_PAYMENTS_DOMAIN ) . $status;
 				break;
 		}
 

@@ -21,8 +21,8 @@ class CCATPAY_Shipping_Prepaid_Refrigerated extends CCATPAY_Shipping_Prepaid {
 	public function __construct( $instance_id = 0 ) {
 		parent::__construct( $instance_id );
 		$this->temperature_type   = 'refrigerated';
-		$this->method_title       = __( '黑貓宅配(冷藏)', 'ccat-for-woocommerce' );
-		$this->title              = __( '黑貓宅配(冷藏)', 'ccat-for-woocommerce' );
-		$this->method_description = __( '黑貓宅配低溫冷藏商品，顧客需先完成付款', 'ccat-for-woocommerce' );
+		$this->method_title       = __( '黑貓宅配(冷藏)', WC_CCAT_PAYMENTS_DOMAIN );
+		$this->title              = __( '黑貓宅配(冷藏)', WC_CCAT_PAYMENTS_DOMAIN );
+		$this->method_description = __( '黑貓宅配低溫冷藏商品，顧客需先完成付款', WC_CCAT_PAYMENTS_DOMAIN );
 	}
 }

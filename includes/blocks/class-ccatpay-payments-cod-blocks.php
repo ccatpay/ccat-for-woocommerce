@@ -66,7 +66,7 @@ class CCATPAY_Gateway_COD_Blocks_Support extends AbstractPaymentMethodType {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-ccat-cod-blocks', 'ccat-for-woocommerce', CCATPAY_Payments::plugin_abspath() . 'languages/' );
+			wp_set_script_translations( 'wc-ccat-cod-blocks', WC_CCAT_PAYMENTS_DOMAIN, CCATPAY_Payments::plugin_abspath() . 'languages/' );
 		}
 
 		return array( 'wc-ccat-cod-blocks' );

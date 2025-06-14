@@ -34,8 +34,8 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 	 */
 	public function __construct() {
 
-		$this->title       = __( '黑貓Pay - 三段式條碼', 'ccat-for-woocommerce' );
-		$this->description = __( '使用黑貓Pay 三段式條碼，付款更安心。', 'ccat-for-woocommerce' );
+		$this->title       = __( '黑貓Pay - 三段式條碼', WC_CCAT_PAYMENTS_DOMAIN );
+		$this->description = __( '使用黑貓Pay 三段式條碼，付款更安心。', WC_CCAT_PAYMENTS_DOMAIN );
 		// 在結帳感謝頁面和訂單詳情中附加條碼相關訊息.
 		add_action( 'woocommerce_thankyou', array( $this, 'display_barcode_details' ) );
 		add_action( 'woocommerce_view_order', array( $this, 'display_barcode_details' ) );
@@ -98,29 +98,29 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 			$current_action = current_filter();
 
 			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
-				$html .= '<h2>' . esc_html__( '感謝您的訂購，請使用三段條碼付款', 'ccat-for-woocommerce' ) . '</h2>';
+				$html .= '<h2>' . esc_html__( '感謝您的訂購，請使用三段條碼付款', WC_CCAT_PAYMENTS_DOMAIN ) . '</h2>';
 			}
 
 			// 條碼容器.
 			$html .= '<div class="barcode-container">';
 			$html .= '<div class="barcode-item">';
-			$html .= '<p>' . esc_html__( '條碼 1:', 'ccat-for-woocommerce' ) . '</p>';
+			$html .= '<p>' . esc_html__( '條碼 1:', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>';
 			$html .= '<svg id="barcode1" data-value="' . esc_attr( $barcode1 ) . '"></svg>';
 			$html .= '</div>';
 
 			$html .= '<div class="barcode-item">';
-			$html .= '<p>' . esc_html__( '條碼 2:', 'ccat-for-woocommerce' ) . '</p>';
+			$html .= '<p>' . esc_html__( '條碼 2:', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>';
 			$html .= '<svg id="barcode2" data-value="' . esc_attr( $barcode2 ) . '"></svg>';
 			$html .= '</div>';
 
 			$html .= '<div class="barcode-item">';
-			$html .= '<p>' . esc_html__( '條碼 3:', 'ccat-for-woocommerce' ) . '</p>';
+			$html .= '<p>' . esc_html__( '條碼 3:', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>';
 			$html .= '<svg id="barcode3" data-value="' . esc_attr( $barcode3 ) . '"></svg>';
 			$html .= '</div>';
 			$html .= '</div>';
 
-			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce' ), $payment_deadline ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d 元', 'ccat-for-woocommerce' ), $bill_amount ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', WC_CCAT_PAYMENTS_DOMAIN ), $payment_deadline ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d 元', WC_CCAT_PAYMENTS_DOMAIN ), $bill_amount ) ) . '</p>';
 
 			// 加入條碼生成的 JavaScript.
 			$html .= '<script type="text/javascript">
@@ -172,16 +172,16 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'   => __( '啟用', 'ccat-for-woocommerce' ),
+				'title'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'    => 'checkbox',
-				'label'   => __( '啟用', 'ccat-for-woocommerce' ),
+				'label'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
 				'default' => 'yes',
 			),
 			'title'   => array(
-				'title'       => __( '付款標題', 'ccat-for-woocommerce' ),
+				'title'       => __( '付款標題', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'        => 'text',
-				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce' ),
-				'default'     => __( '黑貓Pay - 三段式條碼', 'ccat-for-woocommerce' ),
+				'description' => __( '使用者選擇付款時顯示的文字', WC_CCAT_PAYMENTS_DOMAIN ),
+				'default'     => __( '黑貓Pay - 三段式條碼', WC_CCAT_PAYMENTS_DOMAIN ),
 				'desc_tip'    => true,
 			),
 		);

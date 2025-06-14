@@ -62,16 +62,16 @@ abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
 			'title' => array(
-				'title'       => __( '運送方式名稱', 'ccat-for-woocommerce' ),
+				'title'       => __( '運送方式名稱', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'        => 'text',
-				'description' => __( '顧客看到的名稱', 'ccat-for-woocommerce' ),
+				'description' => __( '顧客看到的名稱', WC_CCAT_PAYMENTS_DOMAIN ),
 				'default'     => $this->method_title,
 			),
 			'cost'  => array(
-				'title'       => __( '運費', 'ccat-for-woocommerce' ),
+				'title'       => __( '運費', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'        => 'price',
 				'default'     => '0',
-				'description' => __( '運送費用', 'ccat-for-woocommerce' ),
+				'description' => __( '運送費用', WC_CCAT_PAYMENTS_DOMAIN ),
 			),
 		);
 	}
