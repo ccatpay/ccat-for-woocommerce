@@ -152,7 +152,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 * @return bool True if in test mode, False otherwise.
 	 */
 	public function is_test_mode(): bool {
-		return get_option( 'wc_ccat_test_mode', 'no' ) === 'yes';
+		return get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_mode', 'no' ) === 'yes';
 	}
 
 	/**
@@ -173,12 +173,12 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 * @return string 檢核碼
 	 */
 	protected function get_chk_code(): string {
-		$is_test_mode = 'yes' === get_option( 'wc_ccat_test_mode' );
+		$is_test_mode = 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_mode' );
 		if ( $is_test_mode ) {
-			return get_option( 'wc_ccat_test_chk_code', '' );
+			return get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_chk_code', '' );
 		}
 
-		return get_option( 'wc_ccat_chk_code', '' );
+		return get_option( WC_CCAT_PAYMENTS_PREFIX . '_chk_code', '' );
 	}
 
 
@@ -274,8 +274,8 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 */
 	public function get_account(): string {
 		return $this->is_test_mode()
-			? get_option( 'wc_ccat_test_merchant_id', '' )
-			: get_option( 'wc_ccat_merchant_id', '' );
+			? get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_merchant_id', '' )
+			: get_option( WC_CCAT_PAYMENTS_PREFIX . '_merchant_id', '' );
 	}
 
 	/**
@@ -285,8 +285,8 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 */
 	public function get_password(): string {
 		return $this->is_test_mode()
-			? get_option( 'wc_ccat_test_api_key', '' )
-			: get_option( 'wc_ccat_api_key', '' );
+			? get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_api_key', '' )
+			: get_option( WC_CCAT_PAYMENTS_PREFIX . '_api_key', '' );
 	}
 
 	/**
@@ -542,7 +542,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 				'apn_url'          => $this->get_apn_url(),
 				'b2c'              => '0',
 			);
-			if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
+			if ( 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
 			}
 			if ( CCATPAY_Payments::is_shipping_enabled() ) {

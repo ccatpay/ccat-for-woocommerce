@@ -30,7 +30,7 @@ if ( ! defined( 'WC_CCAT_PAYMENTS_DOMAIN' ) ) {
 	define( 'WC_CCAT_PAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
 }
 if ( ! defined( 'WC_CCAT_PAYMENTS_PREFIX' ) ) {
-	define( 'WC_CCAT_PAYMENTS_PREFIX', 'ccatpay-for-wc' );
+	define( 'WC_CCAT_PAYMENTS_PREFIX', 'ccatpay-for-woocommerce' );
 }
 
 
@@ -113,7 +113,7 @@ class CCATPAY_Payments {
 	 * @return bool True if enabled, false otherwise.
 	 */
 	public static function is_ccat_enabled(): bool {
-		$is_enabled = get_option( 'wc_ccat_enable', 'yes' );
+		$is_enabled = get_option( WC_CCAT_PAYMENTS_PREFIX . '_enable', 'yes' );
 
 		return 'yes' === $is_enabled;
 	}
@@ -202,7 +202,7 @@ class CCATPAY_Payments {
 	 * @return bool True if enabled, false otherwise.
 	 */
 	public static function is_shipping_enabled(): bool {
-		$is_enabled = get_option( 'wc_ccat_shipping_enable', 'yes' );
+		$is_enabled = get_option( WC_CCAT_PAYMENTS_PREFIX . '_shipping_enable', 'yes' );
 
 		return 'yes' === $is_enabled;
 	}
@@ -237,7 +237,7 @@ class CCATPAY_Payments {
 	 * Plugin includes.
 	 */
 	public static function includes(): void {
-		$is_invoice_enabled = 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' );
+		$is_invoice_enabled = 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' );
 		if ( $is_invoice_enabled ) {
 			require_once 'ccat-checkout-block/ccatpay-block-integration-checkout.php';
 			require_once 'includes/class-ccatpay-invoice-display.php';

@@ -295,7 +295,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 			return;
 		}
 		$temp_var = isset( $_POST['TempVar'] ) ? sanitize_text_field( wp_unslash( $_POST['TempVar'] ) ) : '';  // phpcs:ignore WordPress
-		$data     = get_option( 'ccat_temp_var_' . $temp_var );
+		$data     = get_option( WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
 
 		// check nonce myself.
 		if ( empty( $data ) ) {
@@ -313,13 +313,13 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		}
 
 		// 獲取保存的資訊.
-		$stored_data = get_option( 'ccat_temp_var_' . $temp_var );
+		$stored_data = get_option( WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
 		if ( empty( $stored_data ) ) {
 			wp_die( esc_html__( '無效的識別參數', WC_CCAT_PAYMENTS_DOMAIN ) );
 		}
 
 		// 刪除臨時資料.
-		delete_option( 'ccat_temp_var_' . $temp_var );
+		delete_option( WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
 
 		// 準備 JavaScript 回調.
 		$store_data = wp_json_encode(
@@ -536,7 +536,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 				// 儲存臨時變數，以便在回調時使用.
 				update_option(
-					'ccat_temp_var_' . $temp_var,
+					WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var,
 					array(
 						'shipping_method' => $shipping_method,
 						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '',

@@ -64,11 +64,11 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 	/**
 	 * Displays the virtual account details for an order.
 	 *
-	 * @param int $order_id The ID of the order for which to display the virtual account details.
+	 * @param mixed $order_id The ID of the order for which to display the virtual account details.
 	 *
 	 * @return void
 	 */
-	public function display_virtual_account_details( int $order_id ) {
+	public function display_virtual_account_details( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( $order->get_payment_method() !== $this->id ) {
 			return;

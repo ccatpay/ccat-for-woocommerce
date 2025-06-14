@@ -216,10 +216,10 @@ class CCATPAY_Shipping_Display {
 		$recipient_address = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
 
 		// 寄件人資訊 (從店家設定取得).
-		$sender_name    = get_option( 'woocommerce_ccat_sender_name', '' );
-		$sender_tel     = get_option( 'woocommerce_ccat_sender_tel', '' );
-		$sender_mobile  = get_option( 'woocommerce_ccat_sender_mobile', '' );
-		$sender_address = get_option( 'woocommerce_ccat_sender_address', '' );
+		$sender_name    = get_option( WC_CCAT_PAYMENTS_PREFIX . '_sender_name', '' );
+		$sender_tel     = get_option( WC_CCAT_PAYMENTS_PREFIX . '_sender_tel', '' );
+		$sender_mobile  = get_option( WC_CCAT_PAYMENTS_PREFIX . '_sender_mobile', '' );
+		$sender_address = get_option( WC_CCAT_PAYMENTS_PREFIX . '_sender_address', '' );
 
 		// 設定台北時區.
 		$taipei_tz = new DateTimeZone( self::TAIPEI_TIMEZONE );
@@ -494,7 +494,7 @@ class CCATPAY_Shipping_Display {
 			$method_id = $shipping_method->get_method_id();
 
 			// 檢查運送方式ID是否包含"wc_shipping_ccat".
-			if ( strpos( $method_id, 'wc_shipping_ccat' ) !== false ) {
+			if ( strpos( $method_id, 'ccatpay_shipping' ) !== false ) {
 				return true;
 			}
 		}

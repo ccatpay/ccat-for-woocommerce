@@ -21,6 +21,8 @@ class CCATPAY_Settings {
 		add_filter( 'woocommerce_settings_tabs_array', array( __CLASS__, 'add_settings_tab' ), 50 );
 		add_action( 'woocommerce_settings_ccat', array( __CLASS__, 'output_settings' ) );
 		add_action( 'woocommerce_update_options_ccat', array( __CLASS__, 'save_settings' ) );
+
+		self::migrate_settings();
 	}
 
 	/**
@@ -53,95 +55,89 @@ class CCATPAY_Settings {
 				'name'    => __( '啟用黑貓Pay', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'    => 'checkbox',
 				'desc'    => __( '啟用或停用黑貓Pay功能。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'      => 'wc_ccat_enable',
+				'id'      => WC_CCAT_PAYMENTS_PREFIX . '_enable',
 				'default' => 'yes',
 			),
 			array(
 				'name'    => __( '啟用電子發票', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'    => 'checkbox',
 				'desc'    => __( '啟用或停用電子發票功能。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'      => 'wc_ccat_invoice_enable',
+				'id'      => WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable',
 				'default' => 'no',
 			),
 			array(
 				'name'    => __( '啟用黑貓物流', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'    => 'checkbox',
 				'desc'    => __( '啟用或停用黑貓物流功能。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'      => 'wc_ccat_shipping_enable',
+				'id'      => WC_CCAT_PAYMENTS_PREFIX . '_shipping_enable',
 				'default' => 'yes',
 			),
 			array(
 				'name'    => __( '測試模式', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type'    => 'checkbox',
 				'desc'    => __( '啟用測試模式以使用黑貓Pay測試環境，關閉則使用正式環境。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'      => 'wc_ccat_test_mode',
+				'id'      => WC_CCAT_PAYMENTS_PREFIX . '_test_mode',
 				'default' => 'no',
 			),
 			array(
 				'name' => __( '金流代號', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'text',
 				'desc' => __( '輸入您的黑貓Pay 金流代號。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'wc_ccat_merchant_id',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_merchant_id',
 			),
 			array(
 				'name' => __( 'API密碼', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'password',
 				'desc' => __( '輸入黑貓Pay 的 API 密碼。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'wc_ccat_api_key',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_api_key',
 			),
 			array(
 				'name' => __( '檢核碼', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'password',
 				'desc' => __( '輸入API檢核碼(hash_base)，信用卡線上刷卡使用。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'wc_ccat_chk_code',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_chk_code',
 			),
 			array(
 				'name' => __( '測試模式金流代號', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'text',
 				'desc' => __( '測試環境用的金流代號，啟用測試模式時有效。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'wc_ccat_test_merchant_id',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_test_merchant_id',
 			),
 			array(
 				'name' => __( '測試模式 API 密碼', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'password',
 				'desc' => __( '測試環境用的 API 密碼，啟用測試模式時有效。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'wc_ccat_test_api_key',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_test_api_key',
 			),
 			array(
 				'name' => __( '測試模式檢核碼', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'password',
 				'desc' => __( '測試環境用的 API 檢核碼(hash_base)，信用卡線上刷卡使用。', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'wc_ccat_test_chk_code',
-			),
-			array(
-				'name' => __( '寄件人設定', WC_CCAT_PAYMENTS_DOMAIN ),
-				'type' => 'title',
-				'desc' => __( '黑貓物流寄件人相關資訊', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'wc_ccat_sender_section_title',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_test_chk_code',
 			),
 			array(
 				'name' => __( '寄件人姓名', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人姓名', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'woocommerce_ccat_sender_name',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_sender_name',
 			),
 			array(
 				'name' => __( '寄件人電話', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人市話', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'woocommerce_ccat_sender_tel',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_ccat_sender_tel',
 			),
 			array(
 				'name' => __( '寄件人手機', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人手機號碼', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'woocommerce_ccat_sender_mobile',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_sender_mobile',
 			),
 			array(
 				'name' => __( '寄件人地址', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人詳細地址', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => 'woocommerce_ccat_sender_address',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_sender_address',
 			),
 			array(
 				'type' => 'sectionend',
@@ -162,5 +158,43 @@ class CCATPAY_Settings {
 	 */
 	public static function save_settings() {
 		woocommerce_update_options( self::get_settings() );
+	}
+
+	/**
+	 * 遷移黑貓Pay設定值從舊ID到新ID
+	 *
+	 * @return void
+	 */
+	public static function migrate_settings() {
+		$settings_mapping = array(
+			WC_CCAT_PAYMENTS_PREFIX . '_enable'           => 'wc_ccat_enable',
+			WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable'   => 'wc_ccat_invoice_enable',
+			WC_CCAT_PAYMENTS_PREFIX . '_shipping_enable'  => 'wc_ccat_shipping_enable',
+			WC_CCAT_PAYMENTS_PREFIX . '_test_mode'        => 'wc_ccat_test_mode',
+			WC_CCAT_PAYMENTS_PREFIX . '_merchant_id'      => 'wc_ccat_merchant_id',
+			WC_CCAT_PAYMENTS_PREFIX . '_api_key'          => 'wc_ccat_api_key',
+			WC_CCAT_PAYMENTS_PREFIX . '_chk_code'         => 'wc_ccat_chk_code',
+			WC_CCAT_PAYMENTS_PREFIX . '_test_merchant_id' => 'wc_ccat_test_merchant_id',
+			WC_CCAT_PAYMENTS_PREFIX . '_test_api_key'     => 'wc_ccat_test_api_key',
+			WC_CCAT_PAYMENTS_PREFIX . '_test_chk_code'    => 'wc_ccat_test_chk_code',
+			WC_CCAT_PAYMENTS_PREFIX . '_sender_name'      => 'woocommerce_ccat_sender_name',
+			WC_CCAT_PAYMENTS_PREFIX . '_ccat_sender_tel'  => 'woocommerce_ccat_sender_tel',
+			WC_CCAT_PAYMENTS_PREFIX . '_sender_mobile'    => 'woocommerce_ccat_sender_mobile',
+			WC_CCAT_PAYMENTS_PREFIX . '_sender_address'   => 'woocommerce_ccat_sender_address',
+		);
+
+		// 遍歷每個對應關係，檢查並遷移設定值.
+		foreach ( $settings_mapping as $new_id => $old_id ) {
+			$old_value = get_option( $old_id );
+
+			if ( false !== $old_value ) {
+				$new_value = get_option( $new_id );
+
+				// 如果新值不存在或為空，則遷移舊值到新ID.
+				if ( false === $new_value || '' === $new_value ) {
+					update_option( $new_id, $old_value );
+				}
+			}
+		}
 	}
 }
