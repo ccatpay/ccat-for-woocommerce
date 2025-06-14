@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
  *
  * @since 1.0.0
  */
-final class WC_Gateway_CCat_Payuni_Blocks_Support extends AbstractPaymentMethodType {
+final class CCATPAY_Gateway_Payuni_Blocks_Support extends AbstractPaymentMethodType {
 
 	/**
 	 * The gateway instance.

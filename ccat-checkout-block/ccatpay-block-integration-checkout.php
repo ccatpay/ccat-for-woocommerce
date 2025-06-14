@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
  * This class handles the registration, initialization, and setup of scripts
  * required for managing custom blocks in both the editor and frontend contexts.
  */
-class Ccat_Blocks_Integration implements IntegrationInterface {
+class CCATPAY_Blocks_Integration implements IntegrationInterface {
 
 	/**
 	 * The name of the integration.

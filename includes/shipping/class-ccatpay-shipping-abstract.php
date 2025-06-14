@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * 黑貓物流抽象類別
  */
-abstract class WC_Shipping_CCat_Abstract extends WC_Shipping_Method {
+abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
 	/**
 	 * 是否需要付款
 	 *

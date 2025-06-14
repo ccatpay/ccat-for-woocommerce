@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * 黑貓物流宅配先付款 - 冷藏運送方式
  */
-class WC_Shipping_CCat_Prepaid_Refrigerated extends WC_Shipping_CCat_Prepaid {
+class CCATPAY_Shipping_Prepaid_Refrigerated extends CCATPAY_Shipping_Prepaid {
 	/**
 	 * 建構函數
 	 *

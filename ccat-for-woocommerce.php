@@ -239,7 +239,7 @@ class CCATPAY_Payments {
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
-					$integration_registry->register( new Ccat_Blocks_Integration() );
+					$integration_registry->register( new CCATPAY_Blocks_Integration() );
 				}
 			);
 		}
@@ -250,7 +250,7 @@ class CCATPAY_Payments {
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
-					$integration_registry->register( new Ccat711_Blocks_Integration() );
+					$integration_registry->register( new CCATPAY_711_Blocks_Integration() );
 				}
 			);
 		}

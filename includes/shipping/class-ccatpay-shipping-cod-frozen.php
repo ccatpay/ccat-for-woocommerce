@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * 黑貓物流貨到付款 - 冷凍運送方式
  */
-class WC_Shipping_CCat_COD_Frozen extends WC_Shipping_CCat_COD {
+class CCATPAY_Shipping_COD_Frozen extends CCATPAY_Shipping_COD {
 	/**
 	 * 建構函數
 	 *

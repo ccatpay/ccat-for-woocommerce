@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
 /**
  * CCat COD Blocks integration
  */
-class WC_Gateway_CCat_COD_Blocks_Support extends AbstractPaymentMethodType {
+class CCATPAY_Gateway_COD_Blocks_Support extends AbstractPaymentMethodType {
 
 	/**
 	 * The gateway instance.

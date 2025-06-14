@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * 黑貓物流與支付協調器類別
  */
-class WC_CCat_Shipping_Payment_Coordinator {
+class CCATPAY_Shipping_Payment_Coordinator {
 	/**
 	 * 初始化協調器
 	 */

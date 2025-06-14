@@ -4,7 +4,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
 define( 'ORDD_BLOCK_VERSION', '1.0.0' );
 
-class WC_Gateway_CCat_Blocks_Integration implements IntegrationInterface {
+class CCATPAY_Gateway_Blocks_Integration implements IntegrationInterface {
 
 	/**
 	 * The name of the integration.

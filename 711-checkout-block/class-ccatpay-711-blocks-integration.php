@@ -1,6 +1,6 @@
 <?php
 /**
- * Ccat711_Blocks_Integration class
+ * CCATPAY_711_Blocks_Integration class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Integration class for CCAT711 blocks.
  */
-class Ccat711_Blocks_Integration implements IntegrationInterface {
+class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 	/**
 	 * The name of the integration.

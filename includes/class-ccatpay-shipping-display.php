@@ -166,7 +166,7 @@ class CCATPAY_Shipping_Display {
 	 */
 	private function create_logistics_order( WC_Order $order ) {
 		// 從設定獲取 API 資訊.
-		$api_data   = Ccat711_Blocks_Integration::get_api_data();
+		$api_data   = CCATPAY_711_Blocks_Integration::get_api_data();
 		$service_id = $api_data[2];
 		$api_token  = $api_data[0];
 		$api_url    = $api_data[1];
@@ -408,7 +408,7 @@ class CCATPAY_Shipping_Display {
 		$shipping_method = isset( $_POST['shippingMethod'] ) ? sanitize_text_field( wp_unslash( $_POST['shippingMethod'] ) ) : '';
 		$store_category  = isset( $_POST['storeCategory'] ) ? sanitize_text_field( wp_unslash( $_POST['storeCategory'] ) ) : '';
 
-		Ccat711_Blocks_Integration::openMapForStore( $store_category, $shipping_method );
+		CCATPAY_711_Blocks_Integration::openMapForStore( $store_category, $shipping_method );
 		wp_die();
 	}
 
@@ -809,7 +809,7 @@ class CCATPAY_Shipping_Display {
 		$file_no    = $order->get_meta( self::META_FILE_NO );
 		$obt_number = $order->get_meta( self::META_OBT_NUMBER );
 		// 從設定獲取 API 資訊.
-		$api_data   = Ccat711_Blocks_Integration::get_api_data();
+		$api_data   = CCATPAY_711_Blocks_Integration::get_api_data();
 		$service_id = $api_data[2];
 		$api_token  = $api_data[0];
 		$api_url    = $api_data[1];
