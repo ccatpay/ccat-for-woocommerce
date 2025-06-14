@@ -32,7 +32,7 @@ if ( ! defined( 'WC_CCAT_PAYMENTS_VERSION' ) ) {
  *
  * @class WC_CCat_Payments
  */
-class WC_CCat_Payments {
+class CCATPAY_Payments {
 	/**
 	 * Plugin bootstrapping.
 	 */
@@ -209,19 +209,19 @@ class WC_CCat_Payments {
 	 */
 	public static function add_gateway( array $gateways ): array {
 		if ( self::is_ccat_enabled() ) {
-			$gateways[] = 'WC_Gateway_CCat_Credit_Card';
-			$gateways[] = 'WC_Gateway_CCat_Chinatrust';
-			$gateways[] = 'WC_Gateway_CCat_Payuni';
-			$gateways[] = 'WC_Gateway_CCat_Cvs_Ibon';
-			$gateways[] = 'WC_Gateway_CCat_Cvs_Atm';
+			$gateways[] = 'CCATPAY_Gateway_Credit_Card';
+			$gateways[] = 'CCATPAY_Gateway_Chinatrust';
+			$gateways[] = 'CCATPAY_Gateway_Payuni';
+			$gateways[] = 'CCATPAY_Gateway_Cvs_Ibon';
+			$gateways[] = 'CCATPAY_Gateway_Cvs_Atm';
 			// $gateways[] = 'WC_Gateway_CCat_Cvs_Barcode';
-			$gateways[] = 'WC_Gateway_CCat_App_Opw';
-			$gateways[] = 'WC_Gateway_CCat_App_Icash';
+			$gateways[] = 'CCATPAY_Gateway_App_Opw';
+			$gateways[] = 'CCATPAY_Gateway_App_Icash';
 			// 新增黑貓貨到付款閘道.
-			$gateways[] = 'WC_Gateway_CCat_COD_Cash';
-			$gateways[] = 'WC_Gateway_CCat_COD_Mobile';
-			$gateways[] = 'WC_Gateway_CCat_COD_711';
-			$gateways[] = 'WC_Gateway_CCat_COD_Card';
+			$gateways[] = 'CCATPAY_Gateway_COD_Cash';
+			$gateways[] = 'CCATPAY_Gateway_COD_Mobile';
+			$gateways[] = 'CCATPAY_Gateway_COD_711';
+			$gateways[] = 'CCATPAY_Gateway_COD_Card';
 		}
 
 		return $gateways;
@@ -235,7 +235,7 @@ class WC_CCat_Payments {
 		if ( $is_invoice_enabled ) {
 			require_once 'ccat-checkout-block/ccat-block-integration-checkout.php';
 			require_once 'includes/class-wc-ccat-invoice-display.php';
-			new WC_CCat_Invoice_Display();
+			new CCATPAY_Invoice_Display();
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
@@ -246,7 +246,7 @@ class WC_CCat_Payments {
 		if ( self::is_shipping_enabled() ) {
 			require_once '711-checkout-block/class-ccat711-blocks-integration.php';
 			require_once 'includes/class-wc-ccat-shipping-display.php';
-			new WC_CCat_Shipping_Display();
+			new CCATPAY_Shipping_Display();
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
@@ -313,7 +313,7 @@ class WC_CCat_Payments {
 		}
 
 		require_once 'includes/class-wc-ccat-settings.php';
-		WC_CCat_Settings::init();
+		CCATPAY_Settings::init();
 	}
 
 	/**
@@ -373,7 +373,7 @@ class WC_CCat_Payments {
 					$payment_method_registry->register( new WC_Gateway_CCat_Ibon_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Atm_Blocks_Support() );
 					// $payment_method_registry->register( new WC_Gateway_CCat_Barcode_Blocks_Support() );
-					$payment_method_registry->register( new WC_Gateway_CCat_Opw_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_Opw_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_Icash_Blocks_Support() );
 					$payment_method_registry->register( new WC_Gateway_CCat_COD_Blocks_Support() );
 				}
@@ -382,4 +382,4 @@ class WC_CCat_Payments {
 	}
 }
 
-WC_CCat_Payments::init();
+CCATPAY_Payments::init();

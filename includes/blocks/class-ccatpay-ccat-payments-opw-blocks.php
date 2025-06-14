@@ -12,14 +12,14 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
  *
  * @since 1.0.0
  */
-final class WC_Gateway_CCat_Opw_Blocks_Support extends AbstractPaymentMethodType {
+final class CCATPAY_Gateway_Opw_Blocks_Support extends AbstractPaymentMethodType {
 
 	/**
 	 * The gateway instance.
 	 *
-	 * @var WC_Gateway_CCat_Abstract
+	 * @var CCATPAY_Gateway_Abstract
 	 */
-	private WC_Gateway_CCat_Abstract $gateway;
+	private CCATPAY_Gateway_Abstract $gateway;
 
 	/**
 	 * Payment method name/id/slug.
@@ -52,7 +52,7 @@ final class WC_Gateway_CCat_Opw_Blocks_Support extends AbstractPaymentMethodType
 	 */
 	public function get_payment_method_script_handles(): array {
 		$script_path = '/resources/js/frontend/opw.js';
-		$script_url  = WC_CCat_Payments::plugin_url() . $script_path;
+		$script_url  = CCATPAY_Payments::plugin_url() . $script_path;
 
 		wp_register_script(
 			'wc-ccat-opw-payments-blocks',

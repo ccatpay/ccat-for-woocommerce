@@ -9,6 +9,10 @@
 
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Integration class for CCAT711 blocks.
  */
@@ -118,7 +122,8 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 	 */
 	public function get_script_data(): array {
 		return array(
-			'nonce' => wp_create_nonce( 'ccat711_store_selection_nonce' ),
+			'nonce'    => wp_create_nonce( 'ccat711_store_selection_nonce' ),
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
 		);
 	}
 
@@ -148,7 +153,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 		// 嘗試獲取任何 CCat 支付閘道的實例.
 		$gateway = null;
 		foreach ( $available_gateways as $gateway_id => $available_gateway ) {
-			if ( $available_gateway instanceof WC_Gateway_CCat_Abstract ) {
+			if ( $available_gateway instanceof CCATPAY_Gateway_Abstract ) {
 				$gateway = $available_gateway;
 				break;
 			}
@@ -157,7 +162,7 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 		if ( ! $gateway ) {
 			$all_gateways = WC()->payment_gateways()->payment_gateways();
 			foreach ( $all_gateways as $gateway_id => $available_gateway ) {
-				if ( $available_gateway instanceof WC_Gateway_CCat_Abstract ) {
+				if ( $available_gateway instanceof CCATPAY_Gateway_Abstract ) {
 					$gateway = $available_gateway;
 					break;
 				}
@@ -534,7 +539,8 @@ class Ccat711_Blocks_Integration implements IntegrationInterface {
 					'ccat_temp_var_' . $temp_var,
 					array(
 						'shipping_method' => $shipping_method,
-						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '', // phpcs:ignore WordPress
+						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '',
+						// phpcs:ignore WordPress
 						'created_at'      => time(),
 					),
 					false

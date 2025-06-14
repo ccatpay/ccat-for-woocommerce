@@ -15,9 +15,9 @@ class WC_Gateway_CCat_COD_Blocks_Support extends AbstractPaymentMethodType {
 	/**
 	 * The gateway instance.
 	 *
-	 * @var WC_Gateway_CCat_Abstract
+	 * @var CCATPAY_Gateway_Abstract
 	 */
-	private WC_Gateway_CCat_Abstract $gateway;
+	private CCATPAY_Gateway_Abstract $gateway;
 
 	/**
 	 * 支付方法名稱
@@ -50,7 +50,7 @@ class WC_Gateway_CCat_COD_Blocks_Support extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles(): array {
 		$script_path = '/resources/js/frontend/cod.js';
-		$script_url  = WC_CCat_Payments::plugin_url() . $script_path;
+		$script_url  = CCATPAY_Payments::plugin_url() . $script_path;
 
 		wp_register_script(
 			'wc-ccat-cod-blocks',
@@ -66,7 +66,7 @@ class WC_Gateway_CCat_COD_Blocks_Support extends AbstractPaymentMethodType {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-ccat-cod-blocks', 'ccat-for-woocommerce', WC_CCat_Payments::plugin_abspath() . 'languages/' );
+			wp_set_script_translations( 'wc-ccat-cod-blocks', 'ccat-for-woocommerce', CCATPAY_Payments::plugin_abspath() . 'languages/' );
 		}
 
 		return array( 'wc-ccat-cod-blocks' );

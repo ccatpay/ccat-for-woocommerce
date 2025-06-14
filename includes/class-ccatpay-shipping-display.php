@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_CCat_Shipping_Display class handles the display of electronic invoice information
  * both on the frontend and backend order detail pages.
  */
-class WC_CCat_Shipping_Display {
+class CCATPAY_Shipping_Display {
 
 	/**
 	 * 黑貓物流訂單託運單號元數據鍵值
@@ -244,7 +244,7 @@ class WC_CCat_Shipping_Display {
 		// 組裝訂單資料.
 		if ( $is_711 ) {
 			// 獲取收件門市資訊.
-			$store_id = $order->get_meta( WC_Gateway_CCat_Abstract::META_STORE_ID );
+			$store_id = $order->get_meta( CCATPAY_Gateway_Abstract::META_STORE_ID );
 			if ( empty( $store_id ) ) {
 				return new WP_Error( 'missing_store_id', __( '找不到 7-11 門市資訊', 'ccat-for-woocommerce' ) );
 			}
@@ -559,7 +559,7 @@ class WC_CCat_Shipping_Display {
 			// 註冊並加載 JS.
 			wp_register_script(
 				'ccat-logistics-buttons',
-				WC_CCat_Payments::plugin_url() . '/logistics-buttons.js',
+				CCATPAY_Payments::plugin_url() . '/logistics-buttons.js',
 				array( 'jquery' ),
 				time(),
 				true
@@ -720,11 +720,11 @@ class WC_CCat_Shipping_Display {
 		}
 
 		// 更新門市資訊.
-		$order->update_meta_data( WC_Gateway_CCat_Abstract::META_STORE_ID, $store_id );
-		$order->update_meta_data( WC_Gateway_CCat_Abstract::META_STORE_NAME, $store_name );
-		$order->update_meta_data( WC_Gateway_CCat_Abstract::META_STORE_ADDRESS, $store_address );
-		$order->update_meta_data( WC_Gateway_CCat_Abstract::META_OUTSIDE, $outside );
-		$order->update_meta_data( WC_Gateway_CCat_Abstract::META_SHIP, $ship );
+		$order->update_meta_data( CCATPAY_Gateway_Abstract::META_STORE_ID, $store_id );
+		$order->update_meta_data( CCATPAY_Gateway_Abstract::META_STORE_NAME, $store_name );
+		$order->update_meta_data( CCATPAY_Gateway_Abstract::META_STORE_ADDRESS, $store_address );
+		$order->update_meta_data( CCATPAY_Gateway_Abstract::META_OUTSIDE, $outside );
+		$order->update_meta_data( CCATPAY_Gateway_Abstract::META_SHIP, $ship );
 
 		// 更新訂單的運送地址.
 		$shipping_address = array(

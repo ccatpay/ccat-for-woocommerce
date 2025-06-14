@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat class
+ * CCATPAY_Gateway_Cvs_Barcode class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-abstract.php';
+require_once 'class-ccatpay-gateway-cvs-abstract.php';
 
 /**
  * CCat Gateway.
  *
- * @class    WC_Gateway_CCat_Cvs_Barcode
+ * @class    CCATPAY_Gateway_Cvs_Barcode
  * @version  1.0
  */
-class WC_Gateway_CCat_Cvs_Barcode extends WC_Gateway_CCat_Cvs_Abstract {
+class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 
 	/**
 	 * Unique id for the gateway.
@@ -36,11 +36,11 @@ class WC_Gateway_CCat_Cvs_Barcode extends WC_Gateway_CCat_Cvs_Abstract {
 
 		$this->title       = __( '黑貓Pay - 三段式條碼', 'ccat-for-woocommerce' );
 		$this->description = __( '使用黑貓Pay 三段式條碼，付款更安心。', 'ccat-for-woocommerce' );
-		// 在結帳感謝頁面和訂單詳情中附加條碼相關訊息
+		// 在結帳感謝頁面和訂單詳情中附加條碼相關訊息.
 		add_action( 'woocommerce_thankyou', array( $this, 'display_barcode_details' ) );
 		add_action( 'woocommerce_view_order', array( $this, 'display_barcode_details' ) );
 
-		// 在 WooCommerce 後台訂單詳情顯示條碼資料
+		// 在 WooCommerce 後台訂單詳情顯示條碼資料.
 		add_action( 'woocommerce_admin_order_data_after_order_details', array( $this, 'display_barcode_details' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_barcode_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_barcode_scripts' ) );
@@ -48,11 +48,21 @@ class WC_Gateway_CCat_Cvs_Barcode extends WC_Gateway_CCat_Cvs_Abstract {
 		parent::__construct();
 	}
 
+	/**
+	 * Enqueues the required JavaScript libraries for rendering barcodes.
+	 *
+	 * This method ensures that the JsBarcode library is loaded when viewing the
+	 * order received page, the view order page, or when accessing the WordPress admin interface.
+	 *
+	 * @return void
+	 */
 	public function enqueue_barcode_scripts() {
 		if ( is_order_received_page() || is_view_order_page() || is_admin() ) {
+			$script_path = '/resources/js/frontend/JsBarcode.all.min.js';
+			$script_url  = CCATPAY_Payments::plugin_url() . $script_path;
 			wp_enqueue_script(
 				'jsbarcode',
-				'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js',
+				$script_url,
 				array(),
 				'3.11.6',
 				true
@@ -62,6 +72,8 @@ class WC_Gateway_CCat_Cvs_Barcode extends WC_Gateway_CCat_Cvs_Abstract {
 
 	/**
 	 * 顯示條碼付款資訊
+	 *
+	 * @param $order_id
 	 */
 	public function display_barcode_details( $order_id ) {
 		$order = wc_get_order( $order_id );

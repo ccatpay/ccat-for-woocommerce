@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat class
+ * WC_CCATPAY_Gateway_App_Icash class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-app-abstract.php';
+require_once 'class-ccatpay-gateway-app-abstract.php';
 
 /**
  * CCat Gateway.
  *
- * @class    WC_Gateway_CCat_App_Icash
+ * @class    CCATPAY_Gateway_App_Icash
  * @version  1.0
  */
-class WC_Gateway_CCat_App_Icash extends WC_Gateway_CCat_App_Abstract {
+class CCATPAY_Gateway_App_Icash extends CCATPAY_Gateway_App_Abstract {
 
 	/**
 	 * Unique id for the gateway.

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_CCat_Invoice_Display class handles the display of electronic invoice information
  * both on the frontend and backend order detail pages.
  */
-class WC_CCat_Invoice_Display {
+class CCATPAY_Invoice_Display {
 
 	/**
 	 * 初始化 hooks
@@ -42,12 +42,12 @@ class WC_CCat_Invoice_Display {
 			return;
 		}
 
-		$invoice_no = $order->get_meta( WC_Gateway_CCat_Abstract::META_INVOICE_NO );
+		$invoice_no = $order->get_meta( CCATPAY_Gateway_Abstract::META_INVOICE_NO );
 		if ( empty( $invoice_no ) ) {
 			return;
 		}
 
-		$invoice_data = $order->get_meta( WC_Gateway_CCat_Abstract::META_INVOICE_APN );
+		$invoice_data = $order->get_meta( CCATPAY_Gateway_Abstract::META_INVOICE_APN );
 
 		?>
         <h2><?php esc_html_e( '電子發票資訊', 'ccat-for-woocommerce' ); ?></h2>
@@ -89,7 +89,7 @@ class WC_CCat_Invoice_Display {
 			return;
 		}
 
-		$invoice_data = $order->get_meta( WC_Gateway_CCat_Abstract::META_INVOICE_APN );
+		$invoice_data = $order->get_meta( CCATPAY_Gateway_Abstract::META_INVOICE_APN );
 		if ( empty( $invoice_data ) ) {
 			return;
 		}

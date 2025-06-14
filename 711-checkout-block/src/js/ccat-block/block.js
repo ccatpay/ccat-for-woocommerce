@@ -631,7 +631,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
         }
 
         // 使用 AJAX 獲取選擇門市的 URL
-        fetch('/wp-admin/admin-ajax.php', {
+        fetch(ccat711BlockData.ajax_url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

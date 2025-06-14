@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat class
+ * CCATPAY_Gateway_Chinatrust class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-abstract.php';
+require_once 'class-ccatpay-gateway-abstract.php';
 
 /**
  * CCat Gateway.
  *
- * @class    WC_Gateway_CCat
+ * @class    CCATPAY_Gateway_Chinatrust
  * @version  1.10.0
  */
-class WC_Gateway_CCat_Chinatrust extends WC_Gateway_CCat_Abstract {
+class CCATPAY_Gateway_Chinatrust extends CCATPAY_Gateway_Abstract {
 
 	/**
 	 * Supports

@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat class
+ * CCATPAY_Gateway_Payuni class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-abstract.php';
+require_once 'class-ccatpay-gateway-abstract.php';
 
 /**
  * CCat Gateway.
  *
- * @class    WC_Gateway_CCat
+ * @class    CCATPAY_Gateway_Payuni
  * @version  1.10.0
  */
-class WC_Gateway_CCat_Payuni extends WC_Gateway_CCat_Abstract {
+class CCATPAY_Gateway_Payuni extends CCATPAY_Gateway_Abstract {
 
 
 	/**

@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat class
+ * CCATPAY_Gateway_Cvs_Abstract class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-abstract.php';
+require_once 'class-ccatpay-gateway-abstract.php';
 
 /**
  * CCat Gateway.
  *
- * @class    WC_Gateway_CCat
+ * @class    CCATPAY_Gateway_Cvs_Abstract
  * @version  1.10.0
  */
-abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
+abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 	const ATM_BANK_ID = '_bank_id';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const ATM_VIRTUAL_ACCOUNT = '_virtual_account';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const ATM_EXPIRE_DATA = '_expire_date';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
@@ -89,7 +89,7 @@ abstract class WC_Gateway_CCat_Cvs_Abstract extends WC_Gateway_CCat_Abstract {
 			if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
 			}
-			if ( WC_CCat_Payments::is_shipping_enabled() ) {
+			if ( CCATPAY_Payments::is_shipping_enabled() ) {
 				$this->add_shipping_data( $post_data, $order );
 			}
 			$args = array(

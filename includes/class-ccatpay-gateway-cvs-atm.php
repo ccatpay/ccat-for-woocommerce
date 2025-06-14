@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat class
+ * CCATPAY_Gateway_Cvs_Atm class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-abstract.php';
+require_once 'class-ccatpay-gateway-cvs-abstract.php';
 
 /**
  * CCat Gateway.
  *
- * @class    WC_Gateway_CCat_Cvs_Ibon
+ * @class    CCATPAY_Gateway_Cvs_Atm
  * @version  1.0
  */
-class WC_Gateway_CCat_Cvs_Atm extends WC_Gateway_CCat_Cvs_Abstract {
+class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 
 	/**
 	 * Unique id for the gateway.

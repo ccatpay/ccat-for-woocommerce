@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat_COD class
+ * CCATPAY_Gateway_COD_Abstract class
  *
  * @author   Your Name <your.email@example.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-cvs-abstract.php';
+require_once 'class-ccatpay-gateway-abstract.php';
 
 /**
  * CCat 黑貓貨到付款支付閘道.
  *
- * @class    WC_Gateway_CCat_COD
+ * @class    CCATPAY_Gateway_COD_Abstract
  * @version  1.10.4
  */
-class WC_Gateway_CCat_COD_Abstract extends WC_Gateway_CCat_Abstract {
+class CCATPAY_Gateway_COD_Abstract extends CCATPAY_Gateway_Abstract {
 
 	/**
 	 * Unique id for the gateway.
@@ -33,8 +33,8 @@ class WC_Gateway_CCat_COD_Abstract extends WC_Gateway_CCat_Abstract {
 	 * 初始化黑貓貨到付款支付閘道
 	 */
 	public function __construct() {
-		$this->title                    = $this->get_option( 'title' );
-		$this->description              = $this->get_option( 'description' );
+		$this->title       = $this->get_option( 'title' );
+		$this->description = $this->get_option( 'description' );
 		parent::__construct();
 	}
 
@@ -65,7 +65,7 @@ class WC_Gateway_CCat_COD_Abstract extends WC_Gateway_CCat_Abstract {
 				'result' => 'failure',
 			);
 		}
-		if ( WC_CCat_Payments::is_shipping_enabled() ) {
+		if ( CCATPAY_Payments::is_shipping_enabled() ) {
 			$this->add_shipping_data( array(), $order );
 		}
 		// 設置訂單狀態為處理中.

@@ -17,9 +17,9 @@ final class WC_Gateway_CCat_Atm_Blocks_Support extends AbstractPaymentMethodType
 	/**
 	 * The gateway instance.
 	 *
-	 * @var WC_Gateway_CCat_Abstract
+	 * @var CCATPAY_Gateway_Abstract
 	 */
-	private WC_Gateway_CCat_Abstract $gateway;
+	private CCATPAY_Gateway_Abstract $gateway;
 
 	/**
 	 * Payment method name/id/slug.
@@ -52,7 +52,7 @@ final class WC_Gateway_CCat_Atm_Blocks_Support extends AbstractPaymentMethodType
 	 */
 	public function get_payment_method_script_handles(): array {
 		$script_path = '/resources/js/frontend/atm.js';
-		$script_url  = WC_CCat_Payments::plugin_url() . $script_path;
+		$script_url  = CCATPAY_Payments::plugin_url() . $script_path;
 
 		wp_register_script(
 			'wc-ccat-atm-payments-blocks',

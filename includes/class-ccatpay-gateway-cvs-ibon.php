@@ -12,69 +12,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-abstract.php';
+require_once 'class-ccatpay-gateway-cvs-abstract.php';
 
 /**
  * CCat Gateway.
  *
- * @class    WC_Gateway_CCat
- * @version  1.10.0
+ * @class    CCATPAY_Gateway_Cvs_Ibon
+ * @version  1.0
  */
-class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract {
-
-	/**
-	 * Supports
-	 *
-	 * @var array $supports
-	 */
-	public $supports = array(
-		'products',
-		'refunds',
-	);
-
-	/**
-	 * Payment gateway instructions.
-	 *
-	 * @var string
-	 */
-	protected string $instructions;
-
-	/**
-	 * Whether the gateway is visible for non-admin users.
-	 *
-	 * @var boolean
-	 */
-	protected $hide_for_non_admin_users;
+class CCATPAY_Gateway_Cvs_Ibon extends CCATPAY_Gateway_Cvs_Abstract {
 
 	/**
 	 * Unique id for the gateway.
 	 *
 	 * @var string
 	 */
-	public $id = 'ccat_payment_credit_card';
-
-	/**
-	 * Title
-	 *
-	 * @var string Title
-	 */
-	public $title;
-
-	/**
-	 * Description
-	 *
-	 * @var string Description
-	 */
-	public $description;
-
+	public $id = 'ccat_payment_cvs_ibon';
 
 	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
 
-		$this->title       = __( '黑貓Pay - 信用卡(玉山銀行)', 'ccat-for-woocommerce' );
-		$this->description = __( '使用黑貓Pay信用卡(玉山銀行)付款，付款更安心。', 'ccat-for-woocommerce' );
+		$this->title       = __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce' );
+		$this->description = __( '使用黑貓Pay Ibon，付款更安心。', 'ccat-for-woocommerce' );
+//		$this->redirect_url = get_site_url( null, 'ccat-ibon' );
+//		WC_CCat_Payments::log( "> set url:" . $this->redirect_url );
 		parent::__construct();
 	}
 
@@ -94,10 +57,19 @@ class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract {
 				'title'       => __( '付款標題', 'ccat-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce' ),
-				'default'     => __( '黑貓Pay - 信用卡(玉山銀行)', 'ccat-for-woocommerce' ),
+				'default'     => __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce' ),
 				'desc_tip'    => true,
 			),
 		);
+	}
+
+	/**
+	 * Retrieves the configured payment type for the payment gateway.
+	 *
+	 * @return string The payment type as configured in the gateway settings.
+	 */
+	public function payment_type(): string {
+		return '0';
 	}
 
 	/**
@@ -106,7 +78,6 @@ class WC_Gateway_CCat_Credit_Card extends WC_Gateway_CCat_Abstract {
 	 * @return string The acquirer type as configured in the gateway settings.
 	 */
 	public function acquirer_type(): string {
-		return 'esun';
+		return '2';
 	}
-
 }

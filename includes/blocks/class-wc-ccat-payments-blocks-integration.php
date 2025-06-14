@@ -57,8 +57,8 @@ class WC_Gateway_CCat_Blocks_Integration implements IntegrationInterface {
 	 */
 	public function register_block_editor_scripts() {
 		$script_path       = '/build/index.js';
-		$script_url        = WC_CCat_Payments::plugin_url() . $script_path;
-		$script_asset_path = WC_CCat_Payments::plugin_url() . '/build/index.asset.php';
+		$script_url        = CCATPAY_Payments::plugin_url() . $script_path;
+		$script_asset_path = CCATPAY_Payments::plugin_url() . '/build/index.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require $script_asset_path
 			: array(
@@ -82,8 +82,8 @@ class WC_Gateway_CCat_Blocks_Integration implements IntegrationInterface {
 	 */
 	public function register_block_frontend_scripts() {
 		$script_path       = '/build/checkout-block-frontend.js';
-		$script_url        = WC_CCat_Payments::plugin_url() . $script_path;
-		$script_asset_path = WC_CCat_Payments::plugin_url() . '/build/checkout-block-frontend.asset.php';
+		$script_url        = CCATPAY_Payments::plugin_url() . $script_path;
+		$script_asset_path = CCATPAY_Payments::plugin_url() . '/build/checkout-block-frontend.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require $script_asset_path
 			: array(

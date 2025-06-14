@@ -17,9 +17,9 @@ final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMe
 	/**
 	 * The gateway instance.
 	 *
-	 * @var WC_Gateway_CCat_Abstract
+	 * @var CCATPAY_Gateway_Abstract
 	 */
-	private WC_Gateway_CCat_Abstract $gateway;
+	private CCATPAY_Gateway_Abstract $gateway;
 
 
 	/**
@@ -62,7 +62,7 @@ final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMe
 	 */
 	public function get_payment_method_script_handles(): array {
 		$script_path = '/resources/js/frontend/credit-card.js';
-		$script_url  = WC_CCat_Payments::plugin_url() . $script_path;
+		$script_url  = CCATPAY_Payments::plugin_url() . $script_path;
 
 		wp_register_script(
 			'wc-ccat-payments-blocks',
@@ -78,7 +78,7 @@ final class WC_Gateway_CCat_Credit_Card_Blocks_Support extends AbstractPaymentMe
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-ccat-payments-blocks', 'ccat-for-woocommerce', WC_CCat_Payments::plugin_abspath() . 'languages/' );
+			wp_set_script_translations( 'wc-ccat-payments-blocks', 'ccat-for-woocommerce', CCATPAY_Payments::plugin_abspath() . 'languages/' );
 		}
 
 		return array( 'wc-ccat-payments-blocks' );

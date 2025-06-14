@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * 定義 WC_CCat_Settings 類別，處理外掛的 WooCommerce 設定頁面
  */
-class WC_CCat_Settings {
+class CCATPAY_Settings {
 
 	/**
 	 * 在 WooCommerce 設定頁新增自訂頁籤

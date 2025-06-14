@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat class
+ * CCATPAY_Gateway_App_Abstract class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once 'class-wc-gateway-ccat-abstract.php';
+require_once 'class-ccatpay-gateway-abstract.php';
 
 /**
- * CCat Gateway.
+ * CCATPAY_Gateway_App_Abstract.
  *
- * @class    WC_Gateway_CCat
+ * @class    CCATPAY_Gateway_App_Abstract
  * @version  1.10.0
  */
-abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
+abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 
 	const CMD_COCS_ORDER_APPEND = 'DphOrderAppend';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 
@@ -67,7 +67,7 @@ abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
 			if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
 			}
-			if ( WC_CCat_Payments::is_shipping_enabled() ) {
+			if ( CCATPAY_Payments::is_shipping_enabled() ) {
 				$this->add_shipping_data( $post_data, $order );
 			}
 			$args = array(
@@ -82,8 +82,8 @@ abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
 
 			$response = wp_remote_post( $api_url, $args );
 			if ( $this->is_test_mode() ) {
-				WC_CCat_Payments::log( 'request:' . print_r( $post_data, true ) );
-				WC_CCat_Payments::log( 'response:' . $response );
+				CCATPAY_Payments::log( 'request:' . print_r( $post_data, true ) );
+				CCATPAY_Payments::log( 'response:' . $response );
 			}
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( esc_html__( 'Api error. Try again later.', 'ccat-for-woocommerce' ) );
@@ -147,7 +147,7 @@ abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
 		$data = json_decode( $body, true );
 
 		if ( $this->is_test_mode() ) {
-			WC_CCat_Payments::log( 'Payment callback received: ' . $body );
+			CCATPAY_Payments::log( 'Payment callback received: ' . $body );
 		}
 
 		if ( ! $data ) {
@@ -193,7 +193,7 @@ abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
 		$calculated_chk = md5( $check_string );
 
 		if ( $calculated_chk !== $data['chk'] ) {
-			WC_CCat_Payments::log( 'Checksum verification failed. Expected: ' . $calculated_chk . ', Received: ' . $data['chk'] );
+			CCATPAY_Payments::log( 'Checksum verification failed. Expected: ' . $calculated_chk . ', Received: ' . $data['chk'] );
 
 			return new WP_Error( 400, 'Checksum verification failed' );
 		}
@@ -256,8 +256,8 @@ abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
-					WC_CCat_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
-					WC_CCat_Payments::log( 'Refund response data: ' . $body );
+					CCATPAY_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
+					CCATPAY_Payments::log( 'Refund response data: ' . $body );
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
@@ -300,8 +300,8 @@ abstract class WC_Gateway_CCat_App_Abstract extends WC_Gateway_CCat_Abstract {
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
-					WC_CCat_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
-					WC_CCat_Payments::log( 'Refund response data: ' . $body );
+					CCATPAY_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
+					CCATPAY_Payments::log( 'Refund response data: ' . $body );
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {

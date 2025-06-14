@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Gateway_CCat_Abstract class
+ * CCATPAY_Gateway_Abstract class
  *
  * @author   sakilu <brian@sakilu.com>
  * @package  WooCommerce CCat Payments Gateway
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Base class for CCat payment gateways, extending WooCommerce payment gateway functionality.
  */
-abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
+abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	const CMD_COCS_ORDER_APPEND = 'CocsOrderAppend';  // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const ROUTE_NAMESPACE = 'ccat/v1'; // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
 	const META_APN = '_received_apn_notifications'; // phpcs:ignore Generic.Formatting.MultipleStatementAlignment
@@ -328,7 +328,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	 */
 	protected function add_shipping_data( array $order_data, WC_Order $wc_order ) {
 		// 取得 JSON 資料.
-		if ( ! WC_CCat_Payments::is_shipping_enabled() ) {
+		if ( ! CCATPAY_Payments::is_shipping_enabled() ) {
 			return null;
 		}
 
@@ -545,7 +545,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 			if ( 'yes' === get_option( 'wc_ccat_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
 			}
-			if ( WC_CCat_Payments::is_shipping_enabled() ) {
+			if ( CCATPAY_Payments::is_shipping_enabled() ) {
 				$this->add_shipping_data( $post_data, $order );
 			}
 			$args     = array(
@@ -760,7 +760,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 		$data = json_decode( $body, true );
 
 		if ( $this->is_test_mode() ) {
-			WC_CCat_Payments::log( 'Payment callback received: ' . $body );
+			CCATPAY_Payments::log( 'Payment callback received: ' . $body );
 		}
 		if ( ! $data ) {
 			return new WP_Error( 400, 'Invalid JSON' );
@@ -800,7 +800,7 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 	 */
 	public function add_apn_notification( WC_Order $order, array $data ): void {
 		if ( $this->is_test_mode() ) {
-			WC_CCat_Payments::log( 'add_apn_notification: ' . wp_json_encode( $data ) );
+			CCATPAY_Payments::log( 'add_apn_notification: ' . wp_json_encode( $data ) );
 		}
 		$received_notifications = $order->get_meta( self::META_APN );
 		if ( ! is_array( $received_notifications ) ) {
@@ -889,8 +889,8 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
-					WC_CCat_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
-					WC_CCat_Payments::log( 'Refund response data: ' . $body );
+					CCATPAY_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
+					CCATPAY_Payments::log( 'Refund response data: ' . $body );
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
@@ -933,8 +933,8 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
-					WC_CCat_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
-					WC_CCat_Payments::log( 'Refund response data: ' . $body );
+					CCATPAY_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
+					CCATPAY_Payments::log( 'Refund response data: ' . $body );
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
@@ -978,8 +978,8 @@ abstract class WC_Gateway_CCat_Abstract extends WC_Payment_Gateway {
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
-					WC_CCat_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
-					WC_CCat_Payments::log( 'Refund response data: ' . $body );
+					CCATPAY_Payments::log( 'Refund request data: ' . wp_json_encode( $request_data ) );
+					CCATPAY_Payments::log( 'Refund response data: ' . $body );
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
