@@ -286,7 +286,7 @@ class CCATPAY_Shipping_Display {
 						'Authorization' => 'Bearer ' . $api_token,
 					),
 					'body'    => wp_json_encode( $request_data ),
-					'timeout' => 30,
+					'timeout' => 120,
 				)
 			);
 		} else {
@@ -336,7 +336,7 @@ class CCATPAY_Shipping_Display {
 						'Authorization' => 'Bearer ' . $api_token,
 					),
 					'body'    => wp_json_encode( $request_data ),
-					'timeout' => 30,
+					'timeout' => 120,
 				)
 			);
 		}

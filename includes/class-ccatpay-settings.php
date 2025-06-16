@@ -22,7 +22,10 @@ class CCATPAY_Settings {
 		add_action( 'woocommerce_settings_ccat', array( __CLASS__, 'output_settings' ) );
 		add_action( 'woocommerce_update_options_ccat', array( __CLASS__, 'save_settings' ) );
 
-		self::migrate_settings();
+		if ( 'yes' !== get_option( WC_CCAT_PAYMENTS_PREFIX . '_migration_completed' ) ) {
+			self::migrate_settings();
+			update_option( WC_CCAT_PAYMENTS_PREFIX . '_migration_completed', 'yes' );
+		}
 	}
 
 	/**
@@ -125,7 +128,7 @@ class CCATPAY_Settings {
 				'name' => __( '寄件人電話', WC_CCAT_PAYMENTS_DOMAIN ),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人市話', WC_CCAT_PAYMENTS_DOMAIN ),
-				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_ccat_sender_tel',
+				'id'   => WC_CCAT_PAYMENTS_PREFIX . '_sender_tel',
 			),
 			array(
 				'name' => __( '寄件人手機', WC_CCAT_PAYMENTS_DOMAIN ),
