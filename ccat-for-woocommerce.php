@@ -296,22 +296,18 @@ class CCATPAY_Payments {
 			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid.php';
 
 			// 引入宅配先付款不同溫度類型.
-			require_once 'includes/shipping/class-ccatpay-shipping-prepaid-normal.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-prepaid-refrigerated.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-prepaid-frozen.php';
 
 			// 引入宅配貨到付款不同溫度類型.
-			require_once 'includes/shipping/class-ccatpay-shipping-cod-normal.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-cod-refrigerated.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-cod-frozen.php';
 
 			// 引入7-11先付款不同溫度類型.
-			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid-normal.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid-refrigerated.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-711-prepaid-frozen.php';
 
 			// 引入7-11貨到付款不同溫度類型.
-			require_once 'includes/shipping/class-ccatpay-shipping-711-cod-normal.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-711-cod-refrigerated.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-711-cod-frozen.php';
 		}
