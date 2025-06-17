@@ -32,8 +32,8 @@ class CCATPAY_Gateway_COD_711 extends CCATPAY_Gateway_COD_Abstract {
 	 * 初始化超商711貨到付款支付閘道
 	 */
 	public function __construct() {
-		$this->title       = __( '黑貓快速到店711取貨付款', WC_CCAT_PAYMENTS_DOMAIN );
-		$this->description = __( '透過黑貓宅急便提供711超商門市取貨付款的方式', WC_CCAT_PAYMENTS_DOMAIN );
+		$this->title       = __( '黑貓快速到店711取貨付款', 'ccat-for-woocommerce');
+		$this->description = __( '透過黑貓宅急便提供711超商門市取貨付款的方式', 'ccat-for-woocommerce');
 		parent::__construct();
 	}
 
@@ -43,16 +43,16 @@ class CCATPAY_Gateway_COD_711 extends CCATPAY_Gateway_COD_Abstract {
 	public function init_form_fields(): void {
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'   => __( '啟用/停用', WC_CCAT_PAYMENTS_DOMAIN ),
+				'title'   => __( '啟用/停用', 'ccat-for-woocommerce'),
 				'type'    => 'checkbox',
-				'label'   => __( '啟用超商711取貨付款', WC_CCAT_PAYMENTS_DOMAIN ),
+				'label'   => __( '啟用超商711取貨付款', 'ccat-for-woocommerce'),
 				'default' => 'yes',
 			),
 			'title'   => array(
-				'title'       => __( '付款標題', WC_CCAT_PAYMENTS_DOMAIN ),
+				'title'       => __( '付款標題', 'ccat-for-woocommerce'),
 				'type'        => 'text',
-				'description' => __( '使用者選擇付款時顯示的文字', WC_CCAT_PAYMENTS_DOMAIN ),
-				'default'     => __( '黑貓快速到店711取貨付款', WC_CCAT_PAYMENTS_DOMAIN ),
+				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce'),
+				'default'     => __( '黑貓快速到店711取貨付款', 'ccat-for-woocommerce'),
 				'desc_tip'    => true,
 			),
 		);

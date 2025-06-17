@@ -34,8 +34,8 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 	 */
 	public function __construct() {
 
-		$this->title       = __( '黑貓Pay - ATM繳款', WC_CCAT_PAYMENTS_DOMAIN );
-		$this->description = __( '使用黑貓Pay ATM，付款更安心。', WC_CCAT_PAYMENTS_DOMAIN );
+		$this->title       = __( '黑貓Pay - ATM繳款', 'ccat-for-woocommerce');
+		$this->description = __( '使用黑貓Pay ATM，付款更安心。', 'ccat-for-woocommerce');
 		add_action(
 			'woocommerce_thankyou',
 			array(
@@ -83,13 +83,13 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 			$html           = '';
 			$current_action = current_filter();
 			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
-				$html .= '<h2>' . esc_html__( '感謝訂購 請到ATM繳款', WC_CCAT_PAYMENTS_DOMAIN ) . '</h2>';
+				$html .= '<h2>' . esc_html__( '感謝訂購 請到ATM繳款', 'ccat-for-woocommerce') . '</h2>';
 			}
 
-			$html .= '<p>' . esc_html( sprintf( __( '銀行代號: %s', WC_CCAT_PAYMENTS_DOMAIN ), $bank_id ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '轉帳帳號: %s', WC_CCAT_PAYMENTS_DOMAIN ), $virtual_account ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', WC_CCAT_PAYMENTS_DOMAIN ), $payment_deadline ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', WC_CCAT_PAYMENTS_DOMAIN ), $bill_amount ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '銀行代號: %s', 'ccat-for-woocommerce'), $bank_id ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '轉帳帳號: %s', 'ccat-for-woocommerce'), $virtual_account ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce'), $payment_deadline ) ) . '</p>';
+			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce'), $bill_amount ) ) . '</p>';
 			echo $html;
 		}
 	}
@@ -101,16 +101,16 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
+				'title'   => __( '啟用', 'ccat-for-woocommerce'),
 				'type'    => 'checkbox',
-				'label'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
+				'label'   => __( '啟用', 'ccat-for-woocommerce'),
 				'default' => 'yes',
 			),
 			'title'   => array(
-				'title'       => __( '付款標題', WC_CCAT_PAYMENTS_DOMAIN ),
+				'title'       => __( '付款標題', 'ccat-for-woocommerce'),
 				'type'        => 'text',
-				'description' => __( '使用者選擇付款時顯示的文字', WC_CCAT_PAYMENTS_DOMAIN ),
-				'default'     => __( '黑貓Pay - ATM繳款', WC_CCAT_PAYMENTS_DOMAIN ),
+				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce'),
+				'default'     => __( '黑貓Pay - ATM繳款', 'ccat-for-woocommerce'),
 				'desc_tip'    => true,
 			),
 		);

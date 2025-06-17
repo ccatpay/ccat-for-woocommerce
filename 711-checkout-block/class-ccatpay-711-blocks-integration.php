@@ -183,7 +183,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		}
 
 		// 如果無法使用 WC_Gateway_CCat_Abstract 獲取 token，拋出異常.
-		throw new Exception( esc_html__( '無法獲取 API token，請確認已啟用 CCat 支付閘道', WC_CCAT_PAYMENTS_DOMAIN ) );
+		throw new Exception( esc_html__( '無法獲取 API token，請確認已啟用 CCat 支付閘道', 'ccat-for-woocommerce') );
 	}
 
 	/**
@@ -201,7 +201,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'ccat711_store_selection_nonce' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( '安全驗證失敗', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce'),
 				)
 			);
 			wp_die();
@@ -299,7 +299,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 		// check nonce myself.
 		if ( empty( $data ) ) {
-			wp_die( esc_html__( '安全驗證失敗', WC_CCAT_PAYMENTS_DOMAIN ) );
+			wp_die( esc_html__( '安全驗證失敗', 'ccat-for-woocommerce') );
 		}
 		// 獲取臨時變數和門市資訊.
 		$store_name    = isset( $_POST['storename'] ) ? sanitize_text_field( wp_unslash( $_POST['storename'] ) ) : ''; // phpcs:ignore WordPress
@@ -309,13 +309,13 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		$ship          = isset( $_POST['ship'] ) ? sanitize_text_field( wp_unslash( $_POST['ship'] ) ) : '1111111'; //  // phpcs:ignore WordPress
 
 		if ( empty( $temp_var ) ) {
-			wp_die( esc_html__( '缺少識別參數', WC_CCAT_PAYMENTS_DOMAIN ) );
+			wp_die( esc_html__( '缺少識別參數', 'ccat-for-woocommerce') );
 		}
 
 		// 獲取保存的資訊.
 		$stored_data = get_option( WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
 		if ( empty( $stored_data ) ) {
-			wp_die( esc_html__( '無效的識別參數', WC_CCAT_PAYMENTS_DOMAIN ) );
+			wp_die( esc_html__( '無效的識別參數', 'ccat-for-woocommerce') );
 		}
 
 		// 刪除臨時資料.
@@ -339,7 +339,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>' . esc_html__( '門市選擇完成', WC_CCAT_PAYMENTS_DOMAIN ) . '</title>
+			<title>' . esc_html__( '門市選擇完成', 'ccat-for-woocommerce') . '</title>
 			<script type="text/javascript">
 				window.onload = function() {
 					var storeData = ' . $store_data . ';
@@ -440,28 +440,28 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 			</style>
 		</head>
 		<body>
-			<h1>' . esc_html__( '門市選擇完成', WC_CCAT_PAYMENTS_DOMAIN ) . '</h1>
+			<h1>' . esc_html__( '門市選擇完成', 'ccat-for-woocommerce') . '</h1>
 			
 			<div class="store-info">
-				<p><strong>' . esc_html__( '選擇門市：', WC_CCAT_PAYMENTS_DOMAIN ) . '</strong> ' . esc_html( $store_name ) . '</p>
-				<p><strong>' . esc_html__( '門市代號：', WC_CCAT_PAYMENTS_DOMAIN ) . '</strong> ' . esc_html( $store_id ) . '</p>
-				<p><strong>' . esc_html__( '門市地址：', WC_CCAT_PAYMENTS_DOMAIN ) . '</strong> ' . esc_html( $store_address ) . '</p>
-				<p><strong>' . esc_html__( '位置類型：', WC_CCAT_PAYMENTS_DOMAIN ) . '</strong> ' . esc_html( intval( $outside ) ? '本島' : '外島' ) . '</p>
+				<p><strong>' . esc_html__( '選擇門市：', 'ccat-for-woocommerce') . '</strong> ' . esc_html( $store_name ) . '</p>
+				<p><strong>' . esc_html__( '門市代號：', 'ccat-for-woocommerce') . '</strong> ' . esc_html( $store_id ) . '</p>
+				<p><strong>' . esc_html__( '門市地址：', 'ccat-for-woocommerce') . '</strong> ' . esc_html( $store_address ) . '</p>
+				<p><strong>' . esc_html__( '位置類型：', 'ccat-for-woocommerce') . '</strong> ' . esc_html( intval( $outside ) ? '本島' : '外島' ) . '</p>
 			</div>
 			
 			<div id="success-message" class="message">
 				<div class="loading"></div>
-				<p>' . esc_html__( '資料已成功傳送，正在關閉視窗...', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>
+				<p>' . esc_html__( '資料已成功傳送，正在關閉視窗...', 'ccat-for-woocommerce') . '</p>
 			</div>
 			
 			<div id="manual-redirect" class="message">
-				<p>' . esc_html__( '無法自動返回原始頁面，請點擊下方按鈕手動返回結帳', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>
-				<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button">' . esc_html__( '返回結帳頁面', WC_CCAT_PAYMENTS_DOMAIN ) . '</a>
+				<p>' . esc_html__( '無法自動返回原始頁面，請點擊下方按鈕手動返回結帳', 'ccat-for-woocommerce') . '</p>
+				<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button">' . esc_html__( '返回結帳頁面', 'ccat-for-woocommerce') . '</a>
 			</div>
 			
 			<div id="auto-redirect" class="message">
 				<div class="loading"></div>
-				<p>' . esc_html__( '正在自動返回結帳頁面...', WC_CCAT_PAYMENTS_DOMAIN ) . '</p>
+				<p>' . esc_html__( '正在自動返回結帳頁面...', 'ccat-for-woocommerce') . '</p>
 			</div>
 		</body>
 		</html>';
@@ -531,7 +531,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 				// 檢查回應是否包含地圖 URL.
 				if ( empty( $url ) ) {
-					throw new Exception( esc_html__( '取得超商網址錯誤', WC_CCAT_PAYMENTS_DOMAIN ) );
+					throw new Exception( esc_html__( '取得超商網址錯誤', 'ccat-for-woocommerce') );
 				}
 
 				// 儲存臨時變數，以便在回調時使用.
@@ -554,7 +554,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 				);
 
 			} catch ( Exception $e ) {
-				throw new Exception( esc_html__( 'API 請求失敗：', WC_CCAT_PAYMENTS_DOMAIN ) . $e->getMessage() );
+				throw new Exception( esc_html__( 'API 請求失敗：', 'ccat-for-woocommerce') . $e->getMessage() );
 			}
 		} catch ( Exception $e ) {
 			wp_send_json_error(

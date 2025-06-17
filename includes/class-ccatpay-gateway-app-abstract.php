@@ -45,7 +45,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 
 			// 基本驗證.
 			if ( ! filter_var( $payer_email, FILTER_VALIDATE_EMAIL ) ) {
-				throw new Exception( esc_html__( '信箱格式錯誤或沒有填寫', WC_CCAT_PAYMENTS_DOMAIN ) );
+				throw new Exception( esc_html__( '信箱格式錯誤或沒有填寫', 'ccat-for-woocommerce') );
 			}
 
 			// 生成訂單編號.
@@ -83,7 +83,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 			$response = wp_remote_post( $api_url, $args );
 
 			if ( is_wp_error( $response ) ) {
-				throw new Exception( esc_html__( 'Api error. Try again later.', WC_CCAT_PAYMENTS_DOMAIN ) );
+				throw new Exception( esc_html__( 'Api error. Try again later.', 'ccat-for-woocommerce') );
 			}
 
 			$response_body = wp_remote_retrieve_body( $response );
@@ -96,7 +96,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 					array( 'source' => 'api-error' )
 				);
 
-				throw new Exception( $response_data['msg'] ?? __( 'Unknown Error.', WC_CCAT_PAYMENTS_DOMAIN ) );
+				throw new Exception( $response_data['msg'] ?? __( 'Unknown Error.', 'ccat-for-woocommerce') );
 			}
 
 			$redirect = ! empty( $response_data['url'] ) ? $response_data['url'] : $this->get_return_url( $order );
@@ -249,7 +249,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 				);
 
 				if ( is_wp_error( $response ) ) {
-					return new WP_Error( 'api_connection_error', __( 'API 請求失敗: ', WC_CCAT_PAYMENTS_DOMAIN ) . $response->get_error_message() );
+					return new WP_Error( 'api_connection_error', __( 'API 請求失敗: ', 'ccat-for-woocommerce') . $response->get_error_message() );
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
@@ -258,12 +258,12 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
-					return new WP_Error( 'api_response_error', __( 'Json Decode Fail.', WC_CCAT_PAYMENTS_DOMAIN ) );
+					return new WP_Error( 'api_response_error', __( 'Json Decode Fail.', 'ccat-for-woocommerce') );
 				}
 				$status = $response_data['status'] ?? null;
 				$msg    = $response_data['msg'] ?? '';
 				if ( 'OK' !== $status ) {
-					return new WP_Error( 'api_response_error', __( 'API error: ', WC_CCAT_PAYMENTS_DOMAIN ) . $msg );
+					return new WP_Error( 'api_response_error', __( 'API error: ', 'ccat-for-woocommerce') . $msg );
 				}
 
 				return true;
@@ -293,7 +293,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 				);
 
 				if ( is_wp_error( $response ) ) {
-					return new WP_Error( 'api_connection_error', __( 'API 請求失敗: ', WC_CCAT_PAYMENTS_DOMAIN ) . $response->get_error_message() );
+					return new WP_Error( 'api_connection_error', __( 'API 請求失敗: ', 'ccat-for-woocommerce') . $response->get_error_message() );
 				}
 				$body = wp_remote_retrieve_body( $response );
 				if ( $this->is_test_mode() ) {
@@ -302,14 +302,14 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 				}
 				$response_data = json_decode( $body, true );
 				if ( empty( $response_data ) ) {
-					return new WP_Error( 'api_response_error', __( 'JSON Decode Fail.', WC_CCAT_PAYMENTS_DOMAIN ) );
+					return new WP_Error( 'api_response_error', __( 'JSON Decode Fail.', 'ccat-for-woocommerce') );
 				}
 
 				$status = $response_data['status'] ?? null;
 				if ( 'OK' !== $status ) {
 					$msg = $response_data['msg'] ?? '';
 
-					return new WP_Error( 'api_response_error', __( 'API error: ', WC_CCAT_PAYMENTS_DOMAIN ) . $msg );
+					return new WP_Error( 'api_response_error', __( 'API error: ', 'ccat-for-woocommerce') . $msg );
 				}
 
 				return true;

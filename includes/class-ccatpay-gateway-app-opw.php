@@ -34,8 +34,8 @@ class CCATPAY_Gateway_App_Opw extends CCATPAY_Gateway_App_Abstract {
 	 */
 	public function __construct() {
 
-		$this->title       = __( '黑貓Pay - OPEN錢包', WC_CCAT_PAYMENTS_DOMAIN );
-		$this->description = __( '使用黑貓 OPEN錢包，付款更安心。', WC_CCAT_PAYMENTS_DOMAIN );
+		$this->title       = __( '黑貓Pay - OPEN錢包', 'ccat-for-woocommerce');
+		$this->description = __( '使用黑貓 OPEN錢包，付款更安心。', 'ccat-for-woocommerce');
 		parent::__construct();
 	}
 
@@ -45,16 +45,16 @@ class CCATPAY_Gateway_App_Opw extends CCATPAY_Gateway_App_Abstract {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
-				'title'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
+				'title'   => __( '啟用', 'ccat-for-woocommerce'),
 				'type'    => 'checkbox',
-				'label'   => __( '啟用', WC_CCAT_PAYMENTS_DOMAIN ),
+				'label'   => __( '啟用', 'ccat-for-woocommerce'),
 				'default' => 'yes',
 			),
 			'title'   => array(
-				'title'       => __( '付款標題', WC_CCAT_PAYMENTS_DOMAIN ),
+				'title'       => __( '付款標題', 'ccat-for-woocommerce'),
 				'type'        => 'text',
-				'description' => __( '使用者選擇付款時顯示的文字', WC_CCAT_PAYMENTS_DOMAIN ),
-				'default'     => __( '黑貓Pay - OPEN錢包', WC_CCAT_PAYMENTS_DOMAIN ),
+				'description' => __( '使用者選擇付款時顯示的文字', 'ccat-for-woocommerce'),
+				'default'     => __( '黑貓Pay - OPEN錢包', 'ccat-for-woocommerce'),
 				'desc_tip'    => true,
 			),
 		);

@@ -73,7 +73,7 @@ class CCATPAY_Shipping_Display {
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'ccat-logistics-nonce' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( '安全驗證失敗', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce'),
 				)
 			);
 			wp_die();
@@ -83,7 +83,7 @@ class CCATPAY_Shipping_Display {
 		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 
 		if ( ! $order_id ) {
-			wp_send_json_error( array( 'message' => __( '無效的訂單 ID', WC_CCAT_PAYMENTS_DOMAIN ) ) );
+			wp_send_json_error( array( 'message' => __( '無效的訂單 ID', 'ccat-for-woocommerce') ) );
 
 			return;
 		}
@@ -91,7 +91,7 @@ class CCATPAY_Shipping_Display {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order ) {
-			wp_send_json_error( array( 'message' => __( '找不到此訂單', WC_CCAT_PAYMENTS_DOMAIN ) ) );
+			wp_send_json_error( array( 'message' => __( '找不到此訂單', 'ccat-for-woocommerce') ) );
 
 			return;
 		}
@@ -101,7 +101,7 @@ class CCATPAY_Shipping_Display {
 			break; // 只取第一個運送方法.
 		}
 		if ( empty( $shipping_method_id ) ) {
-			wp_send_json_error( array( 'message' => __( '找不到配送方式', WC_CCAT_PAYMENTS_DOMAIN ) ) );
+			wp_send_json_error( array( 'message' => __( '找不到配送方式', 'ccat-for-woocommerce') ) );
 
 			return;
 		}
@@ -130,7 +130,7 @@ class CCATPAY_Shipping_Display {
 			$order->add_order_note(
 				sprintf(
 				/* translators: %s: 黑貓物流託運單號 */
-					__( '黑貓物流託運單已建立，單號: %s', WC_CCAT_PAYMENTS_DOMAIN ),
+					__( '黑貓物流託運單已建立，單號: %s', 'ccat-for-woocommerce'),
 					$obt_number
 				),
 				false, // 不顯示給客戶.
@@ -139,7 +139,7 @@ class CCATPAY_Shipping_Display {
 
 			wp_send_json_success(
 				array(
-					'message'    => __( '物流託運單建立成功', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message'    => __( '物流託運單建立成功', 'ccat-for-woocommerce'),
 					'obt_number' => $obt_number,
 					'file_no'    => $file_no,
 				)
@@ -149,7 +149,7 @@ class CCATPAY_Shipping_Display {
 				array(
 					'message' => sprintf(
 					/* translators: %s: API 錯誤訊息 */
-						__( '建立物流託運單失敗: %s', WC_CCAT_PAYMENTS_DOMAIN ),
+						__( '建立物流託運單失敗: %s', 'ccat-for-woocommerce'),
 						$result['Message']
 					),
 				)
@@ -172,7 +172,7 @@ class CCATPAY_Shipping_Display {
 		$api_url    = $api_data[1];
 
 		if ( empty( $service_id ) || empty( $api_token ) || empty( $api_url ) ) {
-			return new WP_Error( 'invalid_api_settings', __( '黑貓物流 API 設定不完整', WC_CCAT_PAYMENTS_DOMAIN ) );
+			return new WP_Error( 'invalid_api_settings', __( '黑貓物流 API 設定不完整', 'ccat-for-woocommerce') );
 		}
 
 		// 組裝 API 請求資料.
@@ -246,7 +246,7 @@ class CCATPAY_Shipping_Display {
 			// 獲取收件門市資訊.
 			$store_id = $order->get_meta( CCATPAY_Gateway_Abstract::META_STORE_ID );
 			if ( empty( $store_id ) ) {
-				return new WP_Error( 'missing_store_id', __( '找不到 7-11 門市資訊', WC_CCAT_PAYMENTS_DOMAIN ) );
+				return new WP_Error( 'missing_store_id', __( '找不到 7-11 門市資訊', 'ccat-for-woocommerce') );
 			}
 
 			// 7-11 到店託運單資料
@@ -267,7 +267,7 @@ class CCATPAY_Shipping_Display {
 				'CollectionAmount' => intval( $collection_amount ),
 				'FBName'           => substr( get_bloginfo( 'name' ), 0, 6 ),
 				/* translators: %s: 訂單編號 */
-				'Memo'             => sprintf( __( '訂單編號: %s', WC_CCAT_PAYMENTS_DOMAIN ), $order->get_order_number() ),
+				'Memo'             => sprintf( __( '訂單編號: %s', 'ccat-for-woocommerce'), $order->get_order_number() ),
 			);
 
 			// API 請求資料.
@@ -317,7 +317,7 @@ class CCATPAY_Shipping_Display {
 				'ProductTypeId'    => '0015', // 一般食品.
 				'ProductName'      => $product_name,
 				/* translators: %s: 訂單編號 */
-				'Memo'             => sprintf( __( '訂單編號: %s', WC_CCAT_PAYMENTS_DOMAIN ), $order->get_order_number() ),
+				'Memo'             => sprintf( __( '訂單編號: %s', 'ccat-for-woocommerce'), $order->get_order_number() ),
 			);
 
 			// API 請求資料.
@@ -369,7 +369,7 @@ class CCATPAY_Shipping_Display {
 				'api_error',
 				sprintf(
 				/* translators: %1$d: API 回應的狀態碼, %2$s: API 錯誤訊息, %3$s: 請求數據 */
-					__( 'API 請求失敗 (狀態碼: %1$d, 訊息: %2$s) 請求數據: %3$s', WC_CCAT_PAYMENTS_DOMAIN ),
+					__( 'API 請求失敗 (狀態碼: %1$d, 訊息: %2$s) 請求數據: %3$s', 'ccat-for-woocommerce'),
 					$response_code,
 					$error_message,
 					$request_body
@@ -380,7 +380,7 @@ class CCATPAY_Shipping_Display {
 		$result = json_decode( $body, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new WP_Error( 'api_response_error', __( 'API 回應格式無效', WC_CCAT_PAYMENTS_DOMAIN ) );
+			return new WP_Error( 'api_response_error', __( 'API 回應格式無效', 'ccat-for-woocommerce') );
 		}
 
 		return $result;
@@ -398,7 +398,7 @@ class CCATPAY_Shipping_Display {
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'ccat-logistics-nonce' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( '安全驗證失敗', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce'),
 				)
 			);
 			wp_die();
@@ -440,32 +440,32 @@ class CCATPAY_Shipping_Display {
 				// 超商取貨且尚未列印過，顯示變更門市按鈕.
 				if ( $this->is_convenience_store_shipping( $order ) && ! $has_printed ) {
 					echo '<button type="button" class="button change-store" data-order-id="' . esc_attr( $order->get_id() ) . '">' .
-						esc_html__( '變更門市', WC_CCAT_PAYMENTS_DOMAIN ) .
+						esc_html__( '變更門市', 'ccat-for-woocommerce') .
 						'</button>';
 				}
 
 				// 尚未列印過，顯示建立物流訂單按鈕.
 				if ( ! $has_printed ) {
 					echo '<button type="button" class="button create-logistics-order" data-order-id="' . esc_attr( $order->get_id() ) . '">' .
-						esc_html__( '建立物流託運單', WC_CCAT_PAYMENTS_DOMAIN ) .
+						esc_html__( '建立物流託運單', 'ccat-for-woocommerce') .
 						'</button>';
 				}
 
 				// 顯示下載託運單按鈕.
 				if ( $has_printed ) {
 					echo '<button type="button" class="button download-shipping-label" data-order-id="' . esc_attr( $order->get_id() ) . '">' .
-						esc_html__( '下載託運單', WC_CCAT_PAYMENTS_DOMAIN ) .
+						esc_html__( '下載託運單', 'ccat-for-woocommerce') .
 						'</button>';
 				}
 
 				// 提醒託運單格式.
 				if ( $this->is_convenience_store_shipping( $order ) ) {
 					echo '<p class="ccat-logistics-notice">' .
-						esc_html__( '建立物流託運單後，黑貓快速到店(7-11取貨)，將產生A4三模託運單。', WC_CCAT_PAYMENTS_DOMAIN ) .
+						esc_html__( '建立物流託運單後，黑貓快速到店(7-11取貨)，將產生A4三模託運單。', 'ccat-for-woocommerce') .
 						'</p>';
 				} else {
 					echo '<p class="ccat-logistics-notice">' .
-						esc_html__( '建立物流託運單後，黑貓宅配將產生A4二模託運單。', WC_CCAT_PAYMENTS_DOMAIN ) .
+						esc_html__( '建立物流託運單後，黑貓宅配將產生A4二模託運單。', 'ccat-for-woocommerce') .
 						'</p>';
 				}
 
@@ -473,7 +473,7 @@ class CCATPAY_Shipping_Display {
 			} else {
 				// 顯示未付款提示訊息.
 				echo '<p class="ccat-logistics-notice">' .
-					esc_html__( '請完成付款後，系統將自動開放物流託運單建立功能。', WC_CCAT_PAYMENTS_DOMAIN ) .
+					esc_html__( '請完成付款後，系統將自動開放物流託運單建立功能。', 'ccat-for-woocommerce') .
 					'</p>';
 			}
 			echo '</div>';
@@ -691,7 +691,7 @@ class CCATPAY_Shipping_Display {
 		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 
 		if ( ! $order_id ) {
-			wp_send_json_error( array( 'message' => __( '無效的訂單 ID', WC_CCAT_PAYMENTS_DOMAIN ) ) );
+			wp_send_json_error( array( 'message' => __( '無效的訂單 ID', 'ccat-for-woocommerce') ) );
 
 			return;
 		}
@@ -706,7 +706,7 @@ class CCATPAY_Shipping_Display {
 		$postcode      = isset( $_POST['postcode'] ) ? sanitize_text_field( wp_unslash( $_POST['postcode'] ) ) : ''; // phpcs:ignore WordPress
 
 		if ( empty( $store_id ) || empty( $store_name ) || empty( $store_address ) ) {
-			wp_send_json_error( array( 'message' => __( '門市資訊不完整', WC_CCAT_PAYMENTS_DOMAIN ) ) );
+			wp_send_json_error( array( 'message' => __( '門市資訊不完整', 'ccat-for-woocommerce') ) );
 
 			return;
 		}
@@ -714,7 +714,7 @@ class CCATPAY_Shipping_Display {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order ) {
-			wp_send_json_error( array( 'message' => __( '找不到此訂單', WC_CCAT_PAYMENTS_DOMAIN ) ) );
+			wp_send_json_error( array( 'message' => __( '找不到此訂單', 'ccat-for-woocommerce') ) );
 
 			return;
 		}
@@ -748,7 +748,7 @@ class CCATPAY_Shipping_Display {
 		$order->add_order_note(
 			sprintf(
 			/* translators: %1$s: 門市名稱, %2$s: 門市編號, %3$s: 門市地址 */
-				__( '門市已變更為: %1$s (%2$s) %3$s', WC_CCAT_PAYMENTS_DOMAIN ),
+				__( '門市已變更為: %1$s (%2$s) %3$s', 'ccat-for-woocommerce'),
 				$store_name,
 				$store_id,
 				$store_address
@@ -759,7 +759,7 @@ class CCATPAY_Shipping_Display {
 
 		wp_send_json_success(
 			array(
-				'message'       => __( '門市變更成功', WC_CCAT_PAYMENTS_DOMAIN ),
+				'message'       => __( '門市變更成功', 'ccat-for-woocommerce'),
 				'store_id'      => $store_id,
 				'store_name'    => $store_name,
 				'store_address' => $store_address,
@@ -775,7 +775,7 @@ class CCATPAY_Shipping_Display {
 		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'ccat-logistics-nonce' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( '安全驗證失敗', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce'),
 				),
 				400
 			);
@@ -788,7 +788,7 @@ class CCATPAY_Shipping_Display {
 		if ( ! $order_id ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( '缺少必要參數', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => esc_html__( '缺少必要參數', 'ccat-for-woocommerce'),
 				),
 				400
 			);
@@ -800,7 +800,7 @@ class CCATPAY_Shipping_Display {
 		if ( ! $order ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( '找不到此訂單', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => esc_html__( '找不到此訂單', 'ccat-for-woocommerce'),
 				),
 				400
 			);
@@ -817,7 +817,7 @@ class CCATPAY_Shipping_Display {
 		if ( empty( $service_id ) || empty( $api_token ) || empty( $api_url ) ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( '黑貓物流 API 設定不完整', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => esc_html__( '黑貓物流 API 設定不完整', 'ccat-for-woocommerce'),
 				),
 				400
 			);
@@ -869,7 +869,7 @@ class CCATPAY_Shipping_Display {
 			// 處理非 200 的響應.
 			$body          = wp_remote_retrieve_body( $response );
 			$error_data    = json_decode( $body, true );
-			$error_message = $error_data['Message'] ?? __( '下載託運單失敗', WC_CCAT_PAYMENTS_DOMAIN );
+			$error_message = $error_data['Message'] ?? __( '下載託運單失敗', 'ccat-for-woocommerce');
 
 			wp_send_json_error(
 				array(
@@ -885,7 +885,7 @@ class CCATPAY_Shipping_Display {
 		if ( ! file_exists( $file_path ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( '下載託運單失敗：檔案未能正確儲存', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => __( '下載託運單失敗：檔案未能正確儲存', 'ccat-for-woocommerce'),
 				),
 				500
 			);
@@ -904,7 +904,7 @@ class CCATPAY_Shipping_Display {
 		if ( false === $file_content ) {
 			wp_send_json_error(
 				array(
-					'message' => __( '下載託運單失敗：無法讀取檔案', WC_CCAT_PAYMENTS_DOMAIN ),
+					'message' => __( '下載託運單失敗：無法讀取檔案', 'ccat-for-woocommerce'),
 				),
 				500
 			);

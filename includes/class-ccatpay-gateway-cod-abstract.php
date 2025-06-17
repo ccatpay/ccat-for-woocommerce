@@ -59,7 +59,7 @@ class CCATPAY_Gateway_COD_Abstract extends CCATPAY_Gateway_Abstract {
 
 		// 檢查送貨地址是否完整.
 		if ( empty( $order->get_shipping_address_1() ) ) {
-			wc_add_notice( __( '送貨地址為必填項目', WC_CCAT_PAYMENTS_DOMAIN ), 'error' );
+			wc_add_notice( __( '送貨地址為必填項目', 'ccat-for-woocommerce'), 'error' );
 
 			return array(
 				'result' => 'failure',
@@ -71,7 +71,7 @@ class CCATPAY_Gateway_COD_Abstract extends CCATPAY_Gateway_Abstract {
 		// 設置訂單狀態為處理中.
 		$order->update_status(
 			'processing',
-			__( '訂單已建立，等待貨到付款', WC_CCAT_PAYMENTS_DOMAIN )
+			__( '訂單已建立，等待貨到付款', 'ccat-for-woocommerce')
 		);
 
 		// 清空購物車.
