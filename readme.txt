@@ -6,7 +6,7 @@ Author: ccatpay
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 8.3
-Stable tag: 2.0.4
+Stable tag: 2.1.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -94,6 +94,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 = 2.0.4 =
 
 * 修正：文字調整，物流訂單 更改為 物流託運單。
+
+= 2.1.0 =
+
+* 修正：因應WordPress外掛商店上架調整程式碼。
 
 == Third-party Resources ==
 
