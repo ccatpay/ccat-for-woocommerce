@@ -1,5 +1,5 @@
 
-=== ccat-for-woocommerce ===
+=== ccatpay Payment for WooCommerce ===
 Contributors: ccatpay
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Author: ccatpay
