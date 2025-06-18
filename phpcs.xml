@@ -35,6 +35,7 @@
 		<exclude name="WordPress.WhiteSpace" />
 		<exclude name="WordPress.Security.EscapeOutput" />
 		<exclude name="Squiz.PHP.EmbeddedPhp" />
+		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralDomain"/>
 	</rule>
 
 	<rule ref="PHPCompatibility">
