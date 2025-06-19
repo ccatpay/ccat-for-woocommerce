@@ -1,5 +1,6 @@
 jQuery(function ($) {
     // 存取 AJAX URL
+    const ccat_logistics_params =  window['ccatpay_for_woocommerce'+'ccat_logistics_params'];
     const ajaxUrl = ccat_logistics_params.ajax_url;
     const nonce = ccat_logistics_params.nonce;
     const storeCategory = ccat_logistics_params.store_category;
@@ -487,7 +488,7 @@ jQuery(function ($) {
             type: 'POST',
             dataType: 'json',
             data: {
-                action: 'get_store_selection_url',
+                action: 'ccatpay-for-woocommerce_store_selection_url',
                 nonce: nonce,
                 storeCategory: storeCategory,
                 shippingMethod: shippingMethod,
@@ -543,7 +544,7 @@ jQuery(function ($) {
                                             type: 'POST',
                                             dataType: 'json',
                                             data: {
-                                                action: 'save_store_ajax',
+                                                action: 'ccatpay-for-woocommerce_save_store_ajax',
                                                 nonce: nonce,
                                                 order_id: order_id,
                                                 storeid: storeData.storeId,
@@ -630,7 +631,7 @@ jQuery(function ($) {
             type: 'POST',
             dataType: 'json',
             data: {
-                action: 'create_logistics_order',
+                action: 'ccatpay-for-woocommerce_create_logistics_order',
                 nonce: nonce,
                 order_id: orderId
             },
@@ -690,7 +691,7 @@ jQuery(function ($) {
             url: ajaxUrl,
             type: 'POST',
             data: {
-                action: 'download_shipping_label',
+                action: 'ccatpay-for-woocommerce_download_shipping_label',
                 order_id: order_id,
                 nonce: nonce
             },

@@ -82,7 +82,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat711-blocks-integration', // Updated script handle.
+            CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-integration', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -91,8 +91,8 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 		// 將數據本地化到腳本中，確保 nonce 可用.
 		wp_localize_script(
-			'ccat711-blocks-integration',
-			'ccat711BlockData',
+            CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-integration',
+            CCATPAYMENTS_JS_PREFIX.'ccat711BlockData',
 			$this->get_script_data()
 		);
 	}
@@ -103,7 +103,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_script_handles(): array {
-		return array( 'ccat711-blocks-integration', 'ccat711-blocks-frontend' );
+		return array( CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-integration', CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-frontend' );
 	}
 
 	/**
@@ -112,7 +112,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_editor_script_handles(): array {
-		return array( 'ccat711-blocks-integration', 'ccat711-block-editor' );
+		return array( CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-integration', CCATPAYMENTS_JS_PREFIX.'ccat711-block-editor' );
 	}
 
 	/**
@@ -131,8 +131,8 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	 * Constructor for the integration.
 	 */
 	public function __construct() {
-		add_action( 'wp_ajax_get_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
-		add_action( 'wp_ajax_nopriv_get_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
+		add_action( 'wp_ajax_'.CCATPAYMENTS_PREFIX.'_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
+		add_action( 'wp_ajax_nopriv_'.CCATPAYMENTS_PREFIX.'_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
 		add_action( 'template_redirect', array( $this, 'handle_store_callback' ) );
 		add_action( 'init', array( $this, 'ccat711_add_rewrite_rules' ) );
 		add_filter( 'query_vars', array( $this, 'ccat711_add_query_vars' ) );
@@ -232,7 +232,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat711-blocks-editor', // Updated script handle.
+            CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-editor', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -241,8 +241,8 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 		// 將數據本地化到腳本中，確保 nonce 可用.
 		wp_localize_script(
-			'ccat711-blocks-frontend',
-			'ccat711BlockData',
+            CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-frontend',
+            CCATPAYMENTS_JS_PREFIX.'ccat711BlockData',
 			$this->get_script_data()
 		);
 	}
@@ -263,7 +263,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat711-blocks-frontend', // Updated script handle.
+			CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-frontend', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -272,8 +272,8 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 		// 將數據本地化到腳本中，確保 nonce 可用.
 		wp_localize_script(
-			'ccat711-blocks-frontend',
-			'ccat711BlockData',
+            CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-frontend',
+            CCATPAYMENTS_JS_PREFIX.'ccat711BlockData',
 			$this->get_script_data()
 		);
 	}
@@ -284,7 +284,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	 * @return string The cache buster value to use for the given file.
 	 */
 	protected function get_file_version(): string {
-		return WC_CCAT_PAYMENTS_VERSION;
+		return CCATPAYMENTS_VERSION;
 	}
 
 	/**
@@ -295,7 +295,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 			return;
 		}
 		$temp_var = isset( $_POST['TempVar'] ) ? sanitize_text_field( wp_unslash( $_POST['TempVar'] ) ) : '';  // phpcs:ignore WordPress
-		$data     = get_option( WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
+		$data     = get_option( CCATPAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
 
 		// check nonce myself.
 		if ( empty( $data ) ) {
@@ -313,13 +313,13 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		}
 
 		// 獲取保存的資訊.
-		$stored_data = get_option( WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
+		$stored_data = get_option( CCATPAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
 		if ( empty( $stored_data ) ) {
 			wp_die( esc_html__( '無效的識別參數', 'ccat-for-woocommerce') );
 		}
 
 		// 刪除臨時資料.
-		delete_option( WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
+		delete_option( CCATPAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var );
 
 		// 準備 JavaScript 回調.
 		$store_data = wp_json_encode(
@@ -536,7 +536,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 				// 儲存臨時變數，以便在回調時使用.
 				update_option(
-					WC_CCAT_PAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var,
+					CCATPAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var,
 					array(
 						'shipping_method' => $shipping_method,
 						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '',

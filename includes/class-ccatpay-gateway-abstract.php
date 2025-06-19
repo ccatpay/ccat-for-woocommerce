@@ -152,7 +152,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 * @return bool True if in test mode, False otherwise.
 	 */
 	public function is_test_mode(): bool {
-		return get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_mode', 'no' ) === 'yes';
+		return get_option( CCATPAYMENTS_PREFIX . '_test_mode', 'no' ) === 'yes';
 	}
 
 	/**
@@ -173,12 +173,12 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 * @return string 檢核碼
 	 */
 	protected function get_chk_code(): string {
-		$is_test_mode = 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_mode' );
+		$is_test_mode = 'yes' === get_option( CCATPAYMENTS_PREFIX . '_test_mode' );
 		if ( $is_test_mode ) {
-			return get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_chk_code', '' );
+			return get_option( CCATPAYMENTS_PREFIX . '_test_chk_code', '' );
 		}
 
-		return get_option( WC_CCAT_PAYMENTS_PREFIX . '_chk_code', '' );
+		return get_option( CCATPAYMENTS_PREFIX . '_chk_code', '' );
 	}
 
 
@@ -192,7 +192,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 */
 	public function get_payment_api_token(): ?string {
 
-		$cached_token = get_transient( 'api_access_token' );
+		$cached_token = get_transient( CCATPAYMENTS_PREFIX. 'api_access_token' );
 
 		if ( $cached_token ) {
 			return $cached_token;
@@ -261,7 +261,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 		$expires_in   = $expires_at ? ( $expires_at - $current_time ) : 0;
 
 		if ( $access_token && $expires_in > 0 ) {
-			set_transient( 'api_access_token', $access_token, $expires_in - 60 );
+			set_transient( CCATPAYMENTS_PREFIX. 'api_access_token', $access_token, $expires_in - 60 );
 		}
 
 		return $access_token;
@@ -274,8 +274,8 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 */
 	public function get_account(): string {
 		return $this->is_test_mode()
-			? get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_merchant_id', '' )
-			: get_option( WC_CCAT_PAYMENTS_PREFIX . '_merchant_id', '' );
+			? get_option( CCATPAYMENTS_PREFIX . '_test_merchant_id', '' )
+			: get_option( CCATPAYMENTS_PREFIX . '_merchant_id', '' );
 	}
 
 	/**
@@ -285,8 +285,8 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 */
 	public function get_password(): string {
 		return $this->is_test_mode()
-			? get_option( WC_CCAT_PAYMENTS_PREFIX . '_test_api_key', '' )
-			: get_option( WC_CCAT_PAYMENTS_PREFIX . '_api_key', '' );
+			? get_option( CCATPAYMENTS_PREFIX . '_test_api_key', '' )
+			: get_option( CCATPAYMENTS_PREFIX . '_api_key', '' );
 	}
 
 	/**
@@ -542,7 +542,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 				'apn_url'          => $this->get_apn_url(),
 				'b2c'              => '0',
 			);
-			if ( 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
+			if ( 'yes' === get_option( CCATPAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
 			}
 			if ( CCATPAY_Payments::is_shipping_enabled() ) {
@@ -585,7 +585,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 				);
 			} else {
 				$error_message = $response_data['msg'] ?? esc_html__( 'Unknown Error.', 'ccat-for-woocommerce');
-				delete_transient( 'api_access_token' );
+				delete_transient( CCATPAYMENTS_PREFIX. 'api_access_token' );
 				return array(
 					'result'   => 'failure',
 					'messages' => $error_message,

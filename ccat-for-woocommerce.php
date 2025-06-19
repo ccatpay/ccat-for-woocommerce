@@ -26,13 +26,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! defined( 'WC_CCAT_PAYMENTS_VERSION' ) ) {
 	define( 'WC_CCAT_PAYMENTS_VERSION', '2.1.1' );
 }
-if ( ! defined( 'WC_CCAT_PAYMENTS_DOMAIN' ) ) {
-	define( 'WC_CCAT_PAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
+if ( ! defined( 'CCATPAYMENTS_DOMAIN' ) ) {
+	define( 'CCATPAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
 }
-if ( ! defined( 'WC_CCAT_PAYMENTS_PREFIX' ) ) {
-	define( 'WC_CCAT_PAYMENTS_PREFIX', 'ccatpay-for-woocommerce' );
+if ( ! defined( 'CCATPAYMENTS_PREFIX' ) ) {
+	define( 'CCATPAYMENTS_PREFIX', 'ccatpay-for-woocommerce' );
 }
-
+if ( ! defined( 'CCATPAYMENTS_JS_PREFIX' ) ) {
+    define( 'CCATPAYMENTS_JS_PREFIX', 'ccatpay_for_woocommerce' );
+}
 
 /**
  * WC CCat Payment gateway plugin class.
@@ -113,7 +115,7 @@ class CCATPAY_Payments {
 	 * @return bool True if enabled, false otherwise.
 	 */
 	public static function is_ccat_enabled(): bool {
-		$is_enabled = get_option( WC_CCAT_PAYMENTS_PREFIX . '_enable', 'yes' );
+		$is_enabled = get_option( CCATPAYMENTS_PREFIX . '_enable', 'yes' );
 
 		return 'yes' === $is_enabled;
 	}
@@ -202,7 +204,7 @@ class CCATPAY_Payments {
 	 * @return bool True if enabled, false otherwise.
 	 */
 	public static function is_shipping_enabled(): bool {
-		$is_enabled = get_option( WC_CCAT_PAYMENTS_PREFIX . '_shipping_enable', 'yes' );
+		$is_enabled = get_option( CCATPAYMENTS_PREFIX . '_shipping_enable', 'yes' );
 
 		return 'yes' === $is_enabled;
 	}
@@ -237,7 +239,7 @@ class CCATPAY_Payments {
 	 * Plugin includes.
 	 */
 	public static function includes(): void {
-		$is_invoice_enabled = 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' );
+		$is_invoice_enabled = 'yes' === get_option( CCATPAYMENTS_PREFIX . '_invoice_enable', 'no' );
 		if ( $is_invoice_enabled ) {
 			require_once 'ccat-checkout-block/ccatpay-block-integration-checkout.php';
 			require_once 'includes/class-ccatpay-invoice-display.php';
@@ -263,7 +265,7 @@ class CCATPAY_Payments {
 		woocommerce_store_api_register_endpoint_data(
 			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,
-				'namespace'       => WC_CCAT_PAYMENTS_DOMAIN,
+				'namespace'       => CCATPAYMENTS_DOMAIN,
 				'data_callback'   => array( __CLASS__, 'get_invoice_data' ),
 				'schema_callback' => array( __CLASS__, 'get_invoice_schema' ),
 			)
