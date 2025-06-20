@@ -109,7 +109,8 @@ class CCATPAY_Shipping_Display
             return;
         }
         // 呼叫 API 建立物流訂單.
-        $result = $this->create_logistics_order($order);
+        $delivery_time = isset($_POST['delivery_time']) ? sanitize_text_field(wp_unslash($_POST['delivery_time'])) : '04';
+        $result = $this->create_logistics_order($order, $delivery_time);
 
         if (is_wp_error($result)) {
             wp_send_json_error(array('message' => $result->get_error_message()));
@@ -164,10 +165,11 @@ class CCATPAY_Shipping_Display
      * 呼叫黑貓物流 API 建立物流訂單
      *
      * @param WC_Order $order 訂單物件.
+     * @param string $delivery_time 希望配達時段 (宅配用)
      *
      * @return array|WP_Error API 回應或錯誤
      */
-    private function create_logistics_order(WC_Order $order)
+    private function create_logistics_order(WC_Order $order, $delivery_time = '04')
     {
         // 從設定獲取 API 資訊.
         $api_data = CCATPAY_711_Blocks_Integration::get_api_data();
@@ -310,7 +312,7 @@ class CCATPAY_Shipping_Display
                 'SenderAddress' => $sender_address,
                 'ShipmentDate' => $today->format('Ymd'),
                 'DeliveryDate' => $day_after_tomorrow->format('Ymd'),
-                'DeliveryTime' => '04', // 不指定.
+                'DeliveryTime' => $delivery_time, // 使用傳入的希望配達時段
                 'IsFreight' => $is_freight,
                 'IsCollection' => $is_collection,
                 'CollectionAmount' => $collection_amount,
@@ -450,7 +452,17 @@ class CCATPAY_Shipping_Display
                         '</button>';
                 }
 
-                // 尚未列印過，顯示建立物流訂單按鈕.
+                // 尚未列印過，宅配顯示希望配達時段 select。
+                if (!$this->is_convenience_store_shipping($order) && !$has_printed) {
+                    echo '<label for="ccat_delivery_time">' . esc_html__('希望配達時段', 'ccat-for-woocommerce') .
+                        ' <select id="ccat_delivery_time" class="ccat-delivery-time-select">
+                            <option value="04">' . esc_html__('不指定', 'ccat-for-woocommerce') . '</option>
+                            <option value="01">' . esc_html__('13時前', 'ccat-for-woocommerce') . '</option>
+                            <option value="02">' . esc_html__('14-18時', 'ccat-for-woocommerce') . '</option>
+                        </select></label>';
+                }
+                
+                // 尚未列印過，顯示建立物流訂單按鈕
                 if (!$has_printed) {
                     echo '<button type="button" class="button create-logistics-order" data-order-id="' . esc_attr($order->get_id()) . '">' .
                         esc_html__('建立物流託運單', 'ccat-for-woocommerce') .

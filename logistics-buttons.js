@@ -613,6 +613,9 @@ jQuery(function ($) {
         const button = $(this);
         const originalText = button.text();
 
+        // 取得希望配達時段 select 的值
+        const deliveryTime = $(this).closest('.ccat-logistics-buttons').find('.ccat-delivery-time-select').val() || '04';
+
         // 顯示載入中狀態
         button.prop('disabled', true);
         button.text("Loading..");
@@ -633,7 +636,8 @@ jQuery(function ($) {
             data: {
                 action: 'ccatpay-for-woocommerce_create_logistics_order',
                 nonce: nonce,
-                order_id: orderId
+                order_id: orderId,
+                delivery_time: deliveryTime
             },
             success: function (response) {
                 if (response.success) {

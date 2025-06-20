@@ -106,6 +106,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 改進：依照官方審核要求調整變數名稱。
 
+= 2.2.1 =
+
+* 新增：後台列印黑貓宅配託運單時，可選擇希望配達時段
+
 == Third-party Resources ==
 
 1. JsBarcode - https://github.com/lindell/JsBarcode
