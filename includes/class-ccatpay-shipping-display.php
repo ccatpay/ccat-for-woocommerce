@@ -110,7 +110,8 @@ class CCATPAY_Shipping_Display
         }
         // 呼叫 API 建立物流訂單.
         $delivery_time = isset($_POST['delivery_time']) ? sanitize_text_field(wp_unslash($_POST['delivery_time'])) : '04';
-        $result = $this->create_logistics_order($order, $delivery_time);
+        $print_obt_type = isset($_POST['print_obt_type']) ? sanitize_text_field(wp_unslash($_POST['print_obt_type'])) : '01';
+        $result = $this->create_logistics_order($order, $delivery_time, $print_obt_type);
 
         if (is_wp_error($result)) {
             wp_send_json_error(array('message' => $result->get_error_message()));
@@ -166,10 +167,11 @@ class CCATPAY_Shipping_Display
      *
      * @param WC_Order $order 訂單物件.
      * @param string $delivery_time 希望配達時段 (宅配用)
+     * @param string $print_obt_type 託運單類別
      *
      * @return array|WP_Error API 回應或錯誤
      */
-    private function create_logistics_order(WC_Order $order, $delivery_time = '04')
+    private function create_logistics_order(WC_Order $order, $delivery_time = '04', $print_obt_type = '01')
     {
         // 從設定獲取 API 資訊.
         $api_data = CCATPAY_711_Blocks_Integration::get_api_data();
@@ -279,7 +281,7 @@ class CCATPAY_Shipping_Display
             // API 請求資料.
             $request_data = array(
                 'ServiceId' => $service_id,
-                'PrintOBTType' => '01', // A4三模B2S.
+                'PrintOBTType' => $print_obt_type, // 使用傳入的託運單類別
                 'Orders' => array($order_data),
             );
 
@@ -329,7 +331,7 @@ class CCATPAY_Shipping_Display
             // API 請求資料.
             $request_data = array(
                 'ServiceId' => $service_id,
-                'PrintOBTType' => '01', // A4二模宅配.
+                'PrintOBTType' => $print_obt_type, // 使用傳入的託運單類別
                 'Orders' => array($order_data),
             );
 
@@ -445,21 +447,41 @@ class CCATPAY_Shipping_Display
 
             if ($is_paid) {
 
+
+
+                echo '<p class="ccat-logistics-notice">';
+                // 尚未列印過，超商取貨顯示託運單類別；宅配顯示希望配達時段與託運單類別。
+                if ($this->is_convenience_store_shipping($order) && !$has_printed) {
+                    echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
+                        ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
+                            <option value="01">' . esc_html__('A4三模B2S', 'ccat-for-woocommerce') . '</option>
+                            <option value="02">' . esc_html__('熱轉印B2S', 'ccat-for-woocommerce') . '</option>
+                            <option value="03">' . esc_html__('A4三模B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
+                            <option value="04">' . esc_html__('熱轉印B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
+                        </select></label>';
+
+                } elseif(!$has_printed){
+                    echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
+                        ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
+                            <option value="01">' . esc_html__('A4二模宅配', 'ccat-for-woocommerce') . '</option>
+                            <option value="02">' . esc_html__('A4三模宅配', 'ccat-for-woocommerce') . '</option>
+                            <option value="03">' . esc_html__('熱轉印宅配', 'ccat-for-woocommerce') . '</option>
+                        </select></label>';
+                    echo '<label for="ccat_delivery_time" style="margin-right:8px;">' . esc_html__('希望配達時段', 'ccat-for-woocommerce') .
+                        ' <select id="ccat_delivery_time" class="ccat-delivery-time-select" style="min-width:120px; margin-left:4px;">
+                            <option value="04">' . esc_html__('不指定', 'ccat-for-woocommerce') . '</option>
+                            <option value="01">' . esc_html__('13時前', 'ccat-for-woocommerce') . '</option>
+                            <option value="02">' . esc_html__('14-18時', 'ccat-for-woocommerce') . '</option>
+                        </select></label>';
+
+                }
+                echo '</p>';
+                
                 // 超商取貨且尚未列印過，顯示變更門市按鈕.
                 if ($this->is_convenience_store_shipping($order) && !$has_printed) {
                     echo '<button type="button" class="button change-store" data-order-id="' . esc_attr($order->get_id()) . '">' .
                         esc_html__('變更門市', 'ccat-for-woocommerce') .
                         '</button>';
-                }
-
-                // 尚未列印過，宅配顯示希望配達時段 select。
-                if (!$this->is_convenience_store_shipping($order) && !$has_printed) {
-                    echo '<label for="ccat_delivery_time">' . esc_html__('希望配達時段', 'ccat-for-woocommerce') .
-                        ' <select id="ccat_delivery_time" class="ccat-delivery-time-select">
-                            <option value="04">' . esc_html__('不指定', 'ccat-for-woocommerce') . '</option>
-                            <option value="01">' . esc_html__('13時前', 'ccat-for-woocommerce') . '</option>
-                            <option value="02">' . esc_html__('14-18時', 'ccat-for-woocommerce') . '</option>
-                        </select></label>';
                 }
                 
                 // 尚未列印過，顯示建立物流訂單按鈕
@@ -474,17 +496,6 @@ class CCATPAY_Shipping_Display
                     echo '<button type="button" class="button download-shipping-label" data-order-id="' . esc_attr($order->get_id()) . '">' .
                         esc_html__('下載託運單', 'ccat-for-woocommerce') .
                         '</button>';
-                }
-
-                // 提醒託運單格式.
-                if ($this->is_convenience_store_shipping($order)) {
-                    echo '<p class="ccat-logistics-notice">' .
-                        esc_html__('建立物流託運單後，黑貓快速到店(7-11取貨)，將產生A4三模託運單。', 'ccat-for-woocommerce') .
-                        '</p>';
-                } else {
-                    echo '<p class="ccat-logistics-notice">' .
-                        esc_html__('建立物流託運單後，黑貓宅配將產生A4二模託運單。', 'ccat-for-woocommerce') .
-                        '</p>';
                 }
 
                 echo '</div>';

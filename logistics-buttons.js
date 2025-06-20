@@ -615,6 +615,8 @@ jQuery(function ($) {
 
         // 取得希望配達時段 select 的值
         const deliveryTime = $(this).closest('.ccat-logistics-buttons').find('.ccat-delivery-time-select').val() || '04';
+        // 取得託運單類別 select 的值
+        const printOBTType = $(this).closest('.ccat-logistics-buttons').find('.ccat-print-obt-type-select').val() || '01';
 
         // 顯示載入中狀態
         button.prop('disabled', true);
@@ -637,7 +639,8 @@ jQuery(function ($) {
                 action: 'ccatpay-for-woocommerce_create_logistics_order',
                 nonce: nonce,
                 order_id: orderId,
-                delivery_time: deliveryTime
+                delivery_time: deliveryTime,
+                print_obt_type: printOBTType
             },
             success: function (response) {
                 if (response.success) {
