@@ -54,7 +54,7 @@ class CCATPAY_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat-blocks-integration', // Updated script handle.
+            CCATPAYMENTS_JS_PREFIX.'ccat-blocks-integration', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -68,7 +68,7 @@ class CCATPAY_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_script_handles(): array {
-		return array( 'ccat-blocks-integration', 'ccat-blocks-frontend' );
+		return array( CCATPAYMENTS_JS_PREFIX.'ccat-blocks-integration', CCATPAYMENTS_JS_PREFIX.'ccat-blocks-frontend' );
 	}
 
 	/**
@@ -77,7 +77,7 @@ class CCATPAY_Blocks_Integration implements IntegrationInterface {
 	 * @return string[]
 	 */
 	public function get_editor_script_handles(): array {
-		return array( 'ccat-blocks-integration', 'ccat-block-editor' );
+		return array( CCATPAYMENTS_JS_PREFIX.'ccat-blocks-integration', CCATPAYMENTS_JS_PREFIX.'ccat-block-editor' );
 	}
 
 	/**
@@ -107,7 +107,7 @@ class CCATPAY_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat-blocks-editor', // Updated script handle.
+            CCATPAYMENTS_JS_PREFIX.'ccat-blocks-editor', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -131,7 +131,7 @@ class CCATPAY_Blocks_Integration implements IntegrationInterface {
 				'version'      => $this->get_file_version(),
 			);
 		wp_register_script(
-			'ccat-blocks-frontend', // Updated script handle.
+            CCATPAYMENTS_JS_PREFIX.'ccat-blocks-frontend', // Updated script handle.
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -140,7 +140,7 @@ class CCATPAY_Blocks_Integration implements IntegrationInterface {
 
 		// 將數據本地化到腳本中，確保 nonce 可用.
 		wp_localize_script(
-			'ccat711-blocks-integration',
+            CCATPAYMENTS_JS_PREFIX.'ccat711-blocks-integration',
 			'ccat711BlockData',
 			$this->get_script_data()
 		);
@@ -152,6 +152,6 @@ class CCATPAY_Blocks_Integration implements IntegrationInterface {
 	 * @return string The cache buster value to use for the given file.
 	 */
 	protected function get_file_version(): string {
-		return WC_CCAT_PAYMENTS_VERSION;
+		return CCATPAYMENTS_VERSION;
 	}
 }

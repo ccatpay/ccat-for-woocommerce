@@ -38,7 +38,7 @@ class CCATPAY_Invoice_Display {
 	 * @param WC_Order $order 訂單資訊.
 	 */
 	public function display_invoice_info( WC_Order $order ) {
-		if ( 'yes' !== get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
+		if ( 'yes' !== get_option( CCATPAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
 			return;
 		}
 
@@ -85,7 +85,7 @@ class CCATPAY_Invoice_Display {
 	 * @return void This method does not return a value.
 	 */
 	public function display_admin_invoice_info( WC_Order $order ) {
-		if ( 'yes' !== get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
+		if ( 'yes' !== get_option( CCATPAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
 			return;
 		}
 

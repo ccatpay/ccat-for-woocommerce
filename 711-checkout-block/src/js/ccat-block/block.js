@@ -5,7 +5,6 @@ import {cartStore} from '@woocommerce/block-data';
 
 import fetchInterceptor from '../../../../fetch-interceptor';
 
-
 /**
  * 選取門市後更新運送地址
  *
@@ -38,9 +37,26 @@ function updateStoreShippingAddress(storeInfo) {
     // 更新本地地址
     setShippingAddress(updatedAddress);
 }
+const getBlockData = () => {
+    try {
+        const prefix = 'ccatpay_for_woocommerce';
+        const dataKey = `${prefix}ccat711BlockData`;
+        const data = window[dataKey];
+
+        if (!data) {
+            console.warn(`找不到 ${dataKey} 資料`);
+            return {};
+        }
+
+        return data;
+    } catch (error) {
+        console.error('讀取 BlockData 時發生錯誤:', error);
+        return {}; 
+    }
+};
 
 // 獲取全局設置的腳本數據
-const ccat711BlockData = window.ccat711BlockData || {};
+const ccat711BlockData = getBlockData();
 // 用於保存最新的狀態值
 const stateRef = {
     showBlock: false,
@@ -637,7 +653,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
-                action: 'get_711_store_selection_url',
+                action: 'ccatpay-for-woocommerce_711_store_selection_url',
                 security: ccat711BlockData?.nonce || '',
                 shipping_method: selectedShippingMethod,
                 store_category: storeCategory

@@ -114,6 +114,6 @@ class CCATPAY_Gateway_Blocks_Integration implements IntegrationInterface {
 	 * @return string The cache buster value to use for the given file.
 	 */
 	protected function get_file_version(): string {
-		return WC_CCAT_PAYMENTS_VERSION;
+		return CCATPAYMENTS_VERSION;
 	}
 }

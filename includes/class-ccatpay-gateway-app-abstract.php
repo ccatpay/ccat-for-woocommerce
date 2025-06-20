@@ -64,7 +64,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 				'success_url'   => '',
 				'apn_url'       => $this->get_apn_url(),
 			);
-			if ( 'yes' === get_option( WC_CCAT_PAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
+			if ( 'yes' === get_option( CCATPAYMENTS_PREFIX . '_invoice_enable', 'no' ) ) {
 				$post_data = $this->add_invoice_data( $post_data, $order );
 			}
 			if ( CCATPAY_Payments::is_shipping_enabled() ) {
