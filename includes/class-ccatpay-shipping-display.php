@@ -498,6 +498,17 @@ class CCATPAY_Shipping_Display
                         '</button>';
                 }
 
+                // 提醒託運單格式
+				if ( $this->is_convenience_store_shipping( $order ) ) {
+					echo '<p class="ccat-logistics-notice">' .
+						esc_html__( '黑貓快速到店(7-11取貨)，支援A4三模、熱轉印格式。', 'ccat-for-woocommerce' ) .
+						'</p>';
+				} else {
+					echo '<p class="ccat-logistics-notice">' .
+						esc_html__( '黑貓宅配，支援A4二模、A4三模及熱轉印格式，不支援撿貨明細。', 'ccat-for-woocommerce' ) .
+						'</p>';
+				}
+
                 echo '</div>';
             } else {
                 // 顯示未付款提示訊息.
