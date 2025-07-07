@@ -667,7 +667,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
 
                 if (data.success && data.data.url) {
                     // 在新窗口中打開選擇門市頁面
-                    const selectionWindow = window.open(data.data.url, '_blank', 'width=800,height=700');
+                    const selectionWindow = window.open(data.data.url, '_blank', 'width=960,height=720');
 
                     // 創建並顯示提示用戶操作的信息
                     const pendingMessage = document.createElement('div');

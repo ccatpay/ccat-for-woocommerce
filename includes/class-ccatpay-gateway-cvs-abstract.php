@@ -61,7 +61,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 				throw new Exception( esc_html__( '地址為必填', 'ccat-for-woocommerce') );
 			}
 			if ( empty( $payer_mobile ) ) {
-				throw new Exception( esc_html__( '手機為必填', 'ccat-for-woocommerce') );
+				throw new Exception( esc_html__( '聯絡電話為必填', 'ccat-for-woocommerce') );
 			}
 			if ( ! filter_var( $payer_email, FILTER_VALIDATE_EMAIL ) ) {
 				throw new Exception( esc_html__( '信箱格式錯誤或沒有填寫', 'ccat-for-woocommerce') );
