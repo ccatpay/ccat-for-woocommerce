@@ -29,6 +29,14 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 == Installation ==
 
+= 自動安裝 =
+
+1. 前往 [外掛]→[安裝外掛]。
+2. 搜尋「ccatpay」或「黑貓Pay」。
+3. 安裝並啟用 ccatpay Payment for WooCommerce 外掛。
+
+= 手動安裝 =
+
 1. 上傳 `ccat-for-woocommerce` 資料夾至 `/wp-content/plugins/` 目錄
 2. 在後台啟用插件
 3. 前往 WooCommerce > 設定 > 黑貓Pay 設定您的金流
@@ -138,4 +146,5 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 == Support ==
 
-如需技術支援請聯繫客服：02-8752-0688
+* 使用手冊[下載](https://mpsdata.blob.core.windows.net/filedownload/ccatpay_UserManual.pdf "download")
+* 如需技術支援請聯繫客服：02-8752-0688
