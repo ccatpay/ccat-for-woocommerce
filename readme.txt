@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 8.3
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -28,6 +28,14 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 * 完整中文化介面
 
 == Installation ==
+
+= 自動安裝 =
+
+1. 前往 [外掛]→[安裝外掛]。
+2. 搜尋「ccatpay」或「黑貓Pay」。
+3. 安裝並啟用 ccatpay Payment for WooCommerce 外掛。
+
+= 手動安裝 =
 
 1. 上傳 `ccat-for-woocommerce` 資料夾至 `/wp-content/plugins/` 目錄
 2. 在後台啟用插件
@@ -118,6 +126,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 修正：後台列印運單時，提醒託運單格式
 
+= 2.3.3 =
+
+* 修正：711電子地圖視窗大小調整
+
 == Third-party Resources ==
 
 1. JsBarcode - https://github.com/lindell/JsBarcode
@@ -134,4 +146,5 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 == Support ==
 
-如需技術支援請聯繫客服：02-8752-0688
+* 使用手冊[下載](https://mpsdata.blob.core.windows.net/filedownload/ccatpay_UserManual.pdf "download")
+* 如需技術支援請聯繫客服：02-8752-0688
