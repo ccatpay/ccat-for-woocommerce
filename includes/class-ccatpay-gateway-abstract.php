@@ -339,7 +339,12 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 			break; // 只取第一個運送方法.
 		}
 		if ( false !== stripos( $shipping_method_id, 'ccat' ) ) {
-			$phone = $wc_order->get_shipping_phone();
+			$phone = $wc_order->get_billing_phone();
+
+			// 沒有billing_phone就改用shipping_phone
+			if ( empty( $phone ) ) {
+				$phone = $wc_order->get_shipping_phone();
+			}
 
 			// 檢查電話是否為空.
 			if ( empty( $phone ) ) {
