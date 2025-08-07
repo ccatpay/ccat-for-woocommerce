@@ -48,8 +48,13 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 			$payer_name     = trim( $order->get_shipping_last_name() . ' ' . $order->get_shipping_first_name() );
 			$payer_postcode = $order->get_shipping_postcode();
 			$payer_address  = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
-			$payer_mobile   = $order->get_shipping_phone();
 			$payer_email    = $order->get_billing_email();
+			$payer_mobile   = $order->get_billing_phone();
+
+			// 沒有billing_phone就改用shipping_phone
+			if ( empty( $payer_mobile ) ) {
+				$payer_mobile = $order->get_shipping_phone();
+			}
 
 			if ( empty( $payer_name ) ) {
 				throw new Exception( esc_html__( '姓名為必填', 'ccat-for-woocommerce') );
