@@ -250,6 +250,15 @@ class CCATPAY_Payments {
 					$integration_registry->register( new CCATPAY_Blocks_Integration() );
 				}
 			);
+
+			woocommerce_store_api_register_endpoint_data(
+				array(
+					'endpoint'        => CheckoutSchema::IDENTIFIER,
+					'namespace'       => CCATPAYMENTS_DOMAIN,
+					'data_callback'   => array( __CLASS__, 'get_invoice_data' ),
+					'schema_callback' => array( __CLASS__, 'get_invoice_schema' ),
+				)
+			);
 		}
 		if ( self::is_shipping_enabled() ) {
 			require_once '711-checkout-block/class-ccatpay-711-blocks-integration.php';
@@ -262,14 +271,6 @@ class CCATPAY_Payments {
 				}
 			);
 		}
-		woocommerce_store_api_register_endpoint_data(
-			array(
-				'endpoint'        => CheckoutSchema::IDENTIFIER,
-				'namespace'       => CCATPAYMENTS_DOMAIN,
-				'data_callback'   => array( __CLASS__, 'get_invoice_data' ),
-				'schema_callback' => array( __CLASS__, 'get_invoice_schema' ),
-			)
-		);
 
 		if ( class_exists( 'WC_Payment_Gateway' ) && self::is_ccat_enabled() ) {
 			require_once 'includes/class-ccatpay-gateway-abstract.php';
@@ -316,6 +317,14 @@ class CCATPAY_Payments {
 
 		require_once 'includes/class-ccatpay-settings.php';
 		CCATPAY_Settings::init();
+	}
+
+	public static function get_invoice_data(  ) {
+		// todo: 電子發票廠商回呼
+	}
+
+	public static function get_invoice_schema(  ) {
+		// todo: 電子發票廠商回呼
 	}
 
 	/**
