@@ -138,6 +138,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 修正： 未定義變數 $schema 錯誤
 
+= 2.3.6 =
+
+* 修正： get_invoice_data、get_invoice_schema錯誤
+
 == Third-party Resources ==
 
 1. JsBarcode - https://github.com/lindell/JsBarcode
