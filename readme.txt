@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 8.3
-Stable tag: 2.3.5
+Stable tag: 2.3.7
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
