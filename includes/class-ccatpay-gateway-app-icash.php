@@ -57,6 +57,10 @@ class CCATPAY_Gateway_App_Icash extends CCATPAY_Gateway_App_Abstract {
 				'default'     => __( '黑貓Pay - iCash Pay', 'ccat-for-woocommerce'),
 				'desc_tip'    => true,
 			),
+			'description'   => array(
+				'title'       => __( '付款說明', 'ccat-for-woocommerce'),
+				'type'        => 'textarea',
+			),
 		);
 	}
 

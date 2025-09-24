@@ -97,6 +97,10 @@ class CCATPAY_Gateway_Credit_Card extends CCATPAY_Gateway_Abstract {
 				'default'     => __( '黑貓Pay - 信用卡(玉山銀行)', 'ccat-for-woocommerce'),
 				'desc_tip'    => true,
 			),
+			'description'   => array(
+				'title'       => __( '付款說明', 'ccat-for-woocommerce'),
+				'type'        => 'textarea',
+			),
 		);
 	}
 
