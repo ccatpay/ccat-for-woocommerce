@@ -58,6 +58,10 @@ class CCATPAY_Gateway_Cvs_Ibon extends CCATPAY_Gateway_Cvs_Abstract {
 				'default'     => __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce'),
 				'desc_tip'    => true,
 			),
+			'description'   => array(
+				'title'       => __( '付款說明', 'ccat-for-woocommerce'),
+				'type'        => 'textarea',
+			),
 		);
 	}
 

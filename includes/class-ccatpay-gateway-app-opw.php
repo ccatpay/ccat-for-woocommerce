@@ -57,6 +57,10 @@ class CCATPAY_Gateway_App_Opw extends CCATPAY_Gateway_App_Abstract {
 				'default'     => __( '黑貓Pay - OPEN錢包', 'ccat-for-woocommerce'),
 				'desc_tip'    => true,
 			),
+			'description'   => array(
+				'title'       => __( '付款說明', 'ccat-for-woocommerce'),
+				'type'        => 'textarea',
+			),
 		);
 	}
 
