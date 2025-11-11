@@ -223,6 +223,15 @@ class CCATPAY_Shipping_Display
         $recipient_mobile = $order->get_shipping_phone();
         $recipient_address = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
 
+        // 沒有shipping_phone就改用billing_phone
+        if ( empty( $recipient_tel ) ) {
+            $recipient_tel = $order->get_billing_phone();
+        }
+        
+        if ( empty( $recipient_mobile ) ) {
+            $recipient_mobile = $order->get_billing_phone();
+        }
+
         // 寄件人資訊 (從店家設定取得).
         $sender_name = get_option(CCATPAYMENTS_PREFIX . '_sender_name', '');
         $sender_tel = get_option(CCATPAYMENTS_PREFIX . '_sender_tel', '');
