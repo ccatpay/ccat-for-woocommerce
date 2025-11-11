@@ -689,8 +689,8 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 
 		$order->add_order_note( $note );
 
-		// 處理發票資訊.
-		if ( isset( $data['invoice_no'] ) ) {
+		// 處理發票資訊，有發票號碼才寫入紀錄
+		if ( isset( $data['invoice_no'] ) && ! empty( $data['invoice_no'] ) ) {
 			// 基本發票資訊.
 			$order->update_meta_data( self::META_INVOICE_NO, sanitize_text_field( $data['invoice_no'] ) );
 			$order->update_meta_data( self::META_INVOICE_DATE, sanitize_text_field( $data['invoice_date'] ) );
