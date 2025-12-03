@@ -221,9 +221,12 @@ class CCATPAY_Shipping_Display
         $recipient_name = $order->get_shipping_last_name() . $order->get_shipping_first_name();
         $recipient_tel = $order->get_shipping_phone();
         $recipient_mobile = $order->get_shipping_phone();
-        $recipient_address = $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2();
+        $recipient_city = $order->get_shipping_city();
+        $recipient_state = $order->get_shipping_state();
+        $recipient_postcode = $order->get_shipping_postcode();
+        $recipient_address = $order->get_shipping_address_1() . $order->get_shipping_address_2();
 
-        // 沒有shipping_phone就改用billing_phone
+        // 沒有shipping就改用billing資料
         if ( empty( $recipient_tel ) ) {
             $recipient_tel = $order->get_billing_phone();
         }
@@ -231,6 +234,25 @@ class CCATPAY_Shipping_Display
         if ( empty( $recipient_mobile ) ) {
             $recipient_mobile = $order->get_billing_phone();
         }
+
+        if ( empty( $recipient_address ) ) {
+            $recipient_address = $order->get_billing_address_1() . $order->get_billing_address_2();
+        }
+
+        if ( empty( $recipient_city ) ) {
+            $recipient_city = $order->get_billing_city();
+        }
+
+        if ( empty( $recipient_state ) ) {
+            $recipient_state = $order->get_billing_state();
+        }
+
+        if ( empty( $recipient_postcode ) ) {
+            $recipient_postcode = $order->get_billing_postcode();
+        }
+
+        // 組合完整收件人地址
+        $recipient_address = $recipient_postcode  . $recipient_state . $recipient_city . $recipient_address;
 
         // 寄件人資訊 (從店家設定取得).
         $sender_name = get_option(CCATPAYMENTS_PREFIX . '_sender_name', '');

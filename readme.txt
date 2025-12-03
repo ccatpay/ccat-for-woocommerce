@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 8.3
-Stable tag: 2.3.8
+Stable tag: 2.3.9
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -125,6 +125,9 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 * 修正： 調整消費者沒有填配送方式的聯絡電話時，印單時就改抓帳單的聯絡電話
 * 改進： 收到APN資訊，有發票號碼才寫入訂單備註紀錄
 
+= 2.3.9 =
+
+* 修正： 列印黑貓宅配單，補上郵遞區號及縣市區資料
 
 == Third-party Resources ==
 
