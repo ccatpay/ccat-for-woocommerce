@@ -44,3 +44,11 @@ select2.scss
 /assets/
 /languages/
 **/node_modules
+
+# VS Code
+.vscode/
+
+# Build & Dist
+build/
+/download/
+*.zip
