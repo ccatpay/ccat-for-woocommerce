@@ -3,7 +3,7 @@
  * Plugin Name: ccatpay Payment for WooCommerce
  * Plugin URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
- * Version: 2.3.10
+ * Version: 2.4
  * Author: ccatpay
  * Text Domain: ccat-for-woocommerce
  *
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 if ( ! defined( 'CCATPAYMENTS_VERSION' ) ) {
-	define( 'CCATPAYMENTS_VERSION', '2.3.10' );
+	define( 'CCATPAYMENTS_VERSION', '2.4' );
 }
 if ( ! defined( 'CCATPAYMENTS_DOMAIN' ) ) {
 	define( 'CCATPAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
@@ -223,11 +223,11 @@ class CCATPAY_Payments {
 			$gateways[] = 'CCATPAY_Gateway_Payuni';
 			$gateways[] = 'CCATPAY_Gateway_Cvs_Ibon';
 			$gateways[] = 'CCATPAY_Gateway_Cvs_Atm';
-			$gateways[] = 'CCATPAY_Gateway_App_Opw';
-			$gateways[] = 'CCATPAY_Gateway_App_Icash';
+			// $gateways[] = 'CCATPAY_Gateway_App_Opw';
+			// $gateways[] = 'CCATPAY_Gateway_App_Icash';
 			// 新增黑貓貨到付款閘道.
 			$gateways[] = 'CCATPAY_Gateway_COD_Cash';
-			$gateways[] = 'CCATPAY_Gateway_COD_Mobile';
+			// $gateways[] = 'CCATPAY_Gateway_COD_Mobile';
 			$gateways[] = 'CCATPAY_Gateway_COD_711';
 			$gateways[] = 'CCATPAY_Gateway_COD_Card';
 		}
@@ -384,8 +384,8 @@ class CCATPAY_Payments {
 					$payment_method_registry->register( new CCATPAY_Gateway_Payuni_Blocks_Support() );
 					$payment_method_registry->register( new CCATPAY_Gateway_Ibon_Blocks_Support() );
 					$payment_method_registry->register( new CCATPAY_Gateway_Atm_Blocks_Support() );
-					$payment_method_registry->register( new CCATPAY_Gateway_Opw_Blocks_Support() );
-					$payment_method_registry->register( new CCATPAY_Gateway_Icash_Blocks_Support() );
+					// $payment_method_registry->register( new CCATPAY_Gateway_Opw_Blocks_Support() );
+					// $payment_method_registry->register( new CCATPAY_Gateway_Icash_Blocks_Support() );
 					$payment_method_registry->register( new CCATPAY_Gateway_COD_Blocks_Support() );
 				}
 			);
