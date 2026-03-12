@@ -241,7 +241,12 @@ class CCATPAY_Shipping_Display
 
         // 出貨日期和希望配達日期 (使用台北時區).
         $day_after_tomorrow = clone $today;
-        $day_after_tomorrow->add(new DateInterval('P2D'));
+        $day_after_tomorrow->add(new DateInterval('P1D'));
+
+        // 如果是星期日，則順延到星期一
+        if ('0' === $day_after_tomorrow->format('w')) {
+            $day_after_tomorrow->add(new DateInterval('P1D'));
+        }
 
         // 取得訂單商品資訊.
         $product_name = '';
