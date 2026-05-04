@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 8.3
-Stable tag: 2.5
+Stable tag: 2.6
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -140,6 +140,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 = 2.5 =
 
 * 修正： 列印託運單的希望配達日，如果計算結果當天是星期日，則順延到星期一
+
+= 2.6 =
+
+* 改進： 調整 Ibon 支付流程，改為在結帳完成頁面顯示支付按鈕而非自動轉址。
 
 == Third-party Resources ==
 
