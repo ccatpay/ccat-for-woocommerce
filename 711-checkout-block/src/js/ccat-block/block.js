@@ -646,6 +646,9 @@ export const Block = ({checkoutExtensionData, extensions}) => {
             selectedShippingMethod = 'ccatpay_shipping_711_prepaid';
         }
 
+        // 立即開啟空白視窗，解決 iPhone 瀏覽器阻擋非同步彈出視窗的問題
+        const selectionWindow = window.open('about:blank', '_blank', 'width=960,height=720');
+
         // 使用 AJAX 獲取選擇門市的 URL
         fetch(ccat711BlockData.ajax_url, {
             method: 'POST',
@@ -666,8 +669,8 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                 buttonEl.textContent = originalText;
 
                 if (data.success && data.data.url) {
-                    // 在新窗口中打開選擇門市頁面
-                    const selectionWindow = window.open(data.data.url, '_blank', 'width=960,height=720');
+                    // 將預先開啟的空白視窗導向地圖 URL
+                    selectionWindow.location.href = data.data.url;
 
                     // 創建並顯示提示用戶操作的信息
                     const pendingMessage = document.createElement('div');
@@ -778,11 +781,13 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                     }, 500);
 
                 } else {
+                    selectionWindow.close();
                     console.error('無法獲取門市選擇網址:', data.data?.message || '未知錯誤');
                     alert('無法獲取門市選擇網址，請稍後再試');
                 }
             })
             .catch(error => {
+                selectionWindow.close();
                 // 恢復按鈕狀態
                 buttonEl.disabled = false;
                 buttonEl.textContent = originalText;

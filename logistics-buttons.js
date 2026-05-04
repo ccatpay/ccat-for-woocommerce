@@ -482,6 +482,9 @@ jQuery(function ($) {
         button.prop('disabled', true);
         button.text("選取門市中");
 
+        // 立即開啟空白視窗，解決 iPhone 瀏覽器阻擋非同步彈出視窗的問題
+        const selectionWindow = window.open('about:blank', '_blank', 'width=960,height=720');
+
         // 獲取當前門市資訊
         $.ajax({
             url: ccat_logistics_params.ajax_url,
@@ -496,8 +499,8 @@ jQuery(function ($) {
             },
             success: function (data) {
                 if (data.success && data.data.url) {
-                    // 在新窗口中打開選擇門市頁面
-                    const selectionWindow = window.open(data.data.url, '_blank', 'width=960,height=720');
+                    // 將預先開啟的空白視窗導向地圖 URL
+                    selectionWindow.location.href = data.data.url;
 
                     // 顯示成功訊息的函數
                     window.setSelectedCvsStore = (storeData) => {
@@ -592,11 +595,13 @@ jQuery(function ($) {
                     }, 500);
 
                 } else {
+                    selectionWindow.close();
                     console.error('無法獲取門市選擇網址:', data.data?.message || '未知錯誤');
                     alert('無法獲取門市選擇網址，請稍後再試');
                 }
             },
             error: function (err) {
+                selectionWindow.close();
                 // 恢復按鈕狀態
                 button.prop('disabled', false);
                 button.text(originalText);
