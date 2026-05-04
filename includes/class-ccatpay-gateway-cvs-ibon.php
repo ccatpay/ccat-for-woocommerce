@@ -36,6 +36,10 @@ class CCATPAY_Gateway_Cvs_Ibon extends CCATPAY_Gateway_Cvs_Abstract {
 
 		$this->title       = __( '黑貓Pay - Ibon繳款', 'ccat-for-woocommerce');
 		$this->description = __( '使用黑貓Pay Ibon，付款更安心。', 'ccat-for-woocommerce');
+		add_action( 'woocommerce_thankyou', array( $this, 'display_payment_button' ) );
+		add_action( 'woocommerce_view_order', array( $this, 'display_payment_button' ) );
+		add_action( 'woocommerce_admin_order_data_after_order_details', array( $this, 'display_payment_button' ) );
+
 		parent::__construct();
 	}
 
@@ -81,5 +85,37 @@ class CCATPAY_Gateway_Cvs_Ibon extends CCATPAY_Gateway_Cvs_Abstract {
 	 */
 	public function acquirer_type(): string {
 		return '2';
+	}
+
+	/**
+	 * Displays the payment button for Ibon payment.
+	 *
+	 * @param int $order_id The ID of the order.
+	 */
+	public function display_payment_button( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order || $order->get_payment_method() !== $this->id ) {
+			return;
+		}
+
+		$short_url = $order->get_meta( '_ccat_short_url' );
+		if ( $short_url ) {
+			$current_action = current_filter();
+			$html           = '';
+
+			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
+				$html .= '<div class="ccat-pay-button-container" style="margin: 2em 0; padding: 2em; border-radius: 12px; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); border: 1px solid #e0e0e0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">';
+				$html .= '<h3 style="margin-top: 0; color: #333; font-weight: 600;">' . esc_html__( '訂單已建立，請完成後續繳費', 'ccat-for-woocommerce' ) . '</h3>';
+				$html .= '<p style="color: #666; margin-bottom: 1.5em;">' . esc_html__( '點擊下方按鈕將開啟黑貓Pay支付頁面取得繳費代碼。', 'ccat-for-woocommerce' ) . '</p>';
+				$html .= '<a href="' . esc_url( $short_url ) . '" class="button alt" style="display: inline-block; padding: 15px 40px; font-size: 1.1em; font-weight: 600; text-decoration: none; border-radius: 50px; background: #000; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">' . esc_html__( '前往 Ibon 繳費', 'ccat-for-woocommerce' ) . '</a>';
+				$html .= '</div>';
+			} else {
+				// Admin view.
+				$html .= '<p class="form-field form-field-wide"><strong>' . esc_html__( 'Ibon 繳費連結:', 'ccat-for-woocommerce' ) . '</strong><br>';
+				$html .= '<a href="' . esc_url( $short_url ) . '" target="_blank">' . esc_html( $short_url ) . '</a></p>';
+			}
+
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 	}
 }
