@@ -18,8 +18,6 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 * 信用卡支付
 * 超商條碼支付 (ibon)
 * 銀行虛擬帳號 (ATM)
-* OPEN錢包行動支付 (OPW)
-* 愛金卡行動支付 (iCash)
 
 特色：
 
