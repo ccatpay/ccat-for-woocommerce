@@ -78,10 +78,12 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 		$virtual_account  = $order->get_meta( self::ATM_VIRTUAL_ACCOUNT );
 		$payment_deadline = $order->get_meta( self::ATM_EXPIRE_DATA );
 		$bill_amount      = $order->get_meta( self::ATM_BILL_AMOUNT );
+		$short_url        = $order->get_meta( '_ccat_short_url' );
+
+		$current_action = current_filter();
+		$html           = '';
 
 		if ( $virtual_account && $payment_deadline ) {
-			$html           = '';
-			$current_action = current_filter();
 			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
 				$html .= '<h2>' . esc_html__( '感謝訂購 請到ATM繳款', 'ccat-for-woocommerce') . '</h2>';
 			}
@@ -91,6 +93,19 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce'), $payment_deadline ) ) . '</p>';
 			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce'), $bill_amount ) ) . '</p>';
 			echo $html;
+		} elseif ( $short_url ) {
+			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
+				$html .= '<div class="ccat-pay-button-container" style="margin: 2em 0; padding: 2em; border-radius: 12px; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); border: 1px solid #e0e0e0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">';
+				$html .= '<h3 style="margin-top: 0; color: #333; font-weight: 600;">' . esc_html__( '訂單已建立，請完成後續繳費', 'ccat-for-woocommerce' ) . '</h3>';
+				$html .= '<p style="color: #666; margin-bottom: 1.5em;">' . esc_html__( '點擊下方按鈕將開啟黑貓Pay支付頁面取得繳費代碼。', 'ccat-for-woocommerce' ) . '</p>';
+				$html .= '<a href="' . esc_url( $short_url ) . '" class="button alt" style="display: inline-block; padding: 15px 40px; font-size: 1.1em; font-weight: 600; text-decoration: none; border-radius: 50px; background: #000; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">' . esc_html__( '前往 ATM 繳費', 'ccat-for-woocommerce' ) . '</a>';
+				$html .= '</div>';
+			} else {
+				// Admin view.
+				$html .= '<p class="form-field form-field-wide"><strong>' . esc_html__( 'ATM 繳費連結:', 'ccat-for-woocommerce' ) . '</strong><br>';
+				$html .= '<a href="' . esc_url( $short_url ) . '" target="_blank">' . esc_html( $short_url ) . '</a></p>';
+			}
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 

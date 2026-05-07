@@ -141,7 +141,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 			if ( isset( $response_data['status'] ) && self::CODE_OK === $response_data['status'] ) {
 				$this->add_apn_notification( $order, $response_data );
 
-				if ( $this->payment_type() === '0' && ! empty( $response_data['short_url'] ) ) {
+				if ( ( $this->payment_type() === '0' || ( $this->payment_type() === '1' && empty( $response_data['virtual_account'] ) ) ) && ! empty( $response_data['short_url'] ) ) {
 					$order->update_meta_data( '_ccat_short_url', $response_data['short_url'] );
 				}
 
@@ -154,12 +154,12 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 
 				$redirect = ! empty( $response_data['short_url'] ) ? $response_data['short_url'] : $this->get_return_url( $order );
 
-				if ( $this->payment_type() === '0' && ! empty( $response_data['short_url'] ) ) {
+				if ( ( $this->payment_type() === '0' || ( $this->payment_type() === '1' && empty( $response_data['virtual_account'] ) ) ) && ! empty( $response_data['short_url'] ) ) {
 					$redirect = $this->get_return_url( $order );
 				}
 
-				if ( $this->payment_type() === '1' ) {
-					$redirect = ! empty( $response_data['virtual_account'] ) ? $this->get_return_url( $order ) : $redirect;
+				if ( $this->payment_type() === '1' && ! empty( $response_data['virtual_account'] ) ) {
+					$redirect = $this->get_return_url( $order );
 				}
 
 				return array(
