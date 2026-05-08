@@ -145,6 +145,7 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 = 2.6.1 =
 
+* 改進： 調整 Ibon 支付流程，當沒有短網址時，改為在結帳完成頁面顯示直接回傳的 Ibon 繳款代碼。
 * 改進： 調整 ATM 支付流程，當沒有虛擬帳號但有短網址時，改為在結帳完成頁面顯示支付按鈕而非自動轉址。
 
 == Third-party Resources ==
