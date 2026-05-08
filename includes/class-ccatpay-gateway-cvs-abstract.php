@@ -138,6 +138,16 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 				$order->update_meta_data( self::ATM_BILL_AMOUNT, intval( $response_data['bill_amount'] ) );
 			}
 
+			if ( $this->payment_type() === '0' && empty( $response_data['short_url'] ) ) {
+				$ibon_code   = sanitize_text_field( ( $response_data['ibon_shopid'] ?? '' ) . ( $response_data['ibon_code'] ?? '' ) );
+				$expire_date = sanitize_text_field( $response_data['expire_date'] ?? '' );
+				$bill_amount = intval( $response_data['bill_amount'] ?? 0 );
+
+				$order->update_meta_data( '_ccat_ibon_code', $ibon_code );
+				$order->update_meta_data( self::ATM_EXPIRE_DATA, $expire_date );
+				$order->update_meta_data( self::ATM_BILL_AMOUNT, $bill_amount );
+			}
+
 			if ( isset( $response_data['status'] ) && self::CODE_OK === $response_data['status'] ) {
 				$this->add_apn_notification( $order, $response_data );
 
