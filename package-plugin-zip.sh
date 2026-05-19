@@ -51,7 +51,9 @@ zip -r "$OUTPUT_FILE" "$PLUGIN_NAME" \
     -x "$PLUGIN_NAME/**/webpack.config.js" \
     -x "$PLUGIN_NAME/**/LICENSE" \
     -x "$PLUGIN_NAME/**/tests/*" \
-    -x "$PLUGIN_NAME/**/docs/*"
+    -x "$PLUGIN_NAME/**/docs/*" \
+    -x "$PLUGIN_NAME/download/*" \
+    -x "$PLUGIN_NAME/AGENTS.md"
 
 # 將壓縮檔移回原目錄
 mv "$OUTPUT_FILE" "$PLUGIN_NAME/"

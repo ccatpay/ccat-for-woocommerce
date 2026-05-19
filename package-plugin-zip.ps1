@@ -87,7 +87,8 @@ $ExcludeDirs = @(
     ".svn",
     ".github",
     "tests",
-    "docs"
+    "docs",
+    "download"
 )
 
 # 排除檔案 (/XF)
@@ -104,7 +105,8 @@ $ExcludeFiles = @(
     "README.md",
     "package.json",
     "webpack.config.js",
-    "LICENSE"
+    "LICENSE",
+    "AGENTS.md"
 )
 
 # Robocopy 參數組裝
