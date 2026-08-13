@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * CCATPAY_Gateway_Cvs_Abstract class
  *

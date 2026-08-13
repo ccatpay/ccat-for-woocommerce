@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * CCATPAY_711_Blocks_Integration class
  *

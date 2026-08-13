@@ -583,156 +583,163 @@ class CCATPAY_Shipping_Display
     public function register_admin_scripts()
     {
         $screen = get_current_screen();
-
-        if ($screen && 'woocommerce_page_wc-orders' === $screen->id) {
-            if (!isset($_GET['id'])) { // phpcs:ignore WordPress
-                return;
-            }
-            $order_id = absint($_GET['id']); // phpcs:ignore WordPress
-
-            $order = wc_get_order($order_id);
-            if (!$order) {
-                return;
-            }
-            $shipping_methods = $order->get_shipping_methods();
-            foreach ($shipping_methods as $shipping_method_obj) {
-                $shipping_method = $shipping_method_obj->get_method_id();
-                break; // 只取第一個運送方法.
-            }
-            if (empty($shipping_method)) {
-                return;
-            }
-            // 根據運送方式類型決定門市類別.
-            if (false !== strpos($shipping_method, 'refrigerated')) {
-                $store_category = '15'; // 冷藏.
-            } elseif (false !== strpos($shipping_method, 'frozen')) {
-                $store_category = '14'; // 冷凍.
-            } else {
-                $store_category = '13'; // 常溫.
-            }
-            // 註冊並加載 JS.
-            wp_register_script(
-                CCATPAYMENTS_PREFIX.'ccat-logistics-buttons',
-                CCATPAY_Payments::plugin_url() . '/logistics-buttons.js',
-                array('jquery'),
-                time(),
-                true
-            );
-
-            // 將必要的變數傳遞給 JS.
-            wp_localize_script(
-                CCATPAYMENTS_PREFIX.'ccat-logistics-buttons',
-                CCATPAYMENTS_JS_PREFIX.'ccat_logistics_params',
-                array(
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('ccat-logistics-nonce'),
-                    'store_category' => $store_category,
-                    'shipping_method' => $shipping_method,
-                    'order_id' => $order_id,
-                )
-            );
-
-            // 加載 JS.
-            wp_enqueue_script(CCATPAYMENTS_PREFIX.'ccat-logistics-buttons');
-
-            // 加載 CSS.
-            wp_add_inline_style(
-                'woocommerce_admin_styles', // 使用 WooCommerce 的管理樣式.
-                '
-				.ccat-logistics-buttons {
-					margin-top: 10px;
-				}
-				.ccat-logistics-buttons .button {
-					margin-right: 5px;
-					margin-bottom: 5px;
-				}
-				.ccat-store-modal {
-					display: none;
-					position: fixed;
-					z-index: 1000;
-					left: 0;
-					top: 0;
-					width: 100%;
-					height: 100%;
-					overflow: auto;
-					background-color: rgba(0,0,0,0.4);
-				}
-				.ccat-store-modal-content {
-					background-color: #fefefe;
-					margin: 5% auto;
-					padding: 20px;
-					border: 1px solid #888;
-					width: 80%;
-					max-width: 960px;
-					border-radius: 5px;
-					box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-				}
-				.ccat-store-close {
-					color: #aaa;
-					float: right;
-					font-size: 28px;
-					font-weight: bold;
-					cursor: pointer;
-				}
-				.ccat-store-close:hover,
-				.ccat-store-close:focus {
-					color: black;
-					text-decoration: none;
-					cursor: pointer;
-				}
-				.ccat-store-search {
-					margin-bottom: 20px;
-				}
-				.ccat-store-search-fields {
-					display: flex;
-					flex-wrap: wrap;
-					gap: 10px;
-					margin-bottom: 10px;
-				}
-				.ccat-store-search-field {
-					flex: 1;
-					min-width: 150px;
-				}
-				.ccat-store-search-button {
-					display: block;
-					width: 100%;
-					text-align: center;
-				}
-				.ccat-store-list {
-					max-height: 400px;
-					overflow-y: auto;
-					border: 1px solid #ddd;
-					margin-bottom: 20px;
-				}
-				.ccat-store-list table {
-					width: 100%;
-					border-collapse: collapse;
-				}
-				.ccat-store-list th, 
-				.ccat-store-list td {
-					padding: 8px;
-					text-align: left;
-					border-bottom: 1px solid #ddd;
-				}
-				.ccat-store-list th {
-					background-color: #f2f2f2;
-				}
-				.ccat-store-list tr:hover {
-					background-color: #f5f5f5;
-				}
-				.ccat-store-list tr.selected {
-					background-color: #e7f7e7;
-				}
-				.ccat-store-actions {
-					text-align: right;
-				}
-				.ccat-store-loading {
-					text-align: center;
-					padding: 20px;
-				}
-				'
-            );
+        if (!$screen) {
+            return;
         }
+
+        $order_id = 0;
+        if ('woocommerce_page_wc-orders' === $screen->id && isset($_GET['id'])) { // phpcs:ignore WordPress
+            $order_id = absint($_GET['id']); // phpcs:ignore WordPress
+        } elseif ('shop_order' === $screen->id && isset($_GET['post'])) { // phpcs:ignore WordPress
+            $order_id = absint($_GET['post']); // phpcs:ignore WordPress
+        }
+
+        if (!$order_id) {
+            return;
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return;
+        }
+        $shipping_methods = $order->get_shipping_methods();
+        foreach ($shipping_methods as $shipping_method_obj) {
+            $shipping_method = $shipping_method_obj->get_method_id();
+            break; // 只取第一個運送方法.
+        }
+        if (empty($shipping_method)) {
+            return;
+        }
+        // 根據運送方式類型決定門市類別.
+        if (false !== strpos($shipping_method, 'refrigerated')) {
+            $store_category = '15'; // 冷藏.
+        } elseif (false !== strpos($shipping_method, 'frozen')) {
+            $store_category = '14'; // 冷凍.
+        } else {
+            $store_category = '13'; // 常溫.
+        }
+        // 註冊並加載 JS.
+        wp_register_script(
+            CCATPAYMENTS_PREFIX.'ccat-logistics-buttons',
+            CCATPAY_Payments::plugin_url() . '/logistics-buttons.js',
+            array('jquery'),
+            time(),
+            true
+        );
+
+        // 將必要的變數傳遞給 JS.
+        wp_localize_script(
+            CCATPAYMENTS_PREFIX.'ccat-logistics-buttons',
+            CCATPAYMENTS_JS_PREFIX.'ccat_logistics_params',
+            array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('ccat-logistics-nonce'),
+                'store_category' => $store_category,
+                'shipping_method' => $shipping_method,
+                'order_id' => $order_id,
+            )
+        );
+
+        // 加載 JS.
+        wp_enqueue_script(CCATPAYMENTS_PREFIX.'ccat-logistics-buttons');
+
+        // 加載 CSS.
+        wp_add_inline_style(
+            'woocommerce_admin_styles', // 使用 WooCommerce 的管理樣式.
+            '
+			.ccat-logistics-buttons {
+				margin-top: 10px;
+			}
+			.ccat-logistics-buttons .button {
+				margin-right: 5px;
+				margin-bottom: 5px;
+			}
+			.ccat-store-modal {
+				display: none;
+				position: fixed;
+				z-index: 1000;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				overflow: auto;
+				background-color: rgba(0,0,0,0.4);
+			}
+			.ccat-store-modal-content {
+				background-color: #fefefe;
+				margin: 5% auto;
+				padding: 20px;
+				border: 1px solid #888;
+				width: 80%;
+				max-width: 960px;
+				border-radius: 5px;
+				box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+			}
+			.ccat-store-close {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+				cursor: pointer;
+			}
+			.ccat-store-close:hover,
+			.ccat-store-close:focus {
+				color: black;
+				text-decoration: none;
+				cursor: pointer;
+			}
+			.ccat-store-search {
+				margin-bottom: 20px;
+			}
+			.ccat-store-search-fields {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin-bottom: 10px;
+			}
+			.ccat-store-search-field {
+				flex: 1;
+				min-width: 150px;
+			}
+			.ccat-store-search-button {
+				display: block;
+				width: 100%;
+				text-align: center;
+			}
+			.ccat-store-list {
+				max-height: 400px;
+				overflow-y: auto;
+				border: 1px solid #ddd;
+				margin-bottom: 20px;
+			}
+			.ccat-store-list table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+			.ccat-store-list th, 
+			.ccat-store-list td {
+				padding: 8px;
+				text-align: left;
+				border-bottom: 1px solid #ddd;
+			}
+			.ccat-store-list th {
+				background-color: #f2f2f2;
+			}
+			.ccat-store-list tr:hover {
+				background-color: #f5f5f5;
+			}
+			.ccat-store-list tr.selected {
+				background-color: #e7f7e7;
+			}
+			.ccat-store-actions {
+				text-align: right;
+			}
+			.ccat-store-loading {
+				text-align: center;
+				padding: 20px;
+			}
+			'
+        );
     }
 
 
