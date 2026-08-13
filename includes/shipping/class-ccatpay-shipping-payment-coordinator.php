@@ -39,6 +39,29 @@ class CCATPAY_Shipping_Payment_Coordinator {
 				'filter_api_payment_gateways',
 			),
 		);
+
+		// 自動補全與修復 Checkout Field Editor 遺失的核心欄位.
+		add_filter(
+			'woocommerce_checkout_fields',
+			array(
+				__CLASS__,
+				'ensure_core_checkout_fields',
+			),
+			99999
+		);
+
+		// 自動補全顧客預設國家地區為 TW.
+		add_filter(
+			'woocommerce_customer_default_location',
+			array(
+				__CLASS__,
+				'ensure_default_customer_country',
+			),
+			99999
+		);
+
+		// 檢測相容性並於後台提示管理者.
+		add_action( 'admin_notices', array( __CLASS__, 'check_checkout_field_editor_compatibility' ) );
 	}
 
 	/**
@@ -177,4 +200,92 @@ class CCATPAY_Shipping_Payment_Coordinator {
 
 		return false;
 	}
+
+	/**
+	 * 自動補全與確保核心結帳欄位存在，防止 Checkout Field Editor 抹除導致物流/電子地圖無效
+	 *
+	 * @param array $fields 現有結帳欄位.
+	 * @return array 修復後的結帳欄位
+	 */
+	public static function ensure_core_checkout_fields( array $fields ): array {
+		if ( ! is_array( $fields ) ) {
+			return $fields;
+		}
+
+		// 確保 billing_country 存在.
+		if ( ! isset( $fields['billing'] ) || ! is_array( $fields['billing'] ) ) {
+			$fields['billing'] = array();
+		}
+
+		if ( ! isset( $fields['billing']['billing_country'] ) ) {
+			$fields['billing']['billing_country'] = array(
+				'type'        => 'country',
+				'label'       => __( '國家/地區', 'ccat-for-woocommerce' ),
+				'required'    => true,
+				'class'       => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
+				'default'     => 'TW',
+				'priority'    => 40,
+			);
+		}
+
+		// 確保 shipping_country 存在.
+		if ( ! isset( $fields['shipping'] ) || ! is_array( $fields['shipping'] ) ) {
+			$fields['shipping'] = array();
+		}
+
+		if ( ! isset( $fields['shipping']['shipping_country'] ) ) {
+			$fields['shipping']['shipping_country'] = array(
+				'type'        => 'country',
+				'label'       => __( '國家/地區', 'ccat-for-woocommerce' ),
+				'required'    => false,
+				'class'       => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
+				'default'     => 'TW',
+				'priority'    => 40,
+			);
+		}
+
+		// 確保 shipping_address_1 存在（電子地圖回傳門市地址需要）.
+		if ( ! isset( $fields['shipping']['shipping_address_1'] ) ) {
+			$fields['shipping']['shipping_address_1'] = array(
+				'label'    => __( '街道地址', 'ccat-for-woocommerce' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'address-field' ),
+				'priority' => 50,
+			);
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * 自動補全顧客預設國家地區為 TW
+	 *
+	 * @param array $location 位置資訊.
+	 * @return array
+	 */
+	public static function ensure_default_customer_country( array $location ): array {
+		if ( empty( $location['country'] ) ) {
+			$location['country'] = 'TW';
+		}
+		return $location;
+	}
+
+	/**
+	 * 後台相容性檢測提醒
+	 */
+	public static function check_checkout_field_editor_compatibility(): void {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$cfe_active = class_exists( 'THWCFD' ) || class_exists( 'WC_Admin_Checkout_Fields' ) || defined( 'THWCFD_VERSION' );
+		if ( $cfe_active ) {
+			// 在後台顯示提示說明自動修復已生效.
+			echo '<div class="notice notice-info is-dismissible">';
+			echo '<p><strong>' . esc_html__( '【黑貓 Pay 物流與金流】自動修復提醒：', 'ccat-for-woocommerce' ) . '</strong> ';
+			echo esc_html__( '檢測到您安裝了 Checkout Field Editor 外掛。本外掛已自動啟用相容性防護機制，自動補全運算台灣黑貓物流與 7-11 電子地圖所需的預設國家 (TW) 及地址欄位。', 'ccat-for-woocommerce' );
+			echo '</p></div>';
+		}
+	}
 }
+
