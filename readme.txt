@@ -155,6 +155,7 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 = 2.6.3 =
 
 * 修正： 修復傳統 WooCommerce 訂單編輯頁面 (Non-HPOS) 點擊托運單按鈕無反應的問題。
+* 修正： 自動同步「啟用黑貓物流」全域設定至 WooCommerce 運費區域 (Shipping Zones) 實體狀態。
 
 == Third-party Resources ==
 

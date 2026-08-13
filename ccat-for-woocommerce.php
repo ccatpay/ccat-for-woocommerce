@@ -5,7 +5,9 @@
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
  * Version: 2.6.3
  * Author: ccatpay
+ * Author URI: https://www.ccatpay.com.tw/
  * Text Domain: ccat-for-woocommerce
+ * Domain Path: /languages
  *
  * Requires at least: 6.6
  * Tested up to: 6.8
@@ -87,24 +89,22 @@ class CCATPAY_Payments {
 	 * @return array 包含黑貓物流的運送方式
 	 */
 	public static function add_shipping_methods( array $methods ): array {
-		if ( self::is_shipping_enabled() ) {
-			$methods['ccatpay_shipping_cod']         = 'CCATPAY_Shipping_COD';
-			$methods['ccatpay_shipping_711_cod']     = 'CCATPAY_Shipping_711_COD';
-			$methods['ccatpay_shipping_prepaid']     = 'CCATPAY_Shipping_Prepaid';
-			$methods['ccatpay_shipping_711_prepaid'] = 'CCATPAY_Shipping_711_Prepaid';
+		$methods['ccatpay_shipping_cod']         = 'CCATPAY_Shipping_COD';
+		$methods['ccatpay_shipping_711_cod']     = 'CCATPAY_Shipping_711_COD';
+		$methods['ccatpay_shipping_prepaid']     = 'CCATPAY_Shipping_Prepaid';
+		$methods['ccatpay_shipping_711_prepaid'] = 'CCATPAY_Shipping_711_Prepaid';
 
-			// 冷藏物流方法.
-			$methods['ccatpay_shipping_cod_refrigerated']         = 'CCATPAY_Shipping_COD_Refrigerated';
-			$methods['ccatpay_shipping_711_cod_refrigerated']     = 'CCATPAY_Shipping_711_COD_Refrigerated';
-			$methods['ccatpay_shipping_prepaid_refrigerated']     = 'CCATPAY_Shipping_Prepaid_Refrigerated';
-			$methods['ccatpay_shipping_711_prepaid_refrigerated'] = 'CCATPAY_Shipping_711_Prepaid_Refrigerated';
+		// 冷藏物流方法.
+		$methods['ccatpay_shipping_cod_refrigerated']         = 'CCATPAY_Shipping_COD_Refrigerated';
+		$methods['ccatpay_shipping_711_cod_refrigerated']     = 'CCATPAY_Shipping_711_COD_Refrigerated';
+		$methods['ccatpay_shipping_prepaid_refrigerated']     = 'CCATPAY_Shipping_Prepaid_Refrigerated';
+		$methods['ccatpay_shipping_711_prepaid_refrigerated'] = 'CCATPAY_Shipping_711_Prepaid_Refrigerated';
 
-			// 冷凍物流方法.
-			$methods['ccatpay_shipping_cod_frozen']         = 'CCATPAY_Shipping_COD_Frozen';
-			$methods['ccatpay_shipping_711_cod_frozen']     = 'CCATPAY_Shipping_711_COD_Frozen';
-			$methods['ccatpay_shipping_prepaid_frozen']     = 'CCATPAY_Shipping_Prepaid_Frozen';
-			$methods['ccatpay_shipping_711_prepaid_frozen'] = 'CCATPAY_Shipping_711_Prepaid_Frozen';
-		}
+		// 冷凍物流方法.
+		$methods['ccatpay_shipping_cod_frozen']         = 'CCATPAY_Shipping_COD_Frozen';
+		$methods['ccatpay_shipping_711_cod_frozen']     = 'CCATPAY_Shipping_711_COD_Frozen';
+		$methods['ccatpay_shipping_prepaid_frozen']     = 'CCATPAY_Shipping_Prepaid_Frozen';
+		$methods['ccatpay_shipping_711_prepaid_frozen'] = 'CCATPAY_Shipping_711_Prepaid_Frozen';
 
 		return $methods;
 	}
@@ -291,7 +291,7 @@ class CCATPAY_Payments {
 		}
 
 		// 載入黑貓物流相關類別.
-		if ( class_exists( 'WC_Shipping_Method' ) && self::is_shipping_enabled() ) {
+		if ( class_exists( 'WC_Shipping_Method' ) ) {
 			require_once 'includes/shipping/class-ccatpay-shipping-abstract.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-cod.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-711-cod.php';

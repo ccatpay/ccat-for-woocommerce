@@ -129,6 +129,10 @@ abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
 	 * @param array $package 包裹資訊.
 	 */
 	public function calculate_shipping( $package = array() ) {
+		if ( ! CCATPAY_Payments::is_shipping_enabled() ) {
+			return;
+		}
+
         $rate = [
             'id'      => $this->get_rate_id(),
             'label'   => $this->title,

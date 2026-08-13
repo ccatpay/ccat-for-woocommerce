@@ -161,6 +161,38 @@ class CCATPAY_Settings {
 	 */
 	public static function save_settings() {
 		woocommerce_update_options( self::get_settings() );
+		$is_shipping_enabled = CCATPAY_Payments::is_shipping_enabled();
+		self::sync_shipping_methods_status( $is_shipping_enabled );
+	}
+
+	/**
+	 * 同步黑貓物流方法在運費區域的啟用狀態
+	 *
+	 * @param bool $enabled 是否啟用.
+	 * @return void
+	 */
+	public static function sync_shipping_methods_status( bool $enabled ): void {
+		if ( ! class_exists( 'WC_Shipping_Zones' ) ) {
+			return;
+		}
+
+		$raw_zones = WC_Shipping_Zones::get_zones();
+		$zone_ids  = array_merge( array( 0 ), array_keys( $raw_zones ) );
+
+		foreach ( $zone_ids as $zone_id ) {
+			$zone             = new WC_Shipping_Zone( $zone_id );
+			$shipping_methods = $zone->get_shipping_methods();
+
+			foreach ( $shipping_methods as $instance_id => $method ) {
+				if ( 0 === strpos( $method->id, 'ccatpay_shipping_' ) ) {
+					$zone->update_shipping_method( $instance_id, array( 'enabled' => $enabled ? 'yes' : 'no' ) );
+				}
+			}
+		}
+
+		if ( $enabled && method_exists( 'CCATPAY_Payments', 'check_and_add_taiwan_shipping_zone' ) ) {
+			CCATPAY_Payments::check_and_add_taiwan_shipping_zone();
+		}
 	}
 
 	/**
