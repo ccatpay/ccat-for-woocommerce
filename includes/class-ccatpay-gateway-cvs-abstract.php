@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * CCATPAY_Gateway_Cvs_Abstract class
  *
@@ -178,7 +178,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 				);
 			} else {
 				$error_message = $response_data['msg'] ?? __( 'Unknown Error.', 'ccat-for-woocommerce');
-				delete_transient( 'api_access_token' );
+				$this->clear_payment_api_token_cache();
 				throw new Exception( $error_message );
 			}
 		} catch ( Exception $e ) {

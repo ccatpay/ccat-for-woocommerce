@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * CCATPAY_711_Blocks_Integration class
  *
@@ -171,7 +171,10 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 		// 如果找到支付閘道，使用它來獲取 token.
 		if ( $gateway ) {
-			$token      = $gateway->get_payment_api_token();
+			$token = $gateway->get_payment_api_token();
+			if ( empty( $token ) ) {
+				$token = $gateway->get_payment_api_token( true );
+			}
 			$url        = $gateway->get_base_url();
 			$service_id = $gateway->get_account();
 

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * CCATPAY_Gateway_App_Abstract class
  *
@@ -90,6 +90,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 			$response_data = json_decode( $response_body, true );
 
 			if ( empty( $response_data['status'] ) || self::CODE_OK !== $response_data['status'] ) {
+				$this->clear_payment_api_token_cache();
 				$logger = wc_get_logger();
 				$logger->error(
 					'Token:' . $api_token,
