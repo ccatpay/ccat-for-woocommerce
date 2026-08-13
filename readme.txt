@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 8.3
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -147,6 +147,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 改進： 調整 Ibon 支付流程，當沒有短網址時，改為在結帳完成頁面顯示直接回傳的 Ibon 繳款代碼。
 * 改進： 調整 ATM 支付流程，當沒有虛擬帳號但有短網址時，改為在結帳完成頁面顯示支付按鈕而非自動轉址。
+
+= 2.6.2 =
+
+* 修正： 修復加裝 WP Cache 外掛後不會向黑貓 PAY API 更新 token 的問題。
 
 == Third-party Resources ==
 
