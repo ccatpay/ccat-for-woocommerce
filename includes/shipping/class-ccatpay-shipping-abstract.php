@@ -70,6 +70,32 @@ abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
 	}
 
 	/**
+	 * 檢查運送方式是否可用
+	 *
+	 * @param array $package 包裹資料.
+	 * @return bool
+	 */
+	public function is_available( $package = array() ): bool {
+		if ( ! CCATPAY_Payments::is_shipping_enabled() ) {
+			return false;
+		}
+
+		return parent::is_available( $package );
+	}
+
+	/**
+	 * 後台設定選單顯示
+	 */
+	public function admin_options() {
+		if ( ! CCATPAY_Payments::is_shipping_enabled() ) {
+			echo '<div class="notice notice-warning inline"><p><strong>' .
+				esc_html__( '警告：黑貓物流功能目前已於「黑貓Pay設定」中停用，此運送方式將不會在前台呈現。', 'ccat-for-woocommerce' ) .
+				'</strong></p></div>';
+		}
+		parent::admin_options();
+	}
+
+	/**
 	 * 初始化表單欄位
 	 */
 	public function init_form_fields() {

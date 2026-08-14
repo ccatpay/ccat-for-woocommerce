@@ -82,6 +82,15 @@ class CCATPAY_Shipping_Display
             wp_die();
         }
 
+        if ( ! CCATPAY_Payments::is_shipping_enabled() ) {
+            wp_send_json_error(
+                array(
+                    'message' => __( '黑貓物流功能已於黑貓Pay設定中停用，無法建立託運單', 'ccat-for-woocommerce' ),
+                )
+            );
+            return;
+        }
+
         // 獲取訂單 ID.
         $order_id = isset($_POST['order_id']) ? absint($_POST['order_id']) : 0;
 
@@ -445,6 +454,7 @@ class CCATPAY_Shipping_Display
 
         // 判斷是否為黑貓物流.
         if ($this->is_ccat_shipping($order)) {
+            $is_shipping_enabled = CCATPAY_Payments::is_shipping_enabled();
             // 檢查是否已列印託運單.
             $has_printed = $order->get_meta(self::META_PRINTED) === 'yes';
             // 檢查付款方式是否為貨到付款.
@@ -458,70 +468,71 @@ class CCATPAY_Shipping_Display
             echo '<div class="ccat-logistics-buttons">';
 
             if ($is_paid) {
+                if (!$is_shipping_enabled && !$has_printed) {
+                    echo '<p class="ccat-logistics-notice" style="color: #d63638; font-weight: bold;">' .
+                        esc_html__('黑貓物流功能已於黑貓Pay設定中停用，無法建立新託運單。', 'ccat-for-woocommerce') .
+                        '</p>';
+                } else {
+                    echo '<p class="ccat-logistics-notice">';
+                    // 尚未列印過，超商取貨顯示託運單類別；宅配顯示希望配達時段與託運單類別。
+                    if ($this->is_convenience_store_shipping($order) && !$has_printed) {
+                        echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
+                            ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
+                                <option value="01">' . esc_html__('A4三模B2S', 'ccat-for-woocommerce') . '</option>
+                                <option value="02">' . esc_html__('熱轉印B2S', 'ccat-for-woocommerce') . '</option>
+                                <option value="03">' . esc_html__('A4三模B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
+                                <option value="04">' . esc_html__('熱轉印B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
+                            </select></label>';
 
+                    } elseif (!$has_printed) {
+                        echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
+                            ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
+                                <option value="01">' . esc_html__('A4二模宅配', 'ccat-for-woocommerce') . '</option>
+                                <option value="02">' . esc_html__('A4三模宅配', 'ccat-for-woocommerce') . '</option>
+                                <option value="03">' . esc_html__('熱轉印宅配', 'ccat-for-woocommerce') . '</option>
+                            </select></label>';
+                        echo '<label for="ccat_delivery_time" style="margin-right:8px;">' . esc_html__('希望配達時段', 'ccat-for-woocommerce') .
+                            ' <select id="ccat_delivery_time" class="ccat-delivery-time-select" style="min-width:120px; margin-left:4px;">
+                                <option value="04">' . esc_html__('不指定', 'ccat-for-woocommerce') . '</option>
+                                <option value="01">' . esc_html__('13時前', 'ccat-for-woocommerce') . '</option>
+                                <option value="02">' . esc_html__('14-18時', 'ccat-for-woocommerce') . '</option>
+                            </select></label>';
 
+                    }
+                    echo '</p>';
 
-                echo '<p class="ccat-logistics-notice">';
-                // 尚未列印過，超商取貨顯示託運單類別；宅配顯示希望配達時段與託運單類別。
-                if ($this->is_convenience_store_shipping($order) && !$has_printed) {
-                    echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
-                        ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
-                            <option value="01">' . esc_html__('A4三模B2S', 'ccat-for-woocommerce') . '</option>
-                            <option value="02">' . esc_html__('熱轉印B2S', 'ccat-for-woocommerce') . '</option>
-                            <option value="03">' . esc_html__('A4三模B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
-                            <option value="04">' . esc_html__('熱轉印B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
-                        </select></label>';
+                    // 超商取貨且尚未列印過，顯示變更門市按鈕.
+                    if ($this->is_convenience_store_shipping($order) && !$has_printed) {
+                        echo '<button type="button" class="button change-store" data-order-id="' . esc_attr($order->get_id()) . '">' .
+                            esc_html__('變更門市', 'ccat-for-woocommerce') .
+                            '</button>';
+                    }
 
-                } elseif(!$has_printed){
-                    echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
-                        ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
-                            <option value="01">' . esc_html__('A4二模宅配', 'ccat-for-woocommerce') . '</option>
-                            <option value="02">' . esc_html__('A4三模宅配', 'ccat-for-woocommerce') . '</option>
-                            <option value="03">' . esc_html__('熱轉印宅配', 'ccat-for-woocommerce') . '</option>
-                        </select></label>';
-                    echo '<label for="ccat_delivery_time" style="margin-right:8px;">' . esc_html__('希望配達時段', 'ccat-for-woocommerce') .
-                        ' <select id="ccat_delivery_time" class="ccat-delivery-time-select" style="min-width:120px; margin-left:4px;">
-                            <option value="04">' . esc_html__('不指定', 'ccat-for-woocommerce') . '</option>
-                            <option value="01">' . esc_html__('13時前', 'ccat-for-woocommerce') . '</option>
-                            <option value="02">' . esc_html__('14-18時', 'ccat-for-woocommerce') . '</option>
-                        </select></label>';
+                    // 尚未列印過，顯示建立物流訂單按鈕
+                    if (!$has_printed) {
+                        echo '<button type="button" class="button create-logistics-order" data-order-id="' . esc_attr($order->get_id()) . '">' .
+                            esc_html__('建立物流託運單', 'ccat-for-woocommerce') .
+                            '</button>';
+                    }
 
+                    // 顯示下載託運單按鈕.
+                    if ($has_printed) {
+                        echo '<button type="button" class="button download-shipping-label" data-order-id="' . esc_attr($order->get_id()) . '">' .
+                            esc_html__('下載託運單', 'ccat-for-woocommerce') .
+                            '</button>';
+                    }
+
+                    // 提醒託運單格式
+                    if ($this->is_convenience_store_shipping($order)) {
+                        echo '<p class="ccat-logistics-notice">' .
+                            esc_html__('黑貓快速到店(7-11取貨)，支援A4三模、熱轉印格式。', 'ccat-for-woocommerce') .
+                            '</p>';
+                    } else {
+                        echo '<p class="ccat-logistics-notice">' .
+                            esc_html__('黑貓宅配，支援A4二模、A4三模及熱轉印格式，不支援撿貨明細。', 'ccat-for-woocommerce') .
+                            '</p>';
+                    }
                 }
-                echo '</p>';
-                
-                // 超商取貨且尚未列印過，顯示變更門市按鈕.
-                if ($this->is_convenience_store_shipping($order) && !$has_printed) {
-                    echo '<button type="button" class="button change-store" data-order-id="' . esc_attr($order->get_id()) . '">' .
-                        esc_html__('變更門市', 'ccat-for-woocommerce') .
-                        '</button>';
-                }
-                
-                // 尚未列印過，顯示建立物流訂單按鈕
-                if (!$has_printed) {
-                    echo '<button type="button" class="button create-logistics-order" data-order-id="' . esc_attr($order->get_id()) . '">' .
-                        esc_html__('建立物流託運單', 'ccat-for-woocommerce') .
-                        '</button>';
-                }
-
-                // 顯示下載託運單按鈕.
-                if ($has_printed) {
-                    echo '<button type="button" class="button download-shipping-label" data-order-id="' . esc_attr($order->get_id()) . '">' .
-                        esc_html__('下載託運單', 'ccat-for-woocommerce') .
-                        '</button>';
-                }
-
-                // 提醒託運單格式
-				if ( $this->is_convenience_store_shipping( $order ) ) {
-					echo '<p class="ccat-logistics-notice">' .
-						esc_html__( '黑貓快速到店(7-11取貨)，支援A4三模、熱轉印格式。', 'ccat-for-woocommerce' ) .
-						'</p>';
-				} else {
-					echo '<p class="ccat-logistics-notice">' .
-						esc_html__( '黑貓宅配，支援A4二模、A4三模及熱轉印格式，不支援撿貨明細。', 'ccat-for-woocommerce' ) .
-						'</p>';
-				}
-
-                echo '</div>';
             } else {
                 // 顯示未付款提示訊息.
                 echo '<p class="ccat-logistics-notice">' .

@@ -3,10 +3,11 @@
  * Plugin Name: ccatpay Payment for WooCommerce
  * Plugin URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
- * Version: 2.6.2
+ * Version: 2.6.3
  * Author: ccatpay
+ * Author URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Text Domain: ccat-for-woocommerce
- *
+ * Domain Path: /languages
  * Requires at least: 6.6
  * Tested up to: 6.9
  * Requires PHP: 8.3
@@ -24,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 if ( ! defined( 'CCATPAYMENTS_VERSION' ) ) {
-	define( 'CCATPAYMENTS_VERSION', '2.6.2' );
+	define( 'CCATPAYMENTS_VERSION', '2.6.3' );
 }
 if ( ! defined( 'CCATPAYMENTS_DOMAIN' ) ) {
 	define( 'CCATPAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
@@ -262,14 +263,18 @@ class CCATPAY_Payments {
 		}
 		if ( self::is_shipping_enabled() ) {
 			require_once '711-checkout-block/class-ccatpay-711-blocks-integration.php';
-			require_once 'includes/class-ccatpay-shipping-display.php';
-			new CCATPAY_Shipping_Display();
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
 					$integration_registry->register( new CCATPAY_711_Blocks_Integration() );
 				}
 			);
+		}
+
+		// 載入後台物流顯示與下載邏輯 (即使停用物流，已建立的託運單仍需可供下載).
+		if ( is_admin() || wp_doing_ajax() ) {
+			require_once 'includes/class-ccatpay-shipping-display.php';
+			new CCATPAY_Shipping_Display();
 		}
 
 		if ( class_exists( 'WC_Payment_Gateway' ) && self::is_ccat_enabled() ) {
@@ -291,7 +296,7 @@ class CCATPAY_Payments {
 		}
 
 		// 載入黑貓物流相關類別.
-		if ( class_exists( 'WC_Shipping_Method' ) && self::is_shipping_enabled() ) {
+		if ( class_exists( 'WC_Shipping_Method' ) ) {
 			require_once 'includes/shipping/class-ccatpay-shipping-abstract.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-cod.php';
 			require_once 'includes/shipping/class-ccatpay-shipping-711-cod.php';

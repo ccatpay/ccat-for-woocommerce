@@ -5,7 +5,7 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.9
 Requires PHP: 8.3
-Stable tag: 2.6.2
+Stable tag: 2.6.3
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -152,7 +152,11 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 修正： 修復相容 WordPress / WooCommerce 預設顧客位置過濾器傳入型態不一致產生的 TypeError 致命錯誤。
 * 修正： 修復 get_payment_api_token 快取型態為陣列時觸發的 TypeError 致命錯誤。
-* 修正： 解決安裝快取套件（如 Redis Object Cache、WP Rocket 等）時 API Token 無法自動刷新及清除的問題。
+* 修正： 解決安裝快取套件時 API Token 可能無法自動刷新及清除的問題。
+
+= 2.6.3 =
+
+* 改進： 當「啟用黑貓物流」關閉時，停用運算與後台運送設定，並限制訂單託運單建立，同時保留歷史託運單下載功能。
 
 == Third-party Resources ==
 
