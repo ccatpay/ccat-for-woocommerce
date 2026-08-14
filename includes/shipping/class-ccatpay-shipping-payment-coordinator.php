@@ -39,6 +39,16 @@ class CCATPAY_Shipping_Payment_Coordinator {
 				'filter_api_payment_gateways',
 			),
 		);
+
+		// 自動補全顧客預設國家地區為 TW.
+		add_filter(
+			'woocommerce_customer_default_location',
+			array(
+				__CLASS__,
+				'ensure_default_customer_country',
+			),
+			99999
+		);
 	}
 
 	/**
@@ -159,6 +169,28 @@ class CCATPAY_Shipping_Payment_Coordinator {
 				}
 			);
 		}
+	}
+
+	/**
+	 * 自動補全顧客預設國家地區為 TW
+	 *
+	 * @param array|string $location 位置資訊.
+	 *
+	 * @return array|string
+	 */
+	public static function ensure_default_customer_country( $location ) {
+		if ( is_array( $location ) ) {
+			if ( empty( $location['country'] ) ) {
+				$location['country'] = 'TW';
+			}
+			return $location;
+		}
+
+		if ( empty( $location ) ) {
+			return 'TW';
+		}
+
+		return $location;
 	}
 
 	/**

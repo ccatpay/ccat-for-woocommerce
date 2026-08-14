@@ -192,10 +192,18 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 */
 	public function get_payment_api_token(): ?string {
 
-		$cached_token = get_transient( CCATPAYMENTS_PREFIX. 'api_access_token' );
+		$cached_token = get_transient( CCATPAYMENTS_PREFIX . 'api_access_token' );
 
-		if ( $cached_token ) {
+		if ( is_string( $cached_token ) && ! empty( $cached_token ) ) {
 			return $cached_token;
+		}
+
+		if ( is_array( $cached_token ) && ! empty( $cached_token['access_token'] ) && is_string( $cached_token['access_token'] ) ) {
+			return $cached_token['access_token'];
+		}
+
+		if ( ! empty( $cached_token ) ) {
+			delete_transient( CCATPAYMENTS_PREFIX . 'api_access_token' );
 		}
 
 		$api_endpoint = $this->get_base_url() . 'token';

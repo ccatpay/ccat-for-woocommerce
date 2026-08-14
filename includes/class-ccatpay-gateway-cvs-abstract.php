@@ -178,6 +178,7 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 				);
 			} else {
 				$error_message = $response_data['msg'] ?? __( 'Unknown Error.', 'ccat-for-woocommerce');
+				delete_transient( CCATPAYMENTS_PREFIX . 'api_access_token' );
 				delete_transient( 'api_access_token' );
 				throw new Exception( $error_message );
 			}
