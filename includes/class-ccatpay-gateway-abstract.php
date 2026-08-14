@@ -183,28 +183,51 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 
 
 	/**
+	 * Clears the API access token cache from transients and persistent object cache.
+	 */
+	public static function clear_payment_api_token_cache(): void {
+		$transient_key = CCATPAYMENTS_PREFIX . 'api_access_token';
+		delete_transient( $transient_key );
+		delete_site_transient( $transient_key );
+		if ( function_exists( 'wp_cache_delete' ) ) {
+			wp_cache_delete( $transient_key, 'transient' );
+			wp_cache_delete( $transient_key, 'site-transient' );
+		}
+		delete_transient( 'api_access_token' );
+		delete_site_transient( 'api_access_token' );
+		if ( function_exists( 'wp_cache_delete' ) ) {
+			wp_cache_delete( 'api_access_token', 'transient' );
+			wp_cache_delete( 'api_access_token', 'site-transient' );
+		}
+	}
+
+	/**
 	 * Retrieves the API access token for payment requests.
 	 *
-	 * This method checks for a cached API token; if unavailable, it requests a new token
+	 * This method checks for a cached API token; if unavailable or forced refresh, it requests a new token
 	 * from the payment gateway's API based on stored credentials. The token is cached for reuse.
 	 *
-	 * @return string|null Returns the access token in an associative array if successful, or null in case of failure.
+	 * @param bool $force_refresh Whether to force a fresh token fetch bypassing cache.
+	 * @return string|null Returns the access token if successful, or null in case of failure.
 	 */
-	public function get_payment_api_token(): ?string {
+	public function get_payment_api_token( bool $force_refresh = false ): ?string {
 
-		$cached_token = get_transient( CCATPAYMENTS_PREFIX . 'api_access_token' );
+		$transient_key = CCATPAYMENTS_PREFIX . 'api_access_token';
 
-		if ( is_string( $cached_token ) && ! empty( $cached_token ) ) {
-			return $cached_token;
+		if ( ! $force_refresh ) {
+			$cached_token = get_transient( $transient_key );
+
+			if ( is_string( $cached_token ) && ! empty( $cached_token ) ) {
+				return $cached_token;
+			}
+
+			if ( is_array( $cached_token ) && ! empty( $cached_token['access_token'] ) && is_string( $cached_token['access_token'] ) ) {
+				return $cached_token['access_token'];
+			}
 		}
 
-		if ( is_array( $cached_token ) && ! empty( $cached_token['access_token'] ) && is_string( $cached_token['access_token'] ) ) {
-			return $cached_token['access_token'];
-		}
-
-		if ( ! empty( $cached_token ) ) {
-			delete_transient( CCATPAYMENTS_PREFIX . 'api_access_token' );
-		}
+		// Delete cached token from transients and object cache.
+		self::clear_payment_api_token_cache();
 
 		$api_endpoint = $this->get_base_url() . 'token';
 
@@ -252,10 +275,11 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 
 		$decoded_response = json_decode( $response_body, true );
 
-		if ( isset( $decoded_response['error'] ) ) {
-			$logger = wc_get_logger();
+		if ( ! is_array( $decoded_response ) || isset( $decoded_response['error'] ) || empty( $decoded_response['access_token'] ) ) {
+			$logger    = wc_get_logger();
+			$error_msg = is_array( $decoded_response ) && isset( $decoded_response['error'] ) ? $decoded_response['error'] : 'Invalid token response';
 			$logger->error(
-				'API Token error: ' . $decoded_response['error'],
+				'API Token error: ' . $error_msg,
 				array( 'source' => 'api-token' )
 			);
 
@@ -263,14 +287,30 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 		}
 
 		$access_token = $decoded_response['access_token'];
-		$expires_at   = isset( $decoded_response['.expires'] ) ? strtotime( $decoded_response['.expires'] ) : 0;
 
-		$current_time = time();
-		$expires_in   = $expires_at ? ( $expires_at - $current_time ) : 0;
-
-		if ( $access_token && $expires_in > 0 ) {
-			set_transient( CCATPAYMENTS_PREFIX. 'api_access_token', $access_token, $expires_in - 60 );
+		// Calculate expiration in seconds.
+		$expires_in = 0;
+		if ( isset( $decoded_response['expires_in'] ) && is_numeric( $decoded_response['expires_in'] ) ) {
+			$expires_in = (int) $decoded_response['expires_in'];
+		} elseif ( ! empty( $decoded_response['.expires'] ) ) {
+			$expires_at = strtotime( $decoded_response['.expires'] );
+			if ( $expires_at && $expires_at > time() ) {
+				$expires_in = $expires_at - time();
+			}
 		}
+
+		// Buffer of 5 minutes (300s) before actual expiration to refresh early.
+		// CRITICAL FOR CACHE PLUGINS: Ensure $ttl > 0 so WP set_transient does NOT treat 0 as NO EXPIRATION.
+		$buffer = 300;
+		if ( $expires_in > $buffer ) {
+			$ttl = $expires_in - $buffer;
+		} elseif ( $expires_in > 60 ) {
+			$ttl = $expires_in - 30;
+		} else {
+			$ttl = 3600; // Default to 1 hour if unknown or small
+		}
+
+		set_transient( $transient_key, $access_token, $ttl );
 
 		return $access_token;
 	}
@@ -598,7 +638,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 				);
 			} else {
 				$error_message = $response_data['msg'] ?? esc_html__( 'Unknown Error.', 'ccat-for-woocommerce');
-				delete_transient( CCATPAYMENTS_PREFIX. 'api_access_token' );
+				self::clear_payment_api_token_cache();
 				return array(
 					'result'   => 'failure',
 					'messages' => $error_message,

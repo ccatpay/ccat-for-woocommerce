@@ -368,6 +368,7 @@ class CCATPAY_Shipping_Display
         $body = wp_remote_retrieve_body($response);
 
         if (200 !== $response_code) {
+            CCATPAY_Gateway_Abstract::clear_payment_api_token_cache();
             $response_body = wp_remote_retrieve_body($response);
             $error_message = '';
 

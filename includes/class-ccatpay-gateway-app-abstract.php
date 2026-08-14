@@ -95,6 +95,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 					'Token:' . $api_token,
 					array( 'source' => 'api-error' )
 				);
+				self::clear_payment_api_token_cache();
 
 				throw new Exception( $response_data['msg'] ?? __( 'Unknown Error.', 'ccat-for-woocommerce') );
 			}

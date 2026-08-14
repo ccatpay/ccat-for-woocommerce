@@ -141,10 +141,11 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	/**
 	 * 獲取 API 授權 token.
 	 *
+	 * @param bool $force_refresh 是否強制重新獲取 token.
 	 * @return array 授權 token.
 	 * @throws Exception 如果無法獲取 token.
 	 */
-	public static function get_api_data(): array {
+	public static function get_api_data( bool $force_refresh = false ): array {
 		// 使用 WC_Gateway_CCat_Abstract 中的 get_payment_api_token 方法.
 
 		// 從 WooCommerce 獲取啟用的支付閘道.
@@ -171,7 +172,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 		// 如果找到支付閘道，使用它來獲取 token.
 		if ( $gateway ) {
-			$token      = $gateway->get_payment_api_token();
+			$token      = $gateway->get_payment_api_token( $force_refresh );
 			$url        = $gateway->get_base_url();
 			$service_id = $gateway->get_account();
 

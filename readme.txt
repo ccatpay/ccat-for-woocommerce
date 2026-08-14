@@ -152,6 +152,7 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 修正： 修復相容 WordPress / WooCommerce 預設顧客位置過濾器傳入型態不一致產生的 TypeError 致命錯誤。
 * 修正： 修復 get_payment_api_token 快取型態為陣列時觸發的 TypeError 致命錯誤。
+* 修正： 解決安裝快取套件（如 Redis Object Cache、WP Rocket 等）時 API Token 無法自動刷新及清除的問題。
 
 == Third-party Resources ==
 
