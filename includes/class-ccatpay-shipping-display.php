@@ -183,10 +183,14 @@ class CCATPAY_Shipping_Display
     private function create_logistics_order(WC_Order $order, $delivery_time = '04', $print_obt_type = '01')
     {
         // 從設定獲取 API 資訊.
-        $api_data = CCATPAY_711_Blocks_Integration::get_api_data();
-        $service_id = $api_data[2];
-        $api_token = $api_data[0];
-        $api_url = $api_data[1];
+        try {
+            $api_data = CCATPAY_711_Blocks_Integration::get_api_data();
+            $service_id = $api_data[2];
+            $api_token = $api_data[0];
+            $api_url = $api_data[1];
+        } catch ( Exception $e ) {
+            return new WP_Error( 'invalid_api_settings', $e->getMessage() );
+        }
 
         if (empty($service_id) || empty($api_token) || empty($api_url)) {
             return new WP_Error('invalid_api_settings', __('黑貓物流 API 設定不完整', 'ccat-for-woocommerce'));
@@ -595,17 +599,24 @@ class CCATPAY_Shipping_Display
     public function register_admin_scripts()
     {
         $screen = get_current_screen();
+        $order_id = 0;
 
-        if ($screen && 'woocommerce_page_wc-orders' === $screen->id) {
-            if (!isset($_GET['id'])) { // phpcs:ignore WordPress
-                return;
+        if ($screen) {
+            if ('woocommerce_page_wc-orders' === $screen->id && isset($_GET['id'])) { // phpcs:ignore WordPress.Security.NonceVerification
+                $order_id = absint($_GET['id']); // phpcs:ignore WordPress.Security.NonceVerification
+            } elseif (('shop_order' === $screen->id || 'post' === $screen->id) && isset($_GET['post'])) { // phpcs:ignore WordPress.Security.NonceVerification
+                $order_id = absint($_GET['post']); // phpcs:ignore WordPress.Security.NonceVerification
             }
-            $order_id = absint($_GET['id']); // phpcs:ignore WordPress
+        }
 
-            $order = wc_get_order($order_id);
-            if (!$order) {
-                return;
-            }
+        if (!$order_id) {
+            return;
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return;
+        }
             $shipping_methods = $order->get_shipping_methods();
             foreach ($shipping_methods as $shipping_method_obj) {
                 $shipping_method = $shipping_method_obj->get_method_id();
@@ -744,7 +755,6 @@ class CCATPAY_Shipping_Display
 				}
 				'
             );
-        }
     }
 
 
@@ -877,10 +887,20 @@ class CCATPAY_Shipping_Display
         $file_no = $order->get_meta(self::META_FILE_NO);
         $obt_number = $order->get_meta(self::META_OBT_NUMBER);
         // 從設定獲取 API 資訊.
-        $api_data = CCATPAY_711_Blocks_Integration::get_api_data();
-        $service_id = $api_data[2];
-        $api_token = $api_data[0];
-        $api_url = $api_data[1];
+        try {
+            $api_data = CCATPAY_711_Blocks_Integration::get_api_data();
+            $service_id = $api_data[2];
+            $api_token = $api_data[0];
+            $api_url = $api_data[1];
+        } catch ( Exception $e ) {
+            wp_send_json_error(
+                array(
+                    'message' => $e->getMessage(),
+                ),
+                400
+            );
+            wp_die();
+        }
 
         if (empty($service_id) || empty($api_token) || empty($api_url)) {
             wp_send_json_error(
