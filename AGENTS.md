@@ -5,7 +5,7 @@
 ## 1. 專案概述
 - **專案名稱**: ccatpay Payment for WooCommerce (黑貓Pay for WooCommerce)
 - **目的**: 整合黑貓支付（信用卡、ATM轉帳、超商代碼等）與黑貓物流服務（宅配、7-11超商取貨），並支援電子發票開立。
-- **技術環境**: PHP 8.3+, WordPress 6.6+, WooCommerce 9.8+
+- **技術環境**: PHP 8.3+, WordPress 6.6+, WooCommerce 9.8+ ~ 11.0.1+
 
 ## 2. 目錄結構與核心模組
 專案遵循標準的 WordPress 外掛目錄結構。在協助開發或除錯時，請優先參考以下檔案分佈：

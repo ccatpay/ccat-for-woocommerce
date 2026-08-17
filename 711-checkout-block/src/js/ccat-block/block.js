@@ -39,13 +39,27 @@ async function updateStoreShippingAddress(storeInfo, targetRateId = null, packag
         getPostcodeByAddress(addressInfo.city, addressInfo.district) || '00000' :
         (currentShippingAddress.postcode || '00000');
 
-    // 如果地址已經一致，不重複調用避免造成循環觸發
+    let effectiveTargetRateId = targetRateId;
+    if (!effectiveTargetRateId) {
+        try {
+            effectiveTargetRateId = localStorage.getItem('selected711ShippingRate');
+        } catch (e) {}
+    }
+
+    // 如果地址已經一致，檢查並確保運送方式選取
     if (
         currentShippingAddress.address_1 === newAddress1 &&
         currentShippingAddress.address_2 === newAddress2 &&
         currentShippingAddress.city === newCity &&
         currentShippingAddress.state === newState
     ) {
+        if (effectiveTargetRateId && typeof selectShippingRate === 'function') {
+            const currentRates = currentCartData?.shippingRates?.[packageId]?.shipping_rates || [];
+            const isSelected = currentRates.some(r => r.rate_id === effectiveTargetRateId && r.selected);
+            if (!isSelected) {
+                await selectShippingRate(effectiveTargetRateId, packageId);
+            }
+        }
         return;
     }
 
@@ -63,8 +77,8 @@ async function updateStoreShippingAddress(storeInfo, targetRateId = null, packag
     try {
         await setShippingAddress(updatedAddress);
         // 地址更新後，WooCommerce 會重新計算運費並可能將選取跳回第一項，在此重新指定原本選取的 7-11 運送方式
-        if (targetRateId && typeof selectShippingRate === 'function') {
-            await selectShippingRate(targetRateId, packageId);
+        if (effectiveTargetRateId && typeof selectShippingRate === 'function') {
+            await selectShippingRate(effectiveTargetRateId, packageId);
         }
     } catch (e) {
         console.error('更新門市地址或運送方式失敗:', e);
@@ -600,6 +614,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
     });
 
     const selected711RateIdRef = useRef('');
+    const hasAttemptedRestoreRef = useRef(false);
 
     const shippingRates = useSelect((select) => {
         const store = select('wc/store/cart');
@@ -638,6 +653,10 @@ export const Block = ({checkoutExtensionData, extensions}) => {
     // 監聽運送方式變更
     useEffect(() => {
         const activeRates = getActiveShippingRates(shippingRates);
+        if (!activeRates || !activeRates.length) {
+            return;
+        }
+
         let is711Selected = false;
         let current711RateId = '';
 
@@ -653,7 +672,11 @@ export const Block = ({checkoutExtensionData, extensions}) => {
 
         if (is711Selected) {
             selected711RateIdRef.current = current711RateId;
+            try {
+                localStorage.setItem('selected711ShippingRate', current711RateId);
+            } catch (e) {}
             setShowBlock(true);
+            hasAttemptedRestoreRef.current = true;
 
             // 如果目前 state 沒有門市資訊，嘗試從 localStorage 還原
             if (!storeInfo.storeId) {
@@ -670,6 +693,46 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                 }
             }
         } else {
+            // 當前選取的不是 711 運送方式
+            let saved711Rate = '';
+            let savedStore = '';
+            try {
+                saved711Rate = localStorage.getItem('selected711ShippingRate');
+                savedStore = localStorage.getItem('selectedCvsStore');
+            } catch (e) {}
+
+            // 若尚未執行過初始還原，且 localStorage 有保存的 711 運送方式與門市資料（如重新整理頁面後）
+            if (!hasAttemptedRestoreRef.current && saved711Rate && savedStore) {
+                try {
+                    const parsedStore = JSON.parse(savedStore);
+                    if (parsedStore && parsedStore.storeId) {
+                        // 在可用費率中尋找匹配的 711 運送方式
+                        const targetRateObj = activeRates.find(r => r.rate_id === saved711Rate || (r.rate_id && r.rate_id.includes('711')));
+                        if (targetRateObj) {
+                            hasAttemptedRestoreRef.current = true;
+                            const dispatch = wp.data.dispatch(cartStore);
+                            if (dispatch && typeof dispatch.selectShippingRate === 'function') {
+                                dispatch.selectShippingRate(targetRateObj.rate_id, 0);
+                                selected711RateIdRef.current = targetRateObj.rate_id;
+                                setStoreInfo(parsedStore);
+                                setShowBlock(true);
+                                return;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('還原 7-11 運送方式失敗:', e);
+                }
+            }
+
+            // 若使用者已載入完成後手動切換至其他物流方式，清空 saved711Rate
+            if (hasAttemptedRestoreRef.current) {
+                try {
+                    localStorage.removeItem('selected711ShippingRate');
+                } catch (e) {}
+            }
+
+            hasAttemptedRestoreRef.current = true;
             setShowBlock(false);
         }
     }, [shippingRates]);
@@ -811,6 +874,11 @@ export const Block = ({checkoutExtensionData, extensions}) => {
 
                         // 同步更新地址並鎖定 7-11 運送方式
                         const targetRate = selected711RateIdRef.current || selectedShippingMethod;
+                        if (targetRate) {
+                            try {
+                                localStorage.setItem('selected711ShippingRate', targetRate);
+                            } catch (e) {}
+                        }
                         updateStoreShippingAddress(selectedStoreInfo, targetRate);
 
                         showSuccessMessage(noticeContainer);

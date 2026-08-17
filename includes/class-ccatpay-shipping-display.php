@@ -120,7 +120,8 @@ class CCATPAY_Shipping_Display
         // 呼叫 API 建立物流訂單.
         $delivery_time = isset($_POST['delivery_time']) ? sanitize_text_field(wp_unslash($_POST['delivery_time'])) : '04';
         $print_obt_type = isset($_POST['print_obt_type']) ? sanitize_text_field(wp_unslash($_POST['print_obt_type'])) : '01';
-        $result = $this->create_logistics_order($order, $delivery_time, $print_obt_type);
+        $obt_count = isset($_POST['obt_count']) ? max(1, min(99, absint($_POST['obt_count']))) : 1;
+        $result = $this->create_logistics_order($order, $delivery_time, $print_obt_type, $obt_count);
 
         if (is_wp_error($result)) {
             wp_send_json_error(array('message' => $result->get_error_message()));
@@ -131,8 +132,16 @@ class CCATPAY_Shipping_Display
         // 處理 API 回應.
         if ('Y' === $result['IsOK']) {
             // 保存託運單號和檔案編號.
-            $obt_number = $result['Data']['Orders'][0]['OBTNumber'];
-            $file_no = $result['Data']['FileNo'];
+            $obt_numbers = array();
+            if (!empty($result['Data']['Orders']) && is_array($result['Data']['Orders'])) {
+                foreach ($result['Data']['Orders'] as $item) {
+                    if (!empty($item['OBTNumber'])) {
+                        $obt_numbers[] = $item['OBTNumber'];
+                    }
+                }
+            }
+            $obt_number = !empty($obt_numbers) ? implode(', ', $obt_numbers) : (isset($result['Data']['Orders'][0]['OBTNumber']) ? $result['Data']['Orders'][0]['OBTNumber'] : '');
+            $file_no = isset($result['Data']['FileNo']) ? $result['Data']['FileNo'] : '';
 
             // 使用 update_post_meta 確保元數據正確保存.
             $order->update_meta_data(self::META_OBT_NUMBER, $obt_number);
@@ -180,7 +189,7 @@ class CCATPAY_Shipping_Display
      *
      * @return array|WP_Error API 回應或錯誤
      */
-    private function create_logistics_order(WC_Order $order, $delivery_time = '04', $print_obt_type = '01')
+    private function create_logistics_order(WC_Order $order, $delivery_time = '04', $print_obt_type = '01', $obt_count = 1)
     {
         // 從設定獲取 API 資訊.
         try {
@@ -221,14 +230,10 @@ class CCATPAY_Shipping_Display
         // 付款方式.
         $payment_method = $order->get_payment_method();
         $is_cod = strpos($payment_method, 'cod') !== false;
-        $is_collection = $is_cod ? 'Y' : 'N';
 
-        // 是否為代收貨款、代收金額.
+        // 代收金額 (整筆訂單總額).
         $is_freight = 'N';
-        $collection_amount = 0;
-        if ('Y' === $is_collection) {
-            $collection_amount = $order->get_total();
-        }
+        $total_collection_amount = $is_cod ? intval($order->get_total()) : 0;
 
         // 收件人資訊.從shipping取得.
         $recipient_name = $order->get_shipping_last_name() . $order->get_shipping_first_name();
@@ -281,32 +286,41 @@ class CCATPAY_Shipping_Display
                 return new WP_Error('missing_store_id', __('找不到 7-11 門市資訊', 'ccat-for-woocommerce'));
             }
 
-            // 7-11 到店託運單資料
-            $order_data = array(
-                'OBTNumber' => '',
-                'OrderId' => $order->get_order_number(),
-                'Thermosphere' => $thermosphere,
-                'Spec' => $spec,
-                'ReceiveStoreId' => $store_id,
-                'RecipientName' => $recipient_name,
-                'RecipientTel' => $recipient_tel,
-                'RecipientMobile' => $recipient_mobile,
-                'SenderName' => $sender_name,
-                'SenderTel' => $sender_tel,
-                'SenderMobile' => $sender_mobile,
-                'SenderAddress' => $sender_address,
-                'IsCollection' => $is_collection,
-                'CollectionAmount' => intval($collection_amount),
-                'FBName' => substr(get_bloginfo('name'), 0, 6),
-                /* translators: %s: 訂單編號 */
-                'Memo' => sprintf(__('訂單編號: %s', 'ccat-for-woocommerce'), $order->get_order_number()),
-            );
+            $orders_payload = array();
+            $base_order_number = $order->get_order_number();
+
+            for ($i = 1; $i <= $obt_count; $i++) {
+                $item_order_id = $obt_count > 1 ? sprintf('%s-%d', $base_order_number, $i) : $base_order_number;
+                // 代收金額規則：只有第 1 張收款，其餘不收款.
+                $item_is_collection = ($is_cod && 1 === $i) ? 'Y' : 'N';
+                $item_collection_amount = ($is_cod && 1 === $i) ? $total_collection_amount : 0;
+
+                $orders_payload[] = array(
+                    'OBTNumber' => '',
+                    'OrderId' => $item_order_id,
+                    'Thermosphere' => $thermosphere,
+                    'Spec' => $spec,
+                    'ReceiveStoreId' => $store_id,
+                    'RecipientName' => $recipient_name,
+                    'RecipientTel' => $recipient_tel,
+                    'RecipientMobile' => $recipient_mobile,
+                    'SenderName' => $sender_name,
+                    'SenderTel' => $sender_tel,
+                    'SenderMobile' => $sender_mobile,
+                    'SenderAddress' => $sender_address,
+                    'IsCollection' => $item_is_collection,
+                    'CollectionAmount' => $item_collection_amount,
+                    'FBName' => substr(get_bloginfo('name'), 0, 6),
+                    /* translators: %s: 訂單編號 */
+                    'Memo' => sprintf(__('訂單編號: %s', 'ccat-for-woocommerce'), $item_order_id),
+                );
+            }
 
             // API 請求資料.
             $request_data = array(
                 'ServiceId' => $service_id,
                 'PrintOBTType' => $print_obt_type, // 使用傳入的託運單類別
-                'Orders' => array($order_data),
+                'Orders' => $orders_payload,
             );
 
             // 發送 API 請求 - 使用 7-11 到店託運單 API.
@@ -323,40 +337,50 @@ class CCATPAY_Shipping_Display
             );
         } else {
             // 宅配託運單資料.
-            $order_data = array(
-                'OBTNumber' => '',
-                'OrderId' => sprintf('TCAT%s%d', date('Ymd'), $order->get_order_number()),
-                'Thermosphere' => $thermosphere,
-                'Spec' => $spec,
-                'RecipientName' => $recipient_name,
-                'RecipientTel' => $recipient_tel,
-                'RecipientMobile' => $recipient_mobile,
-                'RecipientAddress' => $recipient_address,
-                'SenderName' => $sender_name,
-                'SenderTel' => $sender_tel,
-                'SenderMobile' => $sender_mobile,
-                'SenderAddress' => $sender_address,
-                'ShipmentDate' => $today->format('Ymd'),
-                'DeliveryDate' => $day_after_tomorrow->format('Ymd'),
-                'DeliveryTime' => $delivery_time, // 使用傳入的希望配達時段
-                'IsFreight' => $is_freight,
-                'IsCollection' => $is_collection,
-                'CollectionAmount' => $collection_amount,
-                'IsSwipe' => strpos($shipping_method_id, 'card') !== false ? 'Y' : 'N',
-                'IsMobilePay' => strpos($shipping_method_id, 'mobile') !== false ? 'Y' : 'N',
-                'IsDeclare' => 'N',
-                'DeclareAmount' => 0,
-                'ProductTypeId' => '0015', // 一般食品.
-                'ProductName' => $product_name,
-                /* translators: %s: 訂單編號 */
-                'Memo' => sprintf(__('訂單編號: %s', 'ccat-for-woocommerce'), $order->get_order_number()),
-            );
+            $orders_payload = array();
+            $base_order_number = sprintf('TCAT%s%d', date('Ymd'), $order->get_order_number());
+
+            for ($i = 1; $i <= $obt_count; $i++) {
+                $item_order_id = $obt_count > 1 ? sprintf('%s-%d', $base_order_number, $i) : $base_order_number;
+                // 代收金額規則：只有第 1 張收款，其餘不收款.
+                $item_is_collection = ($is_cod && 1 === $i) ? 'Y' : 'N';
+                $item_collection_amount = ($is_cod && 1 === $i) ? $total_collection_amount : 0;
+
+                $orders_payload[] = array(
+                    'OBTNumber' => '',
+                    'OrderId' => $item_order_id,
+                    'Thermosphere' => $thermosphere,
+                    'Spec' => $spec,
+                    'RecipientName' => $recipient_name,
+                    'RecipientTel' => $recipient_tel,
+                    'RecipientMobile' => $recipient_mobile,
+                    'RecipientAddress' => $recipient_address,
+                    'SenderName' => $sender_name,
+                    'SenderTel' => $sender_tel,
+                    'SenderMobile' => $sender_mobile,
+                    'SenderAddress' => $sender_address,
+                    'ShipmentDate' => $today->format('Ymd'),
+                    'DeliveryDate' => $day_after_tomorrow->format('Ymd'),
+                    'DeliveryTime' => $delivery_time, // 使用傳入的希望配達時段
+                    'IsFreight' => $is_freight,
+                    'IsCollection' => $item_is_collection,
+                    'CollectionAmount' => $item_collection_amount,
+                    'IsSwipe' => strpos($shipping_method_id, 'card') !== false ? 'Y' : 'N',
+                    'IsMobilePay' => strpos($shipping_method_id, 'mobile') !== false ? 'Y' : 'N',
+                    'IsDeclare' => 'N',
+                    'DeclareAmount' => 0,
+                    'ProductTypeId' => '0015', // 一般食品.
+                    'ProductName' => $product_name,
+                    /* translators: %s: 訂單編號 */
+                    'Memo' => sprintf(__('訂單編號: %s', 'ccat-for-woocommerce'), $item_order_id),
+                );
+            }
 
             // API 請求資料.
             $request_data = array(
                 'ServiceId' => $service_id,
                 'PrintOBTType' => $print_obt_type, // 使用傳入的託運單類別
-                'Orders' => array($order_data),
+                'Orders' => $orders_payload,
             );
 
             // 發送 API 請求 - 使用宅配託運單 API.
@@ -477,33 +501,51 @@ class CCATPAY_Shipping_Display
                         esc_html__('黑貓物流功能已於黑貓Pay設定中停用，無法建立新託運單。', 'ccat-for-woocommerce') .
                         '</p>';
                 } else {
-                    echo '<p class="ccat-logistics-notice">';
-                    // 尚未列印過，超商取貨顯示託運單類別；宅配顯示希望配達時段與託運單類別。
-                    if ($this->is_convenience_store_shipping($order) && !$has_printed) {
-                        echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
-                            ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
-                                <option value="01">' . esc_html__('A4三模B2S', 'ccat-for-woocommerce') . '</option>
-                                <option value="02">' . esc_html__('熱轉印B2S', 'ccat-for-woocommerce') . '</option>
-                                <option value="03">' . esc_html__('A4三模B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
-                                <option value="04">' . esc_html__('熱轉印B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
-                            </select></label>';
+                    if (!$has_printed) {
+                        echo '<div class="ccat-logistics-controls">';
 
-                    } elseif (!$has_printed) {
-                        echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') .
-                            ' <select id="ccat_print_obt_type" class="ccat-print-obt-type-select">
-                                <option value="01">' . esc_html__('A4二模宅配', 'ccat-for-woocommerce') . '</option>
-                                <option value="02">' . esc_html__('A4三模宅配', 'ccat-for-woocommerce') . '</option>
-                                <option value="03">' . esc_html__('熱轉印宅配', 'ccat-for-woocommerce') . '</option>
-                            </select></label>';
-                        echo '<label for="ccat_delivery_time" style="margin-right:8px;">' . esc_html__('希望配達時段', 'ccat-for-woocommerce') .
-                            ' <select id="ccat_delivery_time" class="ccat-delivery-time-select" style="min-width:120px; margin-left:4px;">
-                                <option value="04">' . esc_html__('不指定', 'ccat-for-woocommerce') . '</option>
-                                <option value="01">' . esc_html__('13時前', 'ccat-for-woocommerce') . '</option>
-                                <option value="02">' . esc_html__('14-18時', 'ccat-for-woocommerce') . '</option>
-                            </select></label>';
+                        // 託運單類別.
+                        echo '<div class="ccat-control-group">';
+                        echo '<label for="ccat_print_obt_type">' . esc_html__('託運單類別', 'ccat-for-woocommerce') . '</label>';
+                        echo '<select id="ccat_print_obt_type" class="ccat-print-obt-type-select">';
+                        if ($this->is_convenience_store_shipping($order)) {
+                            echo '<option value="01">' . esc_html__('A4三模B2S', 'ccat-for-woocommerce') . '</option>
+                                  <option value="02">' . esc_html__('熱轉印B2S', 'ccat-for-woocommerce') . '</option>
+                                  <option value="03">' . esc_html__('A4三模B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>
+                                  <option value="04">' . esc_html__('熱轉印B2S_QRCode版面', 'ccat-for-woocommerce') . '</option>';
+                        } else {
+                            echo '<option value="01">' . esc_html__('A4二模宅配', 'ccat-for-woocommerce') . '</option>
+                                  <option value="02">' . esc_html__('A4三模宅配', 'ccat-for-woocommerce') . '</option>
+                                  <option value="03">' . esc_html__('熱轉印宅配', 'ccat-for-woocommerce') . '</option>';
+                        }
+                        echo '</select></div>';
 
+                        // 希望配達時段 (宅配).
+                        if (!$this->is_convenience_store_shipping($order)) {
+                            echo '<div class="ccat-control-group">';
+                            echo '<label for="ccat_delivery_time">' . esc_html__('希望配達時段', 'ccat-for-woocommerce') . '</label>';
+                            echo '<select id="ccat_delivery_time" class="ccat-delivery-time-select">
+                                    <option value="04">' . esc_html__('不指定', 'ccat-for-woocommerce') . '</option>
+                                    <option value="01">' . esc_html__('13時前', 'ccat-for-woocommerce') . '</option>
+                                    <option value="02">' . esc_html__('14-18時', 'ccat-for-woocommerce') . '</option>
+                                </select></div>';
+                        }
+
+                        // 託運單數量.
+                        echo '<div class="ccat-control-group">';
+                        echo '<label for="ccat_print_obt_numbers">' . esc_html__('託運單數量', 'ccat-for-woocommerce') . '</label>';
+                        echo '<input type="number" id="ccat_print_obt_numbers" class="ccat-print-obt-numbers-input" min="1" max="99" value="1" data-is-cod="' . ($is_cod ? '1' : '0') . '">';
+                        echo '</div>';
+
+                        echo '</div>'; // .ccat-logistics-controls
+
+                        // 若為貨到付款，顯示多張託運單警示提示（預設隱藏）.
+                        if ($is_cod) {
+                            echo '<p class="ccat-cod-multi-notice" style="display:none; color: #d63638; font-weight: bold; margin: 5px 0 10px 0;">' .
+                                esc_html__('請注意!! 代收金額只會放在第1張託運單上，其餘的託運單則都是不收款。', 'ccat-for-woocommerce') .
+                                '</p>';
+                        }
                     }
-                    echo '</p>';
 
                     // 超商取貨且尚未列印過，顯示變更門市按鈕.
                     if ($this->is_convenience_store_shipping($order) && !$has_printed) {
@@ -665,9 +707,53 @@ class CCATPAY_Shipping_Display
 				.ccat-logistics-buttons {
 					margin-top: 10px;
 				}
+				.ccat-logistics-controls {
+					display: flex;
+					flex-wrap: wrap;
+					align-items: center;
+					gap: 12px;
+					margin: 10px 0;
+				}
+				.ccat-control-group {
+					display: flex;
+					align-items: center;
+					gap: 6px;
+				}
+				.ccat-control-group label {
+					font-weight: 500;
+					white-space: nowrap;
+				}
+				.ccat-control-group select,
+				.ccat-control-group input[type="number"] {
+					min-height: 32px;
+				}
+				.ccat-control-group input[type="number"] {
+					width: 70px;
+				}
 				.ccat-logistics-buttons .button {
 					margin-right: 5px;
 					margin-bottom: 5px;
+				}
+				@media screen and (max-width: 782px) {
+					.ccat-logistics-controls {
+						flex-direction: column;
+						align-items: stretch;
+						gap: 8px;
+					}
+					.ccat-control-group {
+						justify-content: space-between;
+					}
+					.ccat-control-group select,
+					.ccat-control-group input[type="number"] {
+						flex: 1;
+						max-width: 60%;
+					}
+					.ccat-logistics-buttons .button {
+						width: 100%;
+						margin-right: 0;
+						margin-bottom: 8px;
+						text-align: center;
+					}
 				}
 				.ccat-store-modal {
 					display: none;
@@ -912,15 +998,21 @@ class CCATPAY_Shipping_Display
             wp_die();
         }
 
+        // 組裝多單號 Orders 陣列.
+        $obt_list = array_filter(array_map('trim', explode(',', $obt_number)));
+        $orders_payload = array();
+        foreach ($obt_list as $single_obt) {
+            $orders_payload[] = array('OBTNumber' => $single_obt);
+        }
+        if (empty($orders_payload)) {
+            $orders_payload[] = array('OBTNumber' => $obt_number);
+        }
+
         // 組裝 API 請求資料.
         $request_data = array(
             'ServiceId' => $service_id,
             'FileNo' => $file_no,
-            'Orders' => array(
-                array(
-                    'OBTNumber' => $obt_number,
-                ),
-            ),
+            'Orders' => $orders_payload,
         );
 
         // 設定請求頭.

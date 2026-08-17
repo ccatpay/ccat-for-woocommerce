@@ -610,6 +610,20 @@ jQuery(function ($) {
         });
     });
 
+    // 監聽託運單數量輸入變更，針對貨到付款且數量 >= 2 顯示即時警示提示
+    $(document).on('input change', '.ccat-print-obt-numbers-input', function () {
+        const input = $(this);
+        const isCod = input.data('is-cod') == '1';
+        const count = parseInt(input.val(), 10) || 1;
+        const notice = input.closest('.ccat-logistics-buttons').find('.ccat-cod-multi-notice');
+
+        if (isCod && count >= 2) {
+            notice.slideDown(200);
+        } else {
+            notice.slideUp(200);
+        }
+    });
+
     // 創建物流訂單按鈕點擊事件
     $('.create-logistics-order').on('click', function (e) {
         e.preventDefault();
@@ -622,6 +636,8 @@ jQuery(function ($) {
         const deliveryTime = $(this).closest('.ccat-logistics-buttons').find('.ccat-delivery-time-select').val() || '04';
         // 取得託運單類別 select 的值
         const printOBTType = $(this).closest('.ccat-logistics-buttons').find('.ccat-print-obt-type-select').val() || '01';
+        // 取得託運單數量 input 的值
+        const obtCount = parseInt($(this).closest('.ccat-logistics-buttons').find('.ccat-print-obt-numbers-input').val(), 10) || 1;
 
         // 顯示載入中狀態
         button.prop('disabled', true);
@@ -645,7 +661,8 @@ jQuery(function ($) {
                 nonce: nonce,
                 order_id: orderId,
                 delivery_time: deliveryTime,
-                print_obt_type: printOBTType
+                print_obt_type: printOBTType,
+                obt_count: obtCount
             },
             success: function (response) {
                 if (response.success) {

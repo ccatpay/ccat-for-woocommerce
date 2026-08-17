@@ -7,10 +7,10 @@
 ### 1.1 基本資訊
 
 - **外掛名稱**: ccatpay Payment for WooCommerce
-- **版本**: 2.6.3
+- **版本**: 2.7
 - **最低 WordPress/WooCommerce 需求**:
   - WordPress: 6.6+
-  - WooCommerce: (需確認，通常與插件版本相依)
+  - WooCommerce: 9.8 ~ 11.0.1+
   - PHP: 8.3+
 - **授權**: GNU General Public License v3.0
 

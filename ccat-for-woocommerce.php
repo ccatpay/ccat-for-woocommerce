@@ -3,7 +3,7 @@
  * Plugin Name: ccatpay Payment for WooCommerce
  * Plugin URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
- * Version: 2.6.3
+ * Version: 2.7
  * Author: ccatpay
  * Author URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Text Domain: ccat-for-woocommerce
@@ -12,6 +12,8 @@
  * Tested up to: 6.9
  * Requires PHP: 8.3
  * Requires Plugins: woocommerce
+ * WC requires at least: 9.8
+ * WC tested up to: 11.0.1
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  *
@@ -25,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 if ( ! defined( 'CCATPAYMENTS_VERSION' ) ) {
-	define( 'CCATPAYMENTS_VERSION', '2.6.3' );
+	define( 'CCATPAYMENTS_VERSION', '2.7' );
 }
 if ( ! defined( 'CCATPAYMENTS_DOMAIN' ) ) {
 	define( 'CCATPAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
@@ -47,6 +49,17 @@ class CCATPAY_Payments {
 	 * Plugin bootstrapping.
 	 */
 	public static function init(): void {
+		// 宣告 WooCommerce HPOS (High-Performance Order Storage) 與 Checkout Blocks 相容性.
+		add_action(
+			'before_woocommerce_init',
+			function () {
+				if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+					\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+					\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+				}
+			}
+		);
+
 		// CCat Payments gateway class.
 		add_action( 'plugins_loaded', array( __CLASS__, 'includes' ), 0 );
 

@@ -5,7 +5,9 @@ Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
 Tested up to: 6.9
 Requires PHP: 8.3
-Stable tag: 2.6.3
+WC requires at least: 9.8
+WC tested up to: 11.0
+Stable tag: 2.7
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -42,7 +44,7 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 == Frequently Asked Questions ==
 
 = 支援哪些 WooCommerce 版本？ =
-本插件支援 WooCommerce 9.8 以上版本。
+本插件支援 WooCommerce 9.8 至 11.0.1 版本。
 
 = 如何設定電子發票？ =
 前往 WooCommerce > 設定 > 黑貓Pay > 發票設定 啟用並設定。
@@ -157,6 +159,11 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 = 2.6.3 =
 
 * 改進： 當「啟用黑貓物流」關閉時，停用運算與後台運送設定，並限制訂單託運單建立，同時保留歷史託運單下載功能。
+
+= 2.7 =
+
+* 新增： 後台訂單管理支援建立複數件託運單，並依貨到付款規則自動設定代收金額。
+* 改進： 支援相容至最新版 WooCommerce 11.0.1。
 
 == Third-party Resources ==
 
