@@ -120,7 +120,7 @@ class CCATPAY_Shipping_Display
         // 呼叫 API 建立物流訂單.
         $delivery_time = isset($_POST['delivery_time']) ? sanitize_text_field(wp_unslash($_POST['delivery_time'])) : '04';
         $print_obt_type = isset($_POST['print_obt_type']) ? sanitize_text_field(wp_unslash($_POST['print_obt_type'])) : '01';
-        $obt_count = isset($_POST['obt_count']) ? max(1, min(99, absint($_POST['obt_count']))) : 1;
+        $obt_count = isset($_POST['obt_count']) ? max(1, min(100, absint($_POST['obt_count']))) : 1;
         $result = $this->create_logistics_order($order, $delivery_time, $print_obt_type, $obt_count);
 
         if (is_wp_error($result)) {
@@ -534,7 +534,7 @@ class CCATPAY_Shipping_Display
                         // 託運單數量.
                         echo '<div class="ccat-control-group">';
                         echo '<label for="ccat_print_obt_numbers">' . esc_html__('託運單數量', 'ccat-for-woocommerce') . '</label>';
-                        echo '<input type="number" id="ccat_print_obt_numbers" class="ccat-print-obt-numbers-input" min="1" max="99" value="1" data-is-cod="' . ($is_cod ? '1' : '0') . '">';
+                        echo '<input type="number" id="ccat_print_obt_numbers" class="ccat-print-obt-numbers-input" min="1" max="100" value="1" data-is-cod="' . ($is_cod ? '1' : '0') . '">';
                         echo '</div>';
 
                         echo '</div>'; // .ccat-logistics-controls
