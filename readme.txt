@@ -7,7 +7,7 @@ Tested up to: 6.9
 Requires PHP: 8.3
 WC requires at least: 9.8
 WC tested up to: 11.0
-Stable tag: 2.7
+Stable tag: 2.8
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -164,6 +164,10 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 * 新增： 後台訂單管理支援建立複數件託運單，並依貨到付款規則自動設定代收金額。
 * 改進： 支援相容至最新版 WooCommerce 11.0.1。
+
+= 2.8 =
+
+* 新增： WooCommerce 後台訂單管理支援「批次列印託運單」功能，自動過濾已列印訂單並整合下載。
 
 == Third-party Resources ==
 
