@@ -167,7 +167,8 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 = 2.8 =
 
-* 新增： WooCommerce 後台訂單管理支援「批次列印託運單」功能，自動過濾已列印訂單並整合下載。
+* 新增： WooCommerce 後台訂單管理支援「批次列印託運單」功能，自動分流宅配與 7-11 訂單，過濾已列印訂單並整合下載 PDF。
+* 新增： WooCommerce 後台訂單列表新增「黑貓物流」自訂欄位，即時呈現運送方式、溫層、門市名稱與印單狀態標籤（支援HPOS）。
 
 == Third-party Resources ==
 
