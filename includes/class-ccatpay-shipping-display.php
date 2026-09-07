@@ -83,6 +83,140 @@ class CCATPAY_Shipping_Display
 
         // 批次 PDF 下載 Endpoint.
         add_action('admin_post_' . CCATPAYMENTS_PREFIX . '_download_batch_pdf', array($this, 'handle_download_batch_pdf'));
+
+        // 註冊訂單列表自訂欄位：黑貓物流 (支援傳統 CPT 與 HPOS).
+        add_filter('manage_edit-shop_order_columns', array($this, 'add_order_shipping_method_column'), 20);
+        add_filter('manage_woocommerce_page_wc-orders_columns', array($this, 'add_order_shipping_method_column'), 20);
+        add_action('manage_shop_order_posts_custom_column', array($this, 'render_order_shipping_method_column_cpt'), 20, 2);
+        add_action('manage_woocommerce_page_wc-orders_custom_column', array($this, 'render_order_shipping_method_column_hpos'), 20, 2);
+    }
+
+    /**
+     * 新增「黑貓物流」欄位至訂單列表
+     *
+     * @param array $columns 欄位陣列.
+     * @return array
+     */
+    public function add_order_shipping_method_column(array $columns): array
+    {
+        $new_columns = array();
+        foreach ($columns as $key => $column) {
+            $new_columns[$key] = $column;
+            if ('order_status' === $key) {
+                $new_columns['ccat_shipping'] = __('黑貓物流', 'ccat-for-woocommerce');
+            }
+        }
+
+        if (!isset($new_columns['ccat_shipping'])) {
+            $new_columns['ccat_shipping'] = __('黑貓物流', 'ccat-for-woocommerce');
+        }
+
+        return $new_columns;
+    }
+
+    /**
+     * 輸出訂單列表自訂欄位內容 (傳統 CPT)
+     *
+     * @param string $column  欄位名稱.
+     * @param int    $post_id 訂單 ID.
+     */
+    public function render_order_shipping_method_column_cpt(string $column, int $post_id)
+    {
+        if ('ccat_shipping' === $column) {
+            $order = wc_get_order($post_id);
+            if ($order) {
+                $this->display_ccat_shipping_column($order);
+            }
+        }
+    }
+
+    /**
+     * 輸出訂單列表自訂欄位內容 (HPOS)
+     *
+     * @param string   $column 欄位名稱.
+     * @param mixed    $order  訂單物件.
+     */
+    public function render_order_shipping_method_column_hpos(string $column, $order)
+    {
+        if ('ccat_shipping' === $column && $order instanceof WC_Order) {
+            $this->display_ccat_shipping_column($order);
+        }
+    }
+
+    /**
+     * 顯示黑貓物流欄位內容 (運送方式 + 印單狀態)
+     *
+     * @param WC_Order $order 訂單物件.
+     */
+    private function display_ccat_shipping_column(WC_Order $order)
+    {
+        $shipping_methods = $order->get_shipping_methods();
+        if (empty($shipping_methods)) {
+            echo '<span style="color: #999;">-</span>';
+            return;
+        }
+
+        if (!$this->is_ccat_shipping($order)) {
+            $names = array();
+            foreach ($shipping_methods as $shipping_method) {
+                $names[] = esc_html($shipping_method->get_name());
+            }
+            echo '<span style="color: #666;">' . esc_html(implode(', ', $names)) . '</span>';
+            return;
+        }
+
+        $is_711 = $this->is_convenience_store_shipping($order);
+        $method_id = '';
+        foreach ($shipping_methods as $shipping_method) {
+            $method_id = $shipping_method->get_method_id();
+            break;
+        }
+
+        $thermo_name = __('常溫', 'ccat-for-woocommerce');
+        if (strpos($method_id, 'refrigerated') !== false) {
+            $thermo_name = __('冷藏', 'ccat-for-woocommerce');
+        } elseif (strpos($method_id, 'frozen') !== false) {
+            $thermo_name = __('冷凍', 'ccat-for-woocommerce');
+        }
+
+        $is_printed = ('yes' === $order->get_meta(self::META_PRINTED) || !empty($order->get_meta(self::META_OBT_NUMBER)));
+
+        echo '<div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">';
+
+        // 1. 運送方式標籤.
+        echo '<div>';
+        if ($is_711) {
+            echo '<mark class="order-status" style="background:#e5f5fa;color:#0073aa;padding:3px 6px;border-radius:4px;font-size:12px;font-weight:600;display:inline-block;line-height:1.2;">' .
+                esc_html__('7-11超取', 'ccat-for-woocommerce') . ' [' . esc_html($thermo_name) . ']' .
+                '</mark>';
+        } else {
+            echo '<mark class="order-status" style="background:#f0f6ec;color:#46b450;padding:3px 6px;border-radius:4px;font-size:12px;font-weight:600;display:inline-block;line-height:1.2;">' .
+                esc_html__('黑貓宅配', 'ccat-for-woocommerce') . ' [' . esc_html($thermo_name) . ']' .
+                '</mark>';
+        }
+        echo '</div>';
+
+        // 2. 印單狀態標籤 與 門市名稱 (同一行).
+        echo '<div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">';
+        if ($is_printed) {
+            echo '<mark class="order-status" style="background:#c6e1c6;color:#1e4620;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600;display:inline-block;line-height:1.2;">' .
+                esc_html__('已印單', 'ccat-for-woocommerce') .
+                '</mark>';
+        } else {
+            echo '<mark class="order-status" style="background:#e5e5e5;color:#50575e;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600;display:inline-block;line-height:1.2;">' .
+                esc_html__('尚未印單', 'ccat-for-woocommerce') .
+                '</mark>';
+        }
+
+        if ($is_711) {
+            $store_name = $order->get_meta(CCATPAY_Gateway_Abstract::META_STORE_NAME);
+            if (!empty($store_name)) {
+                echo '<span style="font-size:11px;color:#666;">' . esc_html($store_name) . '</span>';
+            }
+        }
+        echo '</div>';
+
+        echo '</div>';
     }
 
     /**
@@ -914,6 +1048,186 @@ class CCATPAY_Shipping_Display
         }
 
         return $result;
+    }
+
+    /**
+     * 處理建立物流訂單的 AJAX 請求
+     */
+    public function handle_create_logistics_order()
+    {
+        // 驗證 nonce.
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'ccat-logistics-nonce')) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('安全驗證失敗', 'ccat-for-woocommerce'),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        // 檢查使用者權限.
+        if (!current_user_can('edit_shop_orders')) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('權限不足', 'ccat-for-woocommerce'),
+                ),
+                403
+            );
+            wp_die();
+        }
+
+        // 檢查物流功能是否啟用.
+        if (!CCATPAY_Payments::is_shipping_enabled()) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('黑貓物流功能已於黑貓Pay設定中停用', 'ccat-for-woocommerce'),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        // 獲取參數.
+        $order_id = isset($_POST['order_id']) ? absint($_POST['order_id']) : 0;
+        if (!$order_id) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('缺少必要參數', 'ccat-for-woocommerce'),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('找不到此訂單', 'ccat-for-woocommerce'),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        // 檢查是否為黑貓物流.
+        if (!$this->is_ccat_shipping($order)) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('非黑貓物流運送方式', 'ccat-for-woocommerce'),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        // 檢查是否已建立過託運單.
+        if ('yes' === $order->get_meta(self::META_PRINTED)) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('此訂單已建立託運單，請勿重複建立', 'ccat-for-woocommerce'),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        // 檢查付款狀態 (已付款或貨到付款).
+        $payment_method = $order->get_payment_method();
+        $is_cod = strpos($payment_method, 'cod') !== false;
+        if (!$order->is_paid() && !$is_cod) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__('請完成付款後再建立物流託運單', 'ccat-for-woocommerce'),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        $delivery_time  = isset($_POST['delivery_time']) ? sanitize_text_field(wp_unslash($_POST['delivery_time'])) : '04';
+        $print_obt_type = isset($_POST['print_obt_type']) ? sanitize_text_field(wp_unslash($_POST['print_obt_type'])) : '01';
+        $obt_count      = isset($_POST['obt_count']) ? max(1, min(100, absint($_POST['obt_count']))) : 1;
+
+        $response = $this->create_logistics_order($order, $delivery_time, $print_obt_type, $obt_count);
+
+        if (is_wp_error($response)) {
+            $order->add_order_note(
+                sprintf(
+                    /* translators: %s: 錯誤訊息 */
+                    __('建立黑貓物流託運單失敗：%s', 'ccat-for-woocommerce'),
+                    $response->get_error_message()
+                ),
+                false,
+                true
+            );
+            wp_send_json_error(
+                array(
+                    'message' => $response->get_error_message(),
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        if (empty($response) || 'Y' !== ($response['IsOK'] ?? '')) {
+            $error_message = $response['Message'] ?? __('建立物流託運單失敗', 'ccat-for-woocommerce');
+            $order->add_order_note(
+                sprintf(
+                    /* translators: %s: 錯誤訊息 */
+                    __('建立黑貓物流託運單失敗：%s', 'ccat-for-woocommerce'),
+                    $error_message
+                ),
+                false,
+                true
+            );
+            wp_send_json_error(
+                array(
+                    'message' => $error_message,
+                ),
+                400
+            );
+            wp_die();
+        }
+
+        $file_no = $response['Data']['FileNo'] ?? '';
+        $orders_returned = $response['Data']['Orders'] ?? array();
+
+        $obt_numbers = array();
+        foreach ($orders_returned as $item) {
+            if (!empty($item['OBTNumber'])) {
+                $obt_numbers[] = $item['OBTNumber'];
+            }
+        }
+        $obt_str = implode(', ', $obt_numbers);
+
+        // 更新訂單 Meta.
+        $order->update_meta_data(self::META_OBT_NUMBER, $obt_str);
+        $order->update_meta_data(self::META_FILE_NO, $file_no);
+        $order->update_meta_data(self::META_PRINTED, 'yes');
+        $order->save();
+
+        // 新增訂單備註.
+        $order->add_order_note(
+            sprintf(
+                /* translators: 1: 託運單號, 2: 檔案編號 */
+                __('黑貓物流託運單已建立，單號: %1$s，檔案編號: %2$s', 'ccat-for-woocommerce'),
+                $obt_str,
+                $file_no
+            ),
+            false,
+            true
+        );
+
+        wp_send_json_success(
+            array(
+                'message'    => __('物流託運單建立成功', 'ccat-for-woocommerce'),
+                'obt_number' => $obt_str,
+                'file_no'    => $file_no,
+            )
+        );
+        wp_die();
     }
 
     /**
