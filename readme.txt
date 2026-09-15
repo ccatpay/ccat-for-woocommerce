@@ -3,7 +3,7 @@
 Contributors: ccatpay
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
-Tested up to: 6.9
+Tested up to: 6.9.7
 Requires PHP: 8.3
 WC requires at least: 9.8
 WC tested up to: 11.0

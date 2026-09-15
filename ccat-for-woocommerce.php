@@ -9,7 +9,7 @@
  * Text Domain: ccat-for-woocommerce
  * Domain Path: /languages
  * Requires at least: 6.6
- * Tested up to: 6.9
+ * Tested up to: 6.9.7
  * Requires PHP: 8.3
  * Requires Plugins: woocommerce
  * WC requires at least: 9.8
