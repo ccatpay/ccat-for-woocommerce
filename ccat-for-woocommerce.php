@@ -3,7 +3,7 @@
  * Plugin Name: ccatpay Payment for WooCommerce
  * Plugin URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
- * Version: 2.8
+ * Version: 2.8.1
  * Author: ccatpay
  * Author URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Text Domain: ccat-for-woocommerce
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 if ( ! defined( 'CCATPAYMENTS_VERSION' ) ) {
-	define( 'CCATPAYMENTS_VERSION', '2.8' );
+	define( 'CCATPAYMENTS_VERSION', '2.8.1' );
 }
 if ( ! defined( 'CCATPAYMENTS_DOMAIN' ) ) {
 	define( 'CCATPAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
@@ -232,7 +232,7 @@ class CCATPAY_Payments {
 	 */
 	public static function add_gateway( array $gateways ): array {
 		if ( self::is_ccat_enabled() ) {
-			$gateways[] = 'CCATPAY_Gateway_Credit_Card';
+			// $gateways[] = 'CCATPAY_Gateway_Credit_Card';
 			$gateways[] = 'CCATPAY_Gateway_Chinatrust';
 			$gateways[] = 'CCATPAY_Gateway_Payuni';
 			$gateways[] = 'CCATPAY_Gateway_Cvs_Ibon';
@@ -293,7 +293,7 @@ class CCATPAY_Payments {
 		if ( class_exists( 'WC_Payment_Gateway' ) && self::is_ccat_enabled() ) {
 			require_once 'includes/class-ccatpay-gateway-abstract.php';
 			require_once 'includes/class-ccatpay-gateway-cvs-abstract.php';
-			require_once 'includes/class-ccatpay-gateway-credit-card.php';
+			// require_once 'includes/class-ccatpay-gateway-credit-card.php';
 			require_once 'includes/class-ccatpay-gateway-chinatrust.php';
 			require_once 'includes/class-ccatpay-gateway-payuni.php';
 			require_once 'includes/class-ccatpay-gateway-cvs-ibon.php';
@@ -385,7 +385,7 @@ class CCATPAY_Payments {
 	 */
 	public static function woocommerce_gateway_ccat_woocommerce_block_support(): void {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) && self::is_ccat_enabled() ) {
-			require_once 'includes/blocks/class-ccatpay-payments-credit-card-blocks.php';
+			// require_once 'includes/blocks/class-ccatpay-payments-credit-card-blocks.php';
 			require_once 'includes/blocks/class-ccatpay-payments-chinatrust-blocks.php';
 			require_once 'includes/blocks/class-ccatpay-payments-payuni-blocks.php';
 			require_once 'includes/blocks/class-ccatpay-payments-ibon-blocks.php';
@@ -397,7 +397,7 @@ class CCATPAY_Payments {
 			add_action(
 				'woocommerce_blocks_payment_method_type_registration',
 				function ( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-					$payment_method_registry->register( new CCATPAY_Gateway_Credit_Card_Blocks_Support() );
+					// $payment_method_registry->register( new CCATPAY_Gateway_Credit_Card_Blocks_Support() );
 					$payment_method_registry->register( new CCATPAY_Gateway_Chinatrust_Blocks_Support() );
 					$payment_method_registry->register( new CCATPAY_Gateway_Payuni_Blocks_Support() );
 					$payment_method_registry->register( new CCATPAY_Gateway_Ibon_Blocks_Support() );
