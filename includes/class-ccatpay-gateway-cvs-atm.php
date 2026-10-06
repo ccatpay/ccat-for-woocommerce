@@ -88,11 +88,15 @@ class CCATPAY_Gateway_Cvs_Atm extends CCATPAY_Gateway_Cvs_Abstract {
 				$html .= '<h2>' . esc_html__( '感謝訂購 請到ATM繳款', 'ccat-for-woocommerce') . '</h2>';
 			}
 
-			$html .= '<p>' . esc_html( sprintf( __( '銀行代號: %s', 'ccat-for-woocommerce'), $bank_id ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '轉帳帳號: %s', 'ccat-for-woocommerce'), $virtual_account ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce'), $payment_deadline ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce'), $bill_amount ) ) . '</p>';
-			echo $html;
+			/* translators: %s: Bank code */
+			$html .= '<p>' . esc_html( sprintf( __( '銀行代號: %s', 'ccat-for-woocommerce' ), $bank_id ) ) . '</p>';
+			/* translators: %s: Virtual account number */
+			$html .= '<p>' . esc_html( sprintf( __( '轉帳帳號: %s', 'ccat-for-woocommerce' ), $virtual_account ) ) . '</p>';
+			/* translators: %s: Payment deadline */
+			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce' ), $payment_deadline ) ) . '</p>';
+			/* translators: %d: Bill amount */
+			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce' ), $bill_amount ) ) . '</p>';
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} elseif ( $short_url ) {
 			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {
 				$html .= '<div class="ccat-pay-button-container" style="margin: 2em 0; padding: 2em; border-radius: 12px; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); border: 1px solid #e0e0e0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">';

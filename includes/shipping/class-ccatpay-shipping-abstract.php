@@ -101,20 +101,20 @@ abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
 			'title' => [
-        'title' => __('Title', 'woocommerce'),
+        'title' => __('Title', 'ccat-for-woocommerce'),
         'type' => 'text',
         'default' => $this->method_title,
-        'description' => __('This controls the title which the user sees during checkout.', 'woocommerce'),
+        'description' => __('This controls the title which the user sees during checkout.', 'ccat-for-woocommerce'),
         'desc_tip' => true
     ],
     'tax_status' => [
-        'title' => __('Tax status', 'woocommerce'),
+        'title' => __('Tax status', 'ccat-for-woocommerce'),
         'type' => 'select',
         'class' => 'wc-enhanced-select',
         'default' => 'none',
         'options' => [
-            'taxable' => __('Taxable', 'woocommerce'),
-            'none' => _x('None', 'Tax status', 'woocommerce')
+            'taxable' => __('Taxable', 'ccat-for-woocommerce'),
+            'none' => _x('None', 'Tax status', 'ccat-for-woocommerce')
         ],
     ],
     'cost' => [
@@ -126,24 +126,24 @@ abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
         'desc_tip' => true
     ],
     'cost_requires' => [
-        'title'   => __( 'Free shipping requires...', 'woocommerce' ),
+        'title'   => __( 'Free shipping requires...', 'ccat-for-woocommerce' ),
         'type'    => 'select',
         'class'   => 'wc-enhanced-select',
         'default' => '',
         'options' => [
-            ''           => __('N/A', 'woocommerce'),
-            'coupon'     => __('A valid free shipping coupon', 'woocommerce'),
-            'min_amount' => __('A minimum order amount', 'woocommerce'),
-            'either'     => __('A minimum order amount OR a coupon', 'woocommerce'),
-            'both'       => __('A minimum order amount AND a coupon', 'woocommerce'),
+            ''           => __('N/A', 'ccat-for-woocommerce'),
+            'coupon'     => __('A valid free shipping coupon', 'ccat-for-woocommerce'),
+            'min_amount' => __('A minimum order amount', 'ccat-for-woocommerce'),
+            'either'     => __('A minimum order amount OR a coupon', 'ccat-for-woocommerce'),
+            'both'       => __('A minimum order amount AND a coupon', 'ccat-for-woocommerce'),
         ]
     ],
     'min_amount' => [
-        'title' => __('A minimum order amount', 'woocommerce'),
+        'title' => __('A minimum order amount', 'ccat-for-woocommerce'),
         'type' => 'price',
         'default' => 0,
         'placeholder' => wc_format_localized_price(0),
-        'description' => __('Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce'),
+        'description' => __('Users will need to spend this amount to get free shipping (if enabled above).', 'ccat-for-woocommerce'),
         'desc_tip' => true
     ]
 		);
@@ -167,6 +167,7 @@ abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
         }
 
         $this->add_rate($rate);
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         do_action('woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate);
 	}
 

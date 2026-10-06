@@ -335,6 +335,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		);
 
 		// 輸出 HTML 和 JavaScript 導回結帳頁面.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $store_data is safely JSON encoded.
 		echo '<!DOCTYPE html>
 		<html>
 		<head>
@@ -540,8 +541,8 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 					CCATPAYMENTS_PREFIX . 'ccat_temp_var_' . $temp_var,
 					array(
 						'shipping_method' => $shipping_method,
+						// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce is verified in ajax_get_711_store_selection_url.
 						'order_id'        => isset( $_POST['order_id'] ) ? sanitize_text_field( wp_unslash( $_POST['order_id'] ) ) : '',
-						// phpcs:ignore WordPress
 						'created_at'      => time(),
 					),
 					false

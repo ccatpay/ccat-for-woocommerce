@@ -38,12 +38,11 @@ Thumbs.db
 
 # Logs
 /logs
-/docs
+docs/
 
 # Build assets.
 select2.scss
 /assets/
-/languages/
 **/node_modules
 
 # VS Code

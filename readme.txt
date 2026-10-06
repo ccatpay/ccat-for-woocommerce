@@ -3,7 +3,7 @@
 Contributors: ccatpay
 Tags: woocommerce, payment gateway, credit card, cvs payment, taiwan
 Requires at least: 6.6
-Tested up to: 6.9.7
+Tested up to: 7.1
 Requires PHP: 8.3
 WC requires at least: 9.8
 WC tested up to: 11.0
@@ -11,21 +11,22 @@ Stable tag: 2.8.1
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-為您的 WooCommerce 網站添加 黑貓Pay 金流支付方式。
+Adds ccatpay (黑貓Pay) payment gateways and shipping services to WooCommerce.
 
 == Description ==
 
-ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
+ccatpay Payment for WooCommerce integrates Taiwan local payment and shipping services:
 
-* 信用卡支付
-* 超商條碼支付 (ibon)
-* 銀行虛擬帳號 (ATM)
+* Credit Card payments
+* Convenience store barcode/code payments (ibon)
+* Virtual Account transfer (ATM)
+* Delivery and 7-Eleven pickup services
 
-特色：
+Features:
 
-* 支援電子發票開立
-* WooCommerce Blocks 整合支援
-* 完整中文化介面
+* Electronic invoice issuance support
+* WooCommerce Blocks integration
+* Traditional Chinese interface
 
 == Installation ==
 

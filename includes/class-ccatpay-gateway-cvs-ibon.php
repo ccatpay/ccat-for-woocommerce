@@ -111,9 +111,12 @@ class CCATPAY_Gateway_Cvs_Ibon extends CCATPAY_Gateway_Cvs_Abstract {
 				$html .= '<h2>' . esc_html__( '感謝訂購 請至 Ibon 機台繳款', 'ccat-for-woocommerce') . '</h2>';
 			}
 
-			$html .= '<p>' . esc_html( sprintf( __( 'Ibon 繳款代碼: %s', 'ccat-for-woocommerce'), $ibon_code ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce'), $payment_deadline ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce'), $bill_amount ) ) . '</p>';
+			/* translators: %s: Ibon payment code */
+			$html .= '<p>' . esc_html( sprintf( __( 'Ibon 繳款代碼: %s', 'ccat-for-woocommerce' ), $ibon_code ) ) . '</p>';
+			/* translators: %s: Payment deadline */
+			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce' ), $payment_deadline ) ) . '</p>';
+			/* translators: %d: Bill amount */
+			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d', 'ccat-for-woocommerce' ), $bill_amount ) ) . '</p>';
 			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} elseif ( $short_url ) {
 			if ( 'woocommerce_admin_order_data_after_order_details' !== $current_action ) {

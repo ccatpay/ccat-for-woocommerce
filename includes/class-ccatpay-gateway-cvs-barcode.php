@@ -119,8 +119,10 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
 			$html .= '</div>';
 			$html .= '</div>';
 
-			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce'), $payment_deadline ) ) . '</p>';
-			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d 元', 'ccat-for-woocommerce'), $bill_amount ) ) . '</p>';
+			/* translators: %s: Payment deadline */
+			$html .= '<p>' . esc_html( sprintf( __( '付款期限: %s', 'ccat-for-woocommerce' ), $payment_deadline ) ) . '</p>';
+			/* translators: %d: Bill amount */
+			$html .= '<p>' . esc_html( sprintf( __( '繳款金額: %d 元', 'ccat-for-woocommerce' ), $bill_amount ) ) . '</p>';
 
 			// 加入條碼生成的 JavaScript.
 			$html .= '<script type="text/javascript">
@@ -162,7 +164,7 @@ class CCATPAY_Gateway_Cvs_Barcode extends CCATPAY_Gateway_Cvs_Abstract {
             }
         </style>';
 
-			echo $html;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 

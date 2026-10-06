@@ -5,9 +5,11 @@
  * @package WooCommerceCCatGateway
  */
 
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
-define( 'ORDD_BLOCK_VERSION', '1.0.0' );
+use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
 /**
  * Integration class handling the registration and management of block scripts and data.
