@@ -7,7 +7,7 @@ Tested up to: 7.1
 Requires PHP: 8.3
 WC requires at least: 9.8
 WC tested up to: 11.0
-Stable tag: 2.8.1
+Stable tag: 2.9
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -173,6 +173,11 @@ Features:
 
 = 2.8.1 =
 * 修正： 移除玉山信用卡支付方式。
+
+= 2.9 =
+* 改進： 升級 WooCommerce 結帳區塊 API 版本至 apiVersion 3，支援 WordPress 7.0+ iframe editor。
+* 修正： 解決 Plugin Check 掃描問題，補齊多語系註解、時區格式與安全輸出規範。
+* 改進： 支援最新 WordPress 7.1 與更新外掛官方規範說明。
 
 == Third-party Resources ==
 
