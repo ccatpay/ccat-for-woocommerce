@@ -446,9 +446,12 @@ class CCATPAY_Shipping_Display
 
         if (is_wp_error($response)) {
             foreach ($orders as $order) {
-                /* translators: %s: Error message */
                 $order->add_order_note(
-                    sprintf(__('黑貓批次列印 API 請求錯誤: %s', 'ccat-for-woocommerce'), $response->get_error_message()),
+                    sprintf(
+                        /* translators: %s: Error message */
+                        __('黑貓批次列印 API 請求錯誤: %s', 'ccat-for-woocommerce'),
+                        $response->get_error_message()
+                    ),
                     false,
                     true
                 );
@@ -475,9 +478,12 @@ class CCATPAY_Shipping_Display
                 }
             }
             foreach ($orders as $order) {
-                /* translators: %s: Error message */
                 $order->add_order_note(
-                    sprintf(__('黑貓批次列印失敗: %s', 'ccat-for-woocommerce'), $error_message),
+                    sprintf(
+                        /* translators: %s: Error message */
+                        __('黑貓批次列印失敗: %s', 'ccat-for-woocommerce'),
+                        $error_message
+                    ),
                     false,
                     true
                 );
@@ -494,9 +500,12 @@ class CCATPAY_Shipping_Display
         if (json_last_error() !== JSON_ERROR_NONE || empty($result) || 'Y' !== ($result['IsOK'] ?? '')) {
             $error_message = $result['Message'] ?? __('建立物流託運單失敗', 'ccat-for-woocommerce');
             foreach ($orders as $order) {
-                /* translators: %s: Error message */
                 $order->add_order_note(
-                    sprintf(__('黑貓批次列印失敗: %s', 'ccat-for-woocommerce'), $error_message),
+                    sprintf(
+                        /* translators: %s: Error message */
+                        __('黑貓批次列印失敗: %s', 'ccat-for-woocommerce'),
+                        $error_message
+                    ),
                     false,
                     true
                 );
@@ -746,9 +755,12 @@ class CCATPAY_Shipping_Display
                     admin_url('admin-post.php?action=' . CCATPAYMENTS_PREFIX . '_download_batch_pdf&token=' . urlencode($token)),
                     'ccat_download_batch_pdf_' . $token
                 );
-                /* translators: %d: Batch sequence number */
                 $btn_label = count($tokens) > 1
-                    ? sprintf(__('下載第 %d 批託運單 PDF', 'ccat-for-woocommerce'), $idx + 1)
+                    ? sprintf(
+                        /* translators: %d: Batch sequence number */
+                        __('下載第 %d 批託運單 PDF', 'ccat-for-woocommerce'),
+                        $idx + 1
+                    )
                     : __('點此下載整批託運單 PDF', 'ccat-for-woocommerce');
 
                 echo '<a href="' . esc_url($download_url) . '" class="button button-primary ccat-auto-download-btn" style="margin-right: 8px;" target="_blank">' .
@@ -787,10 +799,13 @@ class CCATPAY_Shipping_Display
                             'ccat_download_batch_pdf_' . $h_token
                         );
                         $d_time = $h_item['display_time'] ?? '';
-                        /* translators: %s: Created time string */
                         $valid_history_buttons[] = array(
                             'url'   => $download_url,
-                            'label' => sprintf(__('下載 1 小時內建立的託運單 PDF (%s 建立)', 'ccat-for-woocommerce'), $d_time),
+                            'label' => sprintf(
+                                /* translators: %s: Created time string */
+                                __('下載 1 小時內建立的託運單 PDF (%s 建立)', 'ccat-for-woocommerce'),
+                                $d_time
+                            ),
                         );
                     }
                 }

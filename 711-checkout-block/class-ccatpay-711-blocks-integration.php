@@ -335,7 +335,6 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 		);
 
 		// 輸出 HTML 和 JavaScript 導回結帳頁面.
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $store_data is safely JSON encoded.
 		echo '<!DOCTYPE html>
 		<html>
 		<head>
@@ -344,7 +343,8 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 			<title>' . esc_html__( '門市選擇完成', 'ccat-for-woocommerce') . '</title>
 			<script type="text/javascript">
 				window.onload = function() {
-					var storeData = ' . $store_data . ';
+					var storeDataEl = document.getElementById("ccat-selected-store-data");
+					var storeData = storeDataEl ? JSON.parse(storeDataEl.getAttribute("data-store")) : {};
 					
 					// 嘗試將門市資料存儲到 localStorage 以防止資料丟失
 					try {
@@ -442,6 +442,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 			</style>
 		</head>
 		<body>
+			<div id="ccat-selected-store-data" data-store="' . esc_attr( $store_data ) . '" style="display:none;"></div>
 			<h1>' . esc_html__( '門市選擇完成', 'ccat-for-woocommerce') . '</h1>
 			
 			<div class="store-info">
