@@ -3,7 +3,7 @@
  * Plugin Name: ccatpay Payment for WooCommerce
  * Plugin URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Description: Adds the CCat Payments gateway to your WooCommerce website.
- * Version: 2.8.1
+ * Version: 2.9
  * Author: ccatpay
  * Author URI: https://github.com/ccatpay/ccat-for-woocommerce
  * Text Domain: ccat-for-woocommerce
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 if ( ! defined( 'CCATPAYMENTS_VERSION' ) ) {
-	define( 'CCATPAYMENTS_VERSION', '2.8.1' );
+	define( 'CCATPAYMENTS_VERSION', '2.9' );
 }
 if ( ! defined( 'CCATPAYMENTS_DOMAIN' ) ) {
 	define( 'CCATPAYMENTS_DOMAIN', 'ccat-for-woocommerce' );
@@ -404,7 +404,9 @@ class CCATPAY_Payments {
 					$payment_method_registry->register( new CCATPAY_Gateway_Atm_Blocks_Support() );
 					// $payment_method_registry->register( new CCATPAY_Gateway_Opw_Blocks_Support() );
 					// $payment_method_registry->register( new CCATPAY_Gateway_Icash_Blocks_Support() );
-					$payment_method_registry->register( new CCATPAY_Gateway_COD_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_COD_Cash_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_COD_Card_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_COD_711_Blocks_Support() );
 				}
 			);
 		}

@@ -7,7 +7,7 @@ Tested up to: 6.9.7
 Requires PHP: 8.3
 WC requires at least: 9.8
 WC tested up to: 11.0
-Stable tag: 2.8.1
+Stable tag: 2.9
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -172,6 +172,9 @@ ccatpay Payment for WooCommerce 提供多種台灣本地支付方式：
 
 = 2.8.1 =
 * 修正： 移除玉山信用卡支付方式。
+
+= 2.9 =
+* 改進： 貨到付款(現金、刷卡) 改為獨立模組，並完善 WooCommerce Checkout Blocks 可獨立顯示貨到付款(現金、刷卡)各自的付款方式。
 
 == Third-party Resources ==
 

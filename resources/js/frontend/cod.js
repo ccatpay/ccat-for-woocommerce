@@ -9,7 +9,7 @@ const ccatCodePayment = {
     label: ccatCodePaymentLabel,
     content: Object(window.wp.element.createElement)(ccatCodePaymentContent, null),
     edit: Object(window.wp.element.createElement)(ccatCodePaymentContent, null),
-    canMakePayment: () => true,
+    canMakePayment: () => Boolean(ccatCodePaymentConfig && ccatCodePaymentConfig.title),
     ariaLabel: ccatCodePaymentLabel,
     supports: {
         features: ccatCodePaymentConfig.supports,
@@ -27,7 +27,7 @@ const ccatCod711Payment = {
     label: ccatCod711Label,
     content: Object(window.wp.element.createElement)(ccatCod711Content, null),
     edit: Object(window.wp.element.createElement)(ccatCod711Content, null),
-    canMakePayment: () => true,
+    canMakePayment: () => Boolean(ccatCod711Config && ccatCod711Config.title),
     ariaLabel: ccatCod711Label,
     supports: {
         features: ccatCod711Config.supports,
@@ -45,7 +45,7 @@ const ccatCodCashPayment = {
     label: ccatCodCashLabel,
     content: Object(window.wp.element.createElement)(ccatCodCashContent, null),
     edit: Object(window.wp.element.createElement)(ccatCodCashContent, null),
-    canMakePayment: () => true,
+    canMakePayment: () => Boolean(ccatCodCashConfig && ccatCodCashConfig.title),
     ariaLabel: ccatCodCashLabel,
     supports: {
         features: ccatCodCashConfig.supports,
@@ -63,7 +63,7 @@ const ccatCodCardPayment = {
     label: ccatCodCardLabel,
     content: Object(window.wp.element.createElement)(ccatCodCardContent, null),
     edit: Object(window.wp.element.createElement)(ccatCodCardContent, null),
-    canMakePayment: () => true,
+    canMakePayment: () => Boolean(ccatCodCardConfig && ccatCodCardConfig.title),
     ariaLabel: ccatCodCardLabel,
     supports: {
         features: ccatCodCardConfig.supports,
@@ -81,7 +81,7 @@ const ccatCodMobilePayment = {
     label: ccatCodMobileLabel,
     content: Object(window.wp.element.createElement)(ccatCodMobileContent, null),
     edit: Object(window.wp.element.createElement)(ccatCodMobileContent, null),
-    canMakePayment: () => true,
+    canMakePayment: () => Boolean(ccatCodMobileConfig && ccatCodMobileConfig.title),
     ariaLabel: ccatCodMobileLabel,
     supports: {
         features: ccatCodMobileConfig.supports,
