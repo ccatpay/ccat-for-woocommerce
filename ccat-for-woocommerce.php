@@ -404,7 +404,9 @@ class CCATPAY_Payments {
 					$payment_method_registry->register( new CCATPAY_Gateway_Atm_Blocks_Support() );
 					// $payment_method_registry->register( new CCATPAY_Gateway_Opw_Blocks_Support() );
 					// $payment_method_registry->register( new CCATPAY_Gateway_Icash_Blocks_Support() );
-					$payment_method_registry->register( new CCATPAY_Gateway_COD_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_COD_Cash_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_COD_Card_Blocks_Support() );
+					$payment_method_registry->register( new CCATPAY_Gateway_COD_711_Blocks_Support() );
 				}
 			);
 		}
