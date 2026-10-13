@@ -815,8 +815,12 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                     // 將預先開啟的空白視窗導向地圖 URL
                     selectionWindow.location.href = data.data.url;
 
+                    // 向下相容取得目前元素的 document 與 window（相容 iframe 與頂層 DOM）
+                    const currentDoc = (buttonEl && buttonEl.ownerDocument) ? buttonEl.ownerDocument : document;
+                    const currentWin = (currentDoc && currentDoc.defaultView) ? currentDoc.defaultView : window;
+
                     // 創建並顯示提示用戶操作的信息
-                    const pendingMessage = document.createElement('div');
+                    const pendingMessage = currentDoc.createElement('div');
                     pendingMessage.className = 'wc-block-components-notice-banner is-info';
                     pendingMessage.style.marginTop = '10px';
                     pendingMessage.innerHTML = `<span>${__('請在新開啟的視窗中選擇門市...', 'ccat-for-woocommerce')}</span>`;
@@ -839,7 +843,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                         }
 
                         // 建立成功訊息
-                        const successMessage = document.createElement('div');
+                        const successMessage = currentDoc.createElement('div');
                         successMessage.className = 'wc-block-components-notice-banner is-success';
                         successMessage.style.marginTop = '10px';
                         successMessage.innerHTML = `<span>${__('已成功選擇門市', 'ccat-for-woocommerce')}</span>`;
@@ -884,8 +888,8 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                         showSuccessMessage(noticeContainer);
                     };
 
-                    // 設置一個全局回調函數，讓選擇門市頁面可以調用
-                    window.setSelectedCvsStore = (storeData) => {
+                    // 設置全局回調函數，向下相容掛載至當前 window、主視窗與頂層 window（防止 iframe 隔離導致回呼失敗）
+                    const handleCallback = (storeData) => {
                         if (storeData && storeData.storeName && storeData.storeId) {
                             applySelectedStore(storeData);
 
@@ -895,6 +899,14 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                             }
                         }
                     };
+
+                    currentWin.setSelectedCvsStore = handleCallback;
+                    window.setSelectedCvsStore = handleCallback;
+                    try {
+                        if (window.top && window.top !== window) {
+                            window.top.setSelectedCvsStore = handleCallback;
+                        }
+                    } catch (e) {}
 
                     // 監聽窗口關閉事件
                     const checkWindowClosed = setInterval(() => {

@@ -355,16 +355,35 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 					
 					if (window.opener && !window.opener.closed) {
 						try {
-							// 嘗試調用父窗口的回調函數
-							window.opener.setSelectedCvsStore(storeData);
-							document.getElementById("success-message").style.display = "block";
-							// 成功傳遞數據後關閉窗口
-							setTimeout(function() {
-								window.close();
-							}, 1000);
+							// 向下相容搜尋父視窗、頂層視窗或其 iframe 內的 setSelectedCvsStore 回調函數
+							var callbackFn = null;
+							if (typeof window.opener.setSelectedCvsStore === "function") {
+								callbackFn = window.opener.setSelectedCvsStore;
+							} else if (window.opener.top && typeof window.opener.top.setSelectedCvsStore === "function") {
+								callbackFn = window.opener.top.setSelectedCvsStore;
+							} else if (window.opener.frames && window.opener.frames.length > 0) {
+								for (var i = 0; i < window.opener.frames.length; i++) {
+									try {
+										if (typeof window.opener.frames[i].setSelectedCvsStore === "function") {
+											callbackFn = window.opener.frames[i].setSelectedCvsStore;
+											break;
+										}
+									} catch(fe) {}
+								}
+							}
+
+							if (callbackFn) {
+								callbackFn(storeData);
+								document.getElementById("success-message").style.display = "block";
+								// 成功傳遞數據後關閉窗口
+								setTimeout(function() {
+									window.close();
+								}, 1000);
+							} else {
+								throw new Error("找不到 setSelectedCvsStore 回調函數");
+							}
 						} catch(e) {
-							window.alert("調用父窗口函數失敗");
-							console.error("調用父窗口函數失敗:", e);
+							console.error("調用父窗口函數失敗，已存入 localStorage 由結帳頁自動取回:", e);
 							document.getElementById("manual-redirect").style.display = "block";
 						}
 					} else {
