@@ -12,8 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * CCATPAY_Analytics_Orders_Export
  *
- * 處理 WooCommerce 後台 > 分析 (Analytics) > 訂單 (Orders) 的 CSV 匯出功能，
- * 增加黑貓物流相關資訊（收件人姓名、電話、Email、託運單號、配送方式、溫層、收件地址、7-11門市、預計出貨日、希望配達日等）。
+ * 處理 WooCommerce 後台 > 分析 (Analytics) > 訂單 (Orders) 的功能：
+ * 1. 網頁清單欄位：僅保留「配送方式」與「託運單號」。
+ * 2. 下載 CSV 檔案：包含完整黑貓物流資訊（收件人姓名、電話、Email、配送方式、溫層、收件地址、7-11門市、託運單號、預計出貨日、希望配達日等）。
  */
 class CCATPAY_Analytics_Orders_Export {
 
@@ -51,7 +52,7 @@ class CCATPAY_Analytics_Orders_Export {
 	}
 
 	/**
-	 * 建構子：僅掛載專屬 CSV 匯出的核心 hooks，不干擾標準報表查詢與 API
+	 * 建構子：註冊 CSV 匯出與網頁清單擴充 hooks
 	 */
 	public function __construct() {
 		// 1. Analytics > Orders CSV 匯出欄位名稱定義.
@@ -59,10 +60,19 @@ class CCATPAY_Analytics_Orders_Export {
 
 		// 2. Analytics > Orders CSV 匯出單筆資料準備.
 		add_filter( 'woocommerce_report_orders_prepare_export_item', array( $this, 'prepare_export_item' ), 20, 2 );
+
+		// 3. Analytics 訂單查詢資料過濾 (供網頁清單表格取得「配送方式」與「託運單號」).
+		add_filter( 'woocommerce_analytics_orders_select_query', array( $this, 'filter_analytics_orders_select_query' ), 20, 2 );
+
+		// 4. REST API 訂單報表單筆項目回應過濾.
+		add_filter( 'woocommerce_rest_prepare_report_orders', array( $this, 'filter_rest_prepare_report_orders' ), 20, 3 );
+
+		// 5. 後台資源加載 (Analytics 頁面加載前端腳本，顯示網頁清單「配送方式」與「託運單號」).
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 	}
 
 	/**
-	 * 取得黑貓物流擴充欄位定義清單 (欄位鍵值 => 欄位標題)
+	 * 取得黑貓物流 CSV 匯出欄位清單 (欄位鍵值 => 欄位標題)
 	 *
 	 * @return array<string, string>
 	 */
@@ -105,7 +115,7 @@ class CCATPAY_Analytics_Orders_Export {
 	}
 
 	/**
-	 * 準備 CSV 匯出中的單筆訂單黑貓物流資料
+	 * 準備 CSV 匯出中的單筆訂單黑貓物流資料 (包含完整物流資訊)
 	 *
 	 * @param array        $export_item 匯出資料陣列 (key => value).
 	 * @param array|object $item        原始報表項目資料.
@@ -141,7 +151,104 @@ class CCATPAY_Analytics_Orders_Export {
 	}
 
 	/**
-	 * 獲取單筆訂單的完整黑貓物流資料陣列
+	 * 擴充 Analytics 訂單查詢結果 (僅為網頁清單提供「配送方式」與「託運單號」)
+	 *
+	 * @param object|array $results    查詢結果物件或陣列.
+	 * @param array        $query_args 查詢參數.
+	 * @return object|array
+	 */
+	public function filter_analytics_orders_select_query( $results, $query_args ) {
+		try {
+			if ( is_object( $results ) && isset( $results->data ) && is_array( $results->data ) ) {
+				foreach ( $results->data as $index => $row ) {
+					$order_id = 0;
+					if ( is_object( $row ) ) {
+						$order_id = isset( $row->order_id ) ? absint( $row->order_id ) : 0;
+					} elseif ( is_array( $row ) ) {
+						$order_id = isset( $row['order_id'] ) ? absint( $row['order_id'] ) : 0;
+					}
+
+					if ( $order_id ) {
+						$order = wc_get_order( $order_id );
+						if ( $order && is_a( $order, 'WC_Order' ) ) {
+							$shipping_method = trim( (string) $order->get_shipping_method() ) ?: '-';
+							$obt_number      = trim( (string) $order->get_meta( self::META_OBT_NUMBER ) ) ?: '-';
+
+							if ( is_object( $results->data[ $index ] ) ) {
+								$results->data[ $index ]->ccat_shipping_method = $shipping_method;
+								$results->data[ $index ]->ccat_obt_number      = $obt_number;
+							} elseif ( is_array( $results->data[ $index ] ) ) {
+								$results->data[ $index ]['ccat_shipping_method'] = $shipping_method;
+								$results->data[ $index ]['ccat_obt_number']      = $obt_number;
+							}
+						}
+					}
+				}
+			}
+		} catch ( Throwable $e ) {
+			// 捕捉任何例外，保證絕不影響報表查詢.
+		}
+
+		return $results;
+	}
+
+	/**
+	 * 過濾 REST API 單筆項目回應 (僅附加「配送方式」與「託運單號」)
+	 *
+	 * @param WP_REST_Response $response 原始回應物件.
+	 * @param array|object     $item     報表項目資料.
+	 * @param WP_REST_Request  $request  REST 請求物件.
+	 * @return WP_REST_Response
+	 */
+	public function filter_rest_prepare_report_orders( $response, $item, $request ) {
+		try {
+			if ( $response instanceof WP_REST_Response ) {
+				$data     = $response->get_data();
+				$order_id = $this->extract_order_id_from_item( $item );
+
+				if ( ! $order_id && isset( $data['order_id'] ) ) {
+					$order_id = absint( $data['order_id'] );
+				}
+
+				if ( $order_id ) {
+					$order = wc_get_order( $order_id );
+					if ( $order && is_a( $order, 'WC_Order' ) ) {
+						$data['ccat_shipping_method'] = trim( (string) $order->get_shipping_method() ) ?: '-';
+						$data['ccat_obt_number']      = trim( (string) $order->get_meta( self::META_OBT_NUMBER ) ) ?: '-';
+						$response->set_data( $data );
+					}
+				}
+			}
+		} catch ( Throwable $e ) {
+			// 捕捉任何例外.
+		}
+
+		return $response;
+	}
+
+	/**
+	 * 後台加載腳本 (於 Analytics 頁面載入前端 table filter，顯示「配送方式」與「託運單號」)
+	 *
+	 * @param string $hook 目前後台頁面 hook.
+	 * @return void
+	 */
+	public function enqueue_admin_scripts( $hook ): void {
+		$screen = get_current_screen();
+		if ( ! $screen || 'woocommerce_page_wc-admin' !== $screen->id ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'ccatpay-analytics-orders',
+			CCATPAY_Payments::plugin_url() . '/resources/js/admin/ccatpay-analytics-orders.js',
+			array( 'wp-hooks', 'wp-i18n' ),
+			CCATPAYMENTS_VERSION,
+			true
+		);
+	}
+
+	/**
+	 * 獲取單筆訂單的完整黑貓物流資料陣列 (供 CSV 匯出使用)
 	 *
 	 * @param WC_Order $order 訂單物件.
 	 * @return array<string, string>
