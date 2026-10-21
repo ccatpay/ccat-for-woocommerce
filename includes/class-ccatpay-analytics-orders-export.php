@@ -240,6 +240,26 @@ class CCATPAY_Analytics_Orders_Export {
 			return;
 		}
 
+		// 初次安裝時，將黑貓自訂欄位預設加入使用者的「隱藏欄位清單 (orders_report_columns)」，
+		// 確保初次進入網頁清單時新增欄位皆為關閉狀態，等使用者手動開啟.
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			$initialized = get_user_meta( $user_id, '_ccat_analytics_columns_initialized', true );
+			if ( ! $initialized ) {
+				$custom_keys   = array_keys( $this->get_export_column_definitions() );
+				$existing_meta = get_user_meta( $user_id, 'woocommerce_admin_orders_report_columns', true );
+
+				if ( is_array( $existing_meta ) ) {
+					$updated_meta = array_values( array_unique( array_merge( $existing_meta, $custom_keys ) ) );
+					update_user_meta( $user_id, 'woocommerce_admin_orders_report_columns', $updated_meta );
+				} elseif ( empty( $existing_meta ) ) {
+					update_user_meta( $user_id, 'woocommerce_admin_orders_report_columns', $custom_keys );
+				}
+
+				update_user_meta( $user_id, '_ccat_analytics_columns_initialized', 'yes' );
+			}
+		}
+
 		$script_path = dirname( __DIR__ ) . '/resources/js/admin/ccatpay-analytics-orders.js';
 		$version     = file_exists( $script_path ) ? (string) filemtime( $script_path ) : CCATPAYMENTS_VERSION;
 
