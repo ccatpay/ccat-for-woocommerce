@@ -34,15 +34,22 @@
 	];
 
 	// 動態注入 CSS，確保 hidden 欄位在網頁表格上不顯示、不佔空間
-	var style = document.createElement('style');
-	style.type = 'text/css';
-	style.innerHTML = [
-		'.woocommerce-table th.ccat-analytics-hidden,',
-		'.woocommerce-table td.ccat-analytics-hidden {',
-		'    display: none !important;',
-		'}'
-	].join('\n');
-	document.head.appendChild(style);
+	var styleId = 'ccatpay-analytics-table-style';
+	if (!document.getElementById(styleId)) {
+		var style = document.createElement('style');
+		style.id = styleId;
+		style.type = 'text/css';
+		style.innerHTML = [
+			'.ccat-analytics-hidden,',
+			'th.ccat-analytics-hidden,',
+			'td.ccat-analytics-hidden,',
+			'.woocommerce-table th.ccat-analytics-hidden,',
+			'.woocommerce-table td.ccat-analytics-hidden {',
+			'    display: none !important;',
+			'}'
+		].join('\n');
+		document.head.appendChild(style);
+	}
 
 	addFilter(
 		'woocommerce_admin_report_table',
@@ -56,12 +63,17 @@
 
 			// 檢查是否已加入自訂欄位，避免重複加入.
 			var isAlreadyAdded = headers.some(function (header) {
-				return header.key === 'ccat_shipping_method' || header.key === 'ccat_obt_number';
+				return header.key === 'ccat_recipient_name' || (header.key === 'ccat_shipping_method' && headers.length > 15);
 			});
 
 			if (isAlreadyAdded) {
 				return reportTableData;
 			}
+
+			// 如果舊版的只有 2 個欄位，先過濾掉舊的 headers.
+			headers = headers.filter(function (header) {
+				return header.key !== 'ccat_shipping_method' && header.key !== 'ccat_obt_number';
+			});
 
 			// 附加全部 12 個黑貓物流表頭 (供 CSV 下載讀取，hidden 欄位透過 className 隱藏).
 			var newHeaders = headers.concat(
@@ -81,6 +93,8 @@
 			var items = (reportTableData.items && reportTableData.items.data) || [];
 
 			var newRows = rows.map(function (row, index) {
+				// 若原本已有 2 欄舊自訂儲存格，先截斷保留原生儲存格
+				var originalRow = row.slice(0, headers.length);
 				var item = items[index] || {};
 				var extraCells = allColumns.map(function (col) {
 					var rawValue = item[col.key];
@@ -96,7 +110,7 @@
 					};
 				});
 
-				return row.concat(extraCells);
+				return originalRow.concat(extraCells);
 			});
 
 			reportTableData.headers = newHeaders;

@@ -240,11 +240,14 @@ class CCATPAY_Analytics_Orders_Export {
 			return;
 		}
 
+		$script_path = dirname( __DIR__ ) . '/resources/js/admin/ccatpay-analytics-orders.js';
+		$version     = file_exists( $script_path ) ? (string) filemtime( $script_path ) : CCATPAYMENTS_VERSION;
+
 		wp_enqueue_script(
 			'ccatpay-analytics-orders',
 			CCATPAY_Payments::plugin_url() . '/resources/js/admin/ccatpay-analytics-orders.js',
 			array( 'wp-hooks', 'wp-i18n' ),
-			CCATPAYMENTS_VERSION,
+			$version,
 			true
 		);
 	}
