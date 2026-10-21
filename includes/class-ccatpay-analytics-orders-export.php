@@ -12,10 +12,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * CCATPAY_Analytics_Orders_Export
  *
- * 處理 WooCommerce 後台 > 分析 (Analytics) > 訂單 (Orders) 的 CSV 匯出，
- * 增加黑貓物流相關資訊（收件人姓名、Email、託運單號、配送方式、收件地址、預計出貨日、希望配達日等）。
+ * 處理 WooCommerce 後台 > 分析 (Analytics) > 訂單 (Orders) 的 CSV 匯出功能，
+ * 增加黑貓物流相關資訊（收件人姓名、電話、Email、託運單號、配送方式、溫層、收件地址、7-11門市、預計出貨日、希望配達日等）。
  */
 class CCATPAY_Analytics_Orders_Export {
+
+	/**
+	 * 黑貓物流訂單相關 Meta 鍵值常數 (獨立定義以避免跨類別相依性問題)
+	 */
+	const META_OBT_NUMBER    = '_ccat_shipping_obt_number';
+	const META_FILE_NO       = '_ccat_shipping_file_no';
+	const META_PRINTED       = '_ccat_shipping_printed';
+	const META_SHIPMENT_DATE = '_ccat_shipping_shipment_date';
+	const META_DELIVERY_DATE = '_ccat_shipping_delivery_date';
+	const META_DELIVERY_TIME = '_ccat_shipping_delivery_time';
+	const META_STORE_ID      = '_ccat_store_id';
+	const META_STORE_NAME    = '_ccat_store_name';
+	const META_STORE_ADDRESS = '_ccat_store_address';
+	const TAIPEI_TIMEZONE    = 'Asia/Taipei';
 
 	/**
 	 * 單例實例
@@ -37,7 +51,7 @@ class CCATPAY_Analytics_Orders_Export {
 	}
 
 	/**
-	 * 建構子：註冊各項 hooks
+	 * 建構子：僅掛載專屬 CSV 匯出的核心 hooks，不干擾標準報表查詢與 API
 	 */
 	public function __construct() {
 		// 1. Analytics > Orders CSV 匯出欄位名稱定義.
@@ -45,15 +59,6 @@ class CCATPAY_Analytics_Orders_Export {
 
 		// 2. Analytics > Orders CSV 匯出單筆資料準備.
 		add_filter( 'woocommerce_report_orders_prepare_export_item', array( $this, 'prepare_export_item' ), 20, 2 );
-
-		// 3. Analytics 訂單查詢資料過濾 (供前端表格及 REST API 使用).
-		add_filter( 'woocommerce_analytics_orders_select_query', array( $this, 'filter_analytics_orders_select_query' ), 20, 2 );
-
-		// 4. REST API 訂單報表單筆項目回應過濾.
-		add_filter( 'woocommerce_rest_prepare_report_orders', array( $this, 'filter_rest_prepare_report_orders' ), 20, 3 );
-
-		// 5. 後台資源加載 (Analytics 頁面加載前端腳本，支援前端即時單頁 CSV 下載).
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 	}
 
 	/**
@@ -63,18 +68,18 @@ class CCATPAY_Analytics_Orders_Export {
 	 */
 	public function get_export_column_definitions(): array {
 		$columns = array(
-			'ccat_recipient_name'  => __( '收件人姓名', 'ccat-for-woocommerce' ),
-			'ccat_recipient_phone' => __( '收件人電話', 'ccat-for-woocommerce' ),
-			'ccat_customer_email'  => __( 'Email', 'ccat-for-woocommerce' ),
-			'ccat_shipping_method' => __( '配送方式', 'ccat-for-woocommerce' ),
-			'ccat_thermosphere'    => __( '溫層', 'ccat-for-woocommerce' ),
+			'ccat_recipient_name'   => __( '收件人姓名', 'ccat-for-woocommerce' ),
+			'ccat_recipient_phone'  => __( '收件人電話', 'ccat-for-woocommerce' ),
+			'ccat_customer_email'   => __( 'Email', 'ccat-for-woocommerce' ),
+			'ccat_shipping_method'  => __( '配送方式', 'ccat-for-woocommerce' ),
+			'ccat_thermosphere'     => __( '溫層', 'ccat-for-woocommerce' ),
 			'ccat_shipping_address' => __( '收件地址', 'ccat-for-woocommerce' ),
-			'ccat_store_info'      => __( '7-11 門市資訊', 'ccat-for-woocommerce' ),
-			'ccat_obt_number'      => __( '託運單號', 'ccat-for-woocommerce' ),
-			'ccat_shipment_date'   => __( '預計出貨日', 'ccat-for-woocommerce' ),
-			'ccat_delivery_date'   => __( '希望配達日', 'ccat-for-woocommerce' ),
-			'ccat_delivery_time'   => __( '希望配達時段', 'ccat-for-woocommerce' ),
-			'ccat_shipping_status' => __( '黑貓物流狀態', 'ccat-for-woocommerce' ),
+			'ccat_store_info'       => __( '7-11 門市資訊', 'ccat-for-woocommerce' ),
+			'ccat_obt_number'       => __( '託運單號', 'ccat-for-woocommerce' ),
+			'ccat_shipment_date'    => __( '預計出貨日', 'ccat-for-woocommerce' ),
+			'ccat_delivery_date'    => __( '希望配達日', 'ccat-for-woocommerce' ),
+			'ccat_delivery_time'    => __( '希望配達時段', 'ccat-for-woocommerce' ),
+			'ccat_shipping_status'  => __( '黑貓物流狀態', 'ccat-for-woocommerce' ),
 		);
 
 		return apply_filters( 'ccatpay_analytics_orders_export_columns', $columns );
@@ -107,20 +112,24 @@ class CCATPAY_Analytics_Orders_Export {
 	 * @return array
 	 */
 	public function prepare_export_item( array $export_item, $item ): array {
-		$order_id = $this->extract_order_id_from_item( $item );
+		try {
+			$order_id = $this->extract_order_id_from_item( $item );
 
-		if ( $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( $order instanceof WC_Order ) {
-				$shipping_data = $this->get_order_ccat_shipping_data( $order );
-				foreach ( $shipping_data as $key => $value ) {
-					$export_item[ $key ] = $value;
+			if ( $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order && is_a( $order, 'WC_Order' ) ) {
+					$shipping_data = $this->get_order_ccat_shipping_data( $order );
+					foreach ( $shipping_data as $key => $value ) {
+						$export_item[ $key ] = $value;
+					}
+					return $export_item;
 				}
-				return $export_item;
 			}
+		} catch ( Throwable $e ) {
+			// 防禦性捕捉任何例外，避免影響 CSV 匯出.
 		}
 
-		// 若無法讀取訂單，填入預設空白符號.
+		// 若無法讀取訂單或發生例外，填入預設空白符號.
 		$custom_columns = $this->get_export_column_definitions();
 		foreach ( $custom_columns as $key => $label ) {
 			if ( ! isset( $export_item[ $key ] ) ) {
@@ -129,118 +138,6 @@ class CCATPAY_Analytics_Orders_Export {
 		}
 
 		return $export_item;
-	}
-
-	/**
-	 * 擴充 Analytics 訂單查詢結果 (供 REST API 及前端 Table 取得黑貓物流資料)
-	 *
-	 * @param object|array $results    查詢結果物件或陣列.
-	 * @param array        $query_args 查詢參數.
-	 * @return object|array
-	 */
-	public function filter_analytics_orders_select_query( $results, $query_args ) {
-		if ( is_object( $results ) && isset( $results->data ) && is_array( $results->data ) ) {
-			foreach ( $results->data as $index => $row ) {
-				$order_id = isset( $row['order_id'] ) ? absint( $row['order_id'] ) : ( isset( $row['id'] ) ? absint( $row['id'] ) : 0 );
-				if ( $order_id ) {
-					$order = wc_get_order( $order_id );
-					if ( $order instanceof WC_Order ) {
-						$shipping_data = $this->get_order_ccat_shipping_data( $order );
-						foreach ( $shipping_data as $key => $val ) {
-							$results->data[ $index ][ $key ] = $val;
-						}
-					}
-				}
-			}
-		} elseif ( is_array( $results ) ) {
-			foreach ( $results as $index => $row ) {
-				$order_id = isset( $row['order_id'] ) ? absint( $row['order_id'] ) : ( isset( $row['id'] ) ? absint( $row['id'] ) : 0 );
-				if ( $order_id ) {
-					$order = wc_get_order( $order_id );
-					if ( $order instanceof WC_Order ) {
-						$shipping_data = $this->get_order_ccat_shipping_data( $order );
-						foreach ( $shipping_data as $key => $val ) {
-							$results[ $index ][ $key ] = $val;
-						}
-					}
-				}
-			}
-		}
-
-		return $results;
-	}
-
-	/**
-	 * 過濾 REST API 單筆項目回應
-	 *
-	 * @param WP_REST_Response $response 原始回應物件.
-	 * @param array|object     $item     報表項目資料.
-	 * @param WP_REST_Request  $request  REST 請求物件.
-	 * @return WP_REST_Response
-	 */
-	public function filter_rest_prepare_report_orders( $response, $item, $request ) {
-		if ( ! ( $response instanceof WP_REST_Response ) ) {
-			return $response;
-		}
-
-		$data     = $response->get_data();
-		$order_id = $this->extract_order_id_from_item( $item );
-
-		if ( ! $order_id && isset( $data['order_id'] ) ) {
-			$order_id = absint( $data['order_id'] );
-		}
-
-		if ( $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( $order instanceof WC_Order ) {
-				$shipping_data = $this->get_order_ccat_shipping_data( $order );
-				foreach ( $shipping_data as $key => $val ) {
-					$data[ $key ] = $val;
-				}
-				$response->set_data( $data );
-			}
-		}
-
-		return $response;
-	}
-
-	/**
-	 * 後台加載腳本 (於 Analytics 頁面載入前端 table filter，支援即時單頁 CSV 下載)
-	 *
-	 * @param string $hook 目前後台頁面 hook.
-	 * @return void
-	 */
-	public function enqueue_admin_scripts( $hook ): void {
-		$screen = get_current_screen();
-		if ( ! $screen || 'woocommerce_page_wc-admin' !== $screen->id ) {
-			return;
-		}
-
-		$custom_columns = array();
-		foreach ( $this->get_export_column_definitions() as $key => $label ) {
-			$custom_columns[] = array(
-				'key'   => $key,
-				'label' => $label,
-			);
-		}
-
-		wp_register_script(
-			'ccatpay-analytics-orders',
-			CCATPAY_Payments::plugin_url() . '/resources/js/admin/ccatpay-analytics-orders.js',
-			array( 'wp-hooks', 'wp-i18n' ),
-			CCATPAYMENTS_VERSION,
-			true
-		);
-
-		wp_localize_script(
-			'ccatpay-analytics-orders',
-			'ccatpayAnalyticsData',
-			array(
-				'columns' => $custom_columns,
-			)
-		);
-
-		wp_enqueue_script( 'ccatpay-analytics-orders' );
 	}
 
 	/**
@@ -290,7 +187,7 @@ class CCATPAY_Analytics_Orders_Export {
 		$first_name = trim( (string) $order->get_shipping_first_name() );
 
 		if ( ! empty( $last_name ) || ! empty( $first_name ) ) {
-			$name = $last_name . $first_name;
+			$name      = $last_name . $first_name;
 			$formatted = trim( (string) $order->get_formatted_shipping_full_name() );
 			return ! empty( $formatted ) ? $formatted : $name;
 		}
@@ -339,7 +236,7 @@ class CCATPAY_Analytics_Orders_Export {
 	 */
 	private function get_recipient_address( WC_Order $order, bool $is_711 ): string {
 		if ( $is_711 ) {
-			$store_address = trim( (string) $order->get_meta( CCATPAY_Gateway_Abstract::META_STORE_ADDRESS ) );
+			$store_address = trim( (string) $order->get_meta( self::META_STORE_ADDRESS ) );
 			if ( ! empty( $store_address ) ) {
 				return $store_address;
 			}
@@ -351,11 +248,14 @@ class CCATPAY_Analytics_Orders_Export {
 		$address_1 = trim( (string) ( $order->get_shipping_address_1() ?: $order->get_billing_address_1() ) );
 		$address_2 = trim( (string) ( $order->get_shipping_address_2() ?: $order->get_billing_address_2() ) );
 
-		// 處理台灣縣市代碼轉換 (例如 TPE => 台北市).
-		if ( function_exists( 'WC' ) && WC()->countries ) {
-			$states = WC()->countries->get_states( 'TW' );
-			if ( is_array( $states ) && isset( $states[ $state ] ) ) {
-				$state = $states[ $state ];
+		// 處理台灣縣市代碼轉換 (例如 TPE => 台北市)，防禦性檢查 WC()->countries 是否存在.
+		if ( function_exists( 'WC' ) ) {
+			$wc = WC();
+			if ( isset( $wc->countries ) && is_object( $wc->countries ) && is_callable( array( $wc->countries, 'get_states' ) ) ) {
+				$states = $wc->countries->get_states( 'TW' );
+				if ( is_array( $states ) && isset( $states[ $state ] ) ) {
+					$state = $states[ $state ];
+				}
 			}
 		}
 
@@ -377,8 +277,8 @@ class CCATPAY_Analytics_Orders_Export {
 			return '-';
 		}
 
-		$store_id   = trim( (string) $order->get_meta( CCATPAY_Gateway_Abstract::META_STORE_ID ) );
-		$store_name = trim( (string) $order->get_meta( CCATPAY_Gateway_Abstract::META_STORE_NAME ) );
+		$store_id   = trim( (string) $order->get_meta( self::META_STORE_ID ) );
+		$store_name = trim( (string) $order->get_meta( self::META_STORE_NAME ) );
 
 		if ( ! empty( $store_id ) && ! empty( $store_name ) ) {
 			return sprintf( '[%s] %s', $store_id, $store_name );
@@ -398,7 +298,7 @@ class CCATPAY_Analytics_Orders_Export {
 	 * @return string
 	 */
 	private function get_obt_number( WC_Order $order ): string {
-		$obt_number = trim( (string) $order->get_meta( CCATPAY_Shipping_Display::META_OBT_NUMBER ) );
+		$obt_number = trim( (string) $order->get_meta( self::META_OBT_NUMBER ) );
 		return ! empty( $obt_number ) ? $obt_number : '-';
 	}
 
@@ -411,9 +311,13 @@ class CCATPAY_Analytics_Orders_Export {
 	private function get_shipping_method_info( WC_Order $order ): array {
 		$shipping_method_id = '';
 		$shipping_methods   = $order->get_shipping_methods();
-		foreach ( $shipping_methods as $shipping_method ) {
-			$shipping_method_id = (string) $shipping_method->get_method_id();
-			break;
+		if ( is_array( $shipping_methods ) ) {
+			foreach ( $shipping_methods as $shipping_method ) {
+				if ( is_object( $shipping_method ) && is_callable( array( $shipping_method, 'get_method_id' ) ) ) {
+					$shipping_method_id = (string) $shipping_method->get_method_id();
+				}
+				break;
+			}
 		}
 
 		$method_title = trim( (string) $order->get_shipping_method() );
@@ -454,9 +358,9 @@ class CCATPAY_Analytics_Orders_Export {
 	 * @return array{shipment_date: string, delivery_date: string, delivery_time: string, shipping_status: string}
 	 */
 	private function get_dates_and_time_info( WC_Order $order, bool $is_711, string $obt_number, bool $is_ccat ): array {
-		$shipment_date = (string) $order->get_meta( CCATPAY_Shipping_Display::META_SHIPMENT_DATE );
-		$delivery_date = (string) $order->get_meta( CCATPAY_Shipping_Display::META_DELIVERY_DATE );
-		$delivery_time = (string) $order->get_meta( CCATPAY_Shipping_Display::META_DELIVERY_TIME );
+		$shipment_date = (string) $order->get_meta( self::META_SHIPMENT_DATE );
+		$delivery_date = (string) $order->get_meta( self::META_DELIVERY_DATE );
+		$delivery_time = (string) $order->get_meta( self::META_DELIVERY_TIME );
 
 		$time_slot_map = array(
 			'01' => __( '13時前', 'ccat-for-woocommerce' ),
@@ -465,12 +369,12 @@ class CCATPAY_Analytics_Orders_Export {
 		);
 		$delivery_time_text = isset( $time_slot_map[ $delivery_time ] ) ? $time_slot_map[ $delivery_time ] : ( ! empty( $delivery_time ) ? $delivery_time : '-' );
 
-		$has_printed = ( 'yes' === $order->get_meta( CCATPAY_Shipping_Display::META_PRINTED ) ) || ( '-' !== $obt_number && ! empty( $obt_number ) );
+		$has_printed = ( 'yes' === $order->get_meta( self::META_PRINTED ) ) || ( '-' !== $obt_number && ! empty( $obt_number ) );
 
 		// 如果尚未記錄出貨日但已產生託運單，以訂單更新/建立時間推算.
 		if ( empty( $shipment_date ) && $has_printed ) {
 			$date_obj = $order->get_date_modified() ?: $order->get_date_created();
-			if ( $date_obj ) {
+			if ( $date_obj && is_callable( array( $date_obj, 'date' ) ) ) {
 				$shipment_date = $date_obj->date( 'Y-m-d' );
 			}
 		}
@@ -478,13 +382,13 @@ class CCATPAY_Analytics_Orders_Export {
 		// 如果尚未記錄配達日且為黑貓宅配已建立託運單，依黑貓規則 (隔天，若遇週日順延至週一) 推算.
 		if ( empty( $delivery_date ) && ! $is_711 && $has_printed && ! empty( $shipment_date ) && '-' !== $shipment_date ) {
 			try {
-				$ship_dt = new DateTime( $shipment_date, new DateTimeZone( CCATPAY_Shipping_Display::TAIPEI_TIMEZONE ) );
+				$ship_dt = new DateTime( $shipment_date, new DateTimeZone( self::TAIPEI_TIMEZONE ) );
 				$ship_dt->add( new DateInterval( 'P1D' ) );
 				if ( '0' === $ship_dt->format( 'w' ) ) {
 					$ship_dt->add( new DateInterval( 'P1D' ) );
 				}
 				$delivery_date = $ship_dt->format( 'Y-m-d' );
-			} catch ( Exception $e ) {
+			} catch ( Throwable $e ) {
 				$delivery_date = '-';
 			}
 		}
