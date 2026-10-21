@@ -30,8 +30,7 @@
 		{ key: 'ccat_store_info', label: '7-11取貨門市' },
 		{ key: 'ccat_shipment_date', label: '預計出貨日' },
 		{ key: 'ccat_delivery_date', label: '希望配達日' },
-		{ key: 'ccat_delivery_time', label: '希望配達時段' },
-		{ key: 'ccat_shipping_status', label: '託運單狀態' }
+		{ key: 'ccat_delivery_time', label: '希望配達時段' }
 	];
 
 	addFilter(

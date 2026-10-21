@@ -89,7 +89,6 @@ class CCATPAY_Analytics_Orders_Export {
 			'ccat_shipment_date'    => __( '預計出貨日', 'ccat-for-woocommerce' ),
 			'ccat_delivery_date'    => __( '希望配達日', 'ccat-for-woocommerce' ),
 			'ccat_delivery_time'    => __( '希望配達時段', 'ccat-for-woocommerce' ),
-			'ccat_shipping_status'  => __( '黑貓物流狀態', 'ccat-for-woocommerce' ),
 		);
 
 		return apply_filters( 'ccatpay_analytics_orders_export_columns', $columns );
@@ -304,7 +303,6 @@ class CCATPAY_Analytics_Orders_Export {
 			'ccat_shipment_date'    => $dates_and_time['shipment_date'],
 			'ccat_delivery_date'    => $dates_and_time['delivery_date'],
 			'ccat_delivery_time'    => $dates_and_time['delivery_time'],
-			'ccat_shipping_status'  => $dates_and_time['shipping_status'],
 		);
 	}
 
@@ -481,13 +479,13 @@ class CCATPAY_Analytics_Orders_Export {
 	}
 
 	/**
-	 * 取得日期與時段資訊 (預計出貨日、希望配達日、希望配達時段、託運單狀態)
+	 * 取得日期與時段資訊 (預計出貨日、希望配達日、希望配達時段)
 	 *
 	 * @param WC_Order $order      訂單物件.
 	 * @param bool     $is_711     是否為 7-11 超取.
 	 * @param string   $obt_number 託運單號.
 	 * @param bool     $is_ccat    是否為黑貓物流.
-	 * @return array{shipment_date: string, delivery_date: string, delivery_time: string, shipping_status: string}
+	 * @return array{shipment_date: string, delivery_date: string, delivery_time: string}
 	 */
 	private function get_dates_and_time_info( WC_Order $order, bool $is_711, string $obt_number, bool $is_ccat ): array {
 		$shipment_date = (string) $order->get_meta( self::META_SHIPMENT_DATE );
@@ -538,16 +536,10 @@ class CCATPAY_Analytics_Orders_Export {
 			$delivery_date = '-';
 		}
 
-		$shipping_status = '-';
-		if ( $is_ccat ) {
-			$shipping_status = $has_printed ? __( '已建立託運單', 'ccat-for-woocommerce' ) : __( '尚未建立', 'ccat-for-woocommerce' );
-		}
-
 		return array(
-			'shipment_date'   => $shipment_date,
-			'delivery_date'   => $delivery_date,
-			'delivery_time'   => $delivery_time_text,
-			'shipping_status' => $shipping_status,
+			'shipment_date' => $shipment_date,
+			'delivery_date' => $delivery_date,
+			'delivery_time' => $delivery_time_text,
 		);
 	}
 
