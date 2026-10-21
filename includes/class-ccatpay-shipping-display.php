@@ -32,6 +32,21 @@ class CCATPAY_Shipping_Display
     const META_PRINTED = '_ccat_shipping_printed';
 
     /**
+     * 黑貓物流訂單預計出貨日元數據鍵值
+     */
+    const META_SHIPMENT_DATE = '_ccat_shipping_shipment_date';
+
+    /**
+     * 黑貓物流訂單希望配達日元數據鍵值
+     */
+    const META_DELIVERY_DATE = '_ccat_shipping_delivery_date';
+
+    /**
+     * 黑貓物流訂單希望配達時段元數據鍵值
+     */
+    const META_DELIVERY_TIME = '_ccat_shipping_delivery_time';
+
+    /**
      * 黑貓物流批次列印單次上限 (黑貓 API 限制最多 100 筆)
      */
     const MAX_BATCH_LIMIT = 100;
@@ -549,6 +564,14 @@ class CCATPAY_Shipping_Display
             }
         }
 
+        // 計算出貨日與配達日.
+        $batch_today = new DateTime('now', new DateTimeZone(self::TAIPEI_TIMEZONE));
+        $batch_delivery_date = clone $batch_today;
+        $batch_delivery_date->add(new DateInterval('P1D'));
+        if ('0' === $batch_delivery_date->format('w')) {
+            $batch_delivery_date->add(new DateInterval('P1D'));
+        }
+
         // 更新每筆訂單 Meta 與備註.
         foreach ($orders as $order) {
             $oid = $order->get_id();
@@ -561,6 +584,11 @@ class CCATPAY_Shipping_Display
             $order->update_meta_data(self::META_FILE_NO, $file_no);
             $order->update_meta_data(self::META_PRINTED, 'yes');
             $order->update_meta_data('_ccat_shipping_batch_id', $batch_id);
+            $order->update_meta_data(self::META_SHIPMENT_DATE, $batch_today->format('Y-m-d'));
+            if (!$this->is_convenience_store_shipping($order)) {
+                $order->update_meta_data(self::META_DELIVERY_DATE, $batch_delivery_date->format('Y-m-d'));
+                $order->update_meta_data(self::META_DELIVERY_TIME, '04');
+            }
             $order->save();
 
             $order->add_order_note(
@@ -1225,10 +1253,23 @@ class CCATPAY_Shipping_Display
         }
         $obt_str = implode(', ', $obt_numbers);
 
+        // 計算出貨日與配達日.
+        $single_today = new DateTime('now', new DateTimeZone(self::TAIPEI_TIMEZONE));
+        $single_delivery_date = clone $single_today;
+        $single_delivery_date->add(new DateInterval('P1D'));
+        if ('0' === $single_delivery_date->format('w')) {
+            $single_delivery_date->add(new DateInterval('P1D'));
+        }
+
         // 更新訂單 Meta.
         $order->update_meta_data(self::META_OBT_NUMBER, $obt_str);
         $order->update_meta_data(self::META_FILE_NO, $file_no);
         $order->update_meta_data(self::META_PRINTED, 'yes');
+        $order->update_meta_data(self::META_SHIPMENT_DATE, $single_today->format('Y-m-d'));
+        if (!$is_711) {
+            $order->update_meta_data(self::META_DELIVERY_DATE, $single_delivery_date->format('Y-m-d'));
+            $order->update_meta_data(self::META_DELIVERY_TIME, $delivery_time);
+        }
         $order->save();
 
         // 新增訂單備註.
