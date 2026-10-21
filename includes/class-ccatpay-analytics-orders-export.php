@@ -151,7 +151,7 @@ class CCATPAY_Analytics_Orders_Export {
 	}
 
 	/**
-	 * 擴充 Analytics 訂單查詢結果 (僅為網頁清單提供「配送方式」與「託運單號」)
+	 * 擴充 Analytics 訂單查詢結果 (提供完整 12 項黑貓物流資料，供前端即時 CSV 下載與網頁清單使用)
 	 *
 	 * @param object|array $results    查詢結果物件或陣列.
 	 * @param array        $query_args 查詢參數.
@@ -171,15 +171,15 @@ class CCATPAY_Analytics_Orders_Export {
 					if ( $order_id ) {
 						$order = wc_get_order( $order_id );
 						if ( $order && is_a( $order, 'WC_Order' ) ) {
-							$shipping_method = trim( (string) $order->get_shipping_method() ) ?: '-';
-							$obt_number      = trim( (string) $order->get_meta( self::META_OBT_NUMBER ) ) ?: '-';
-
+							$shipping_data = $this->get_order_ccat_shipping_data( $order );
 							if ( is_object( $results->data[ $index ] ) ) {
-								$results->data[ $index ]->ccat_shipping_method = $shipping_method;
-								$results->data[ $index ]->ccat_obt_number      = $obt_number;
+								foreach ( $shipping_data as $key => $val ) {
+									$results->data[ $index ]->$key = $val;
+								}
 							} elseif ( is_array( $results->data[ $index ] ) ) {
-								$results->data[ $index ]['ccat_shipping_method'] = $shipping_method;
-								$results->data[ $index ]['ccat_obt_number']      = $obt_number;
+								foreach ( $shipping_data as $key => $val ) {
+									$results->data[ $index ][ $key ] = $val;
+								}
 							}
 						}
 					}
@@ -193,7 +193,7 @@ class CCATPAY_Analytics_Orders_Export {
 	}
 
 	/**
-	 * 過濾 REST API 單筆項目回應 (僅附加「配送方式」與「託運單號」)
+	 * 過濾 REST API 單筆項目回應 (提供完整 12 項黑貓物流資料)
 	 *
 	 * @param WP_REST_Response $response 原始回應物件.
 	 * @param array|object     $item     報表項目資料.
@@ -213,8 +213,10 @@ class CCATPAY_Analytics_Orders_Export {
 				if ( $order_id ) {
 					$order = wc_get_order( $order_id );
 					if ( $order && is_a( $order, 'WC_Order' ) ) {
-						$data['ccat_shipping_method'] = trim( (string) $order->get_shipping_method() ) ?: '-';
-						$data['ccat_obt_number']      = trim( (string) $order->get_meta( self::META_OBT_NUMBER ) ) ?: '-';
+						$shipping_data = $this->get_order_ccat_shipping_data( $order );
+						foreach ( $shipping_data as $key => $val ) {
+							$data[ $key ] = $val;
+						}
 						$response->set_data( $data );
 					}
 				}
