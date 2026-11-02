@@ -74,13 +74,23 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 			$api_url   = $this->get_base_url() . 'api/Collect';
 			$api_token = $this->get_payment_api_token();
 
-			$order_no  = $this->generate_unique_order_number( $order );
+			$order_no = $this->generate_unique_order_number( $order );
+
+			// 繳款期限天數設定 (可設為 0 表示當天有效；若未設定、留空或小於 0 則預設 7 天).
+			$raw_expire_days = get_option( CCATPAYMENTS_PREFIX . '_cvs_expire_days', '' );
+			if ( '' === $raw_expire_days || ! is_numeric( $raw_expire_days ) || intval( $raw_expire_days ) < 0 ) {
+				$expire_days = 7;
+			} else {
+				$expire_days = intval( $raw_expire_days );
+			}
+			$expire_days = apply_filters( 'ccatpay_cvs_expire_days', $expire_days, $order );
+
 			$post_data = array(
 				'cmd'                  => self::CMD_COCS_ORDER_APPEND,
 				'cust_id'              => $this->get_account(),
 				'cust_order_no'        => $order_no,
 				'order_amount'         => $order->get_total(),
-				'expire_date'          => $datetime->modify( '+7 days' )->format( 'Y-m-d' ),
+				'expire_date'          => $datetime->modify( "+{$expire_days} days" )->format( 'Y-m-d' ),
 				'payer_name'           => $payer_name,
 				'payer_postcode'       => $payer_postcode,
 				'payer_address'        => $payer_address,

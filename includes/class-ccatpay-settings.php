@@ -119,6 +119,18 @@ class CCATPAY_Settings {
 				'id'   => CCATPAYMENTS_PREFIX . '_test_chk_code',
 			),
 			array(
+				'name'              => __( '繳款期限天數', 'ccat-for-woocommerce' ),
+				'type'              => 'number',
+				'desc'              => __( '設定 ATM 及 ibon 的繳費期限天數（整數）。可設為 0（表示當天有效）；若留空或小於 0，將預設使用 7 天。', 'ccat-for-woocommerce' ),
+				'id'                => CCATPAYMENTS_PREFIX . '_cvs_expire_days',
+				'default'           => '7',
+				'css'               => 'width: 100px;',
+				'custom_attributes' => array(
+					'min'  => 0,
+					'step' => 1,
+				),
+			),
+			array(
 				'name' => __( '寄件人姓名', 'ccat-for-woocommerce'),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人姓名', 'ccat-for-woocommerce'),
