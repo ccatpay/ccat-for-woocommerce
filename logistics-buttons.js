@@ -472,7 +472,7 @@ jQuery(function ($) {
     }
 
     // 變更門市按鈕點擊事件
-    $('.change-store').on('click', function (e) {
+    $('.ccat-logistics-buttons .change-store').on('click', function (e) {
         e.preventDefault();
 
         const button = $(this);
@@ -503,7 +503,7 @@ jQuery(function ($) {
                     selectionWindow.location.href = data.data.url;
 
                     // 顯示成功訊息的函數
-                    window.setSelectedCvsStore = (storeData) => {
+                    window.ccatSetSelectedCvsStore = window.setSelectedCvsStore = (storeData) => {
                         if (storeData && storeData.storeName && storeData.storeId) {
                             const selectedStoreInfo = {
                                 tempVar: storeData.tempVar || '',
@@ -625,7 +625,7 @@ jQuery(function ($) {
     });
 
     // 創建物流訂單按鈕點擊事件
-    $('.create-logistics-order').on('click', function (e) {
+    $('.ccat-logistics-buttons .create-logistics-order').on('click', function (e) {
         e.preventDefault();
 
         const orderId = $(this).data('order-id');
@@ -705,7 +705,7 @@ jQuery(function ($) {
     });
 
     // 下載託運單按鈕點擊事件
-    $('.download-shipping-label').on('click', function (e) {
+    $('.ccat-logistics-buttons .download-shipping-label').on('click', function (e) {
         e.preventDefault();
 
         const button = $(this);

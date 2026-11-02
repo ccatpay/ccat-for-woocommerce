@@ -1400,21 +1400,21 @@ class CCATPAY_Shipping_Display
 
                     // 超商取貨且尚未列印過，顯示變更門市按鈕.
                     if ($this->is_convenience_store_shipping($order) && !$has_printed) {
-                        echo '<button type="button" class="button change-store" data-order-id="' . esc_attr($order->get_id()) . '">' .
+                        echo '<button type="button" class="button change-store ccat-change-store" data-order-id="' . esc_attr($order->get_id()) . '">' .
                             esc_html__('變更門市', 'ccat-for-woocommerce') .
                             '</button>';
                     }
 
                     // 尚未列印過，顯示建立物流訂單按鈕
                     if (!$has_printed) {
-                        echo '<button type="button" class="button create-logistics-order" data-order-id="' . esc_attr($order->get_id()) . '">' .
+                        echo '<button type="button" class="button create-logistics-order ccat-create-logistics-order" data-order-id="' . esc_attr($order->get_id()) . '">' .
                             esc_html__('建立物流託運單', 'ccat-for-woocommerce') .
                             '</button>';
                     }
 
                     // 顯示下載託運單按鈕.
                     if ($has_printed) {
-                        echo '<button type="button" class="button download-shipping-label" data-order-id="' . esc_attr($order->get_id()) . '">' .
+                        echo '<button type="button" class="button download-shipping-label ccat-download-shipping-label" data-order-id="' . esc_attr($order->get_id()) . '">' .
                             esc_html__('下載託運單', 'ccat-for-woocommerce') .
                             '</button>';
                     }
@@ -1478,7 +1478,7 @@ class CCATPAY_Shipping_Display
             $method_id = $shipping_method->get_method_id();
 
             // 檢查是否為7-11超商取貨.
-            if (strpos($method_id, '711') !== false) {
+            if (strpos($method_id, 'ccatpay_shipping_711') !== false) {
                 return true;
             }
         }
@@ -1515,7 +1515,7 @@ class CCATPAY_Shipping_Display
                 $shipping_method = $shipping_method_obj->get_method_id();
                 break; // 只取第一個運送方法.
             }
-            if (empty($shipping_method)) {
+            if (empty($shipping_method) || !$this->is_ccat_shipping($order)) {
                 return;
             }
             // 根據運送方式類型決定門市類別.

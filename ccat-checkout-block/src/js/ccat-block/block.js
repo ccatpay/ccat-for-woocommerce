@@ -160,7 +160,8 @@ export const Block = ({checkoutExtensionData}) => {
 };
 const invoiceInterceptor = async (resource, config) => {
     // 檢查是否是結帳請求
-    if (resource.includes('/wc/store/v1/checkout') && config.body) {
+    const resourceUrl = typeof resource === 'string' ? resource : (resource?.url || '');
+    if (resourceUrl.includes('/wc/store/v1/checkout') && config.body) {
         const invoiceData = sessionStorage.getItem('wc_invoice_data')
             ? JSON.parse(sessionStorage.getItem('wc_invoice_data'))
             : defaultInvoiceData;

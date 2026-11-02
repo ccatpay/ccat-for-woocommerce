@@ -456,7 +456,7 @@ class CCATPAY_Analytics_Orders_Export {
 		}
 
 		$is_ccat = ( false !== strpos( $shipping_method_id, 'ccatpay_shipping' ) );
-		$is_711  = ( false !== strpos( $shipping_method_id, '711' ) );
+		$is_711  = $is_ccat && ( false !== strpos( $shipping_method_id, '711' ) );
 
 		$thermosphere = '-';
 		if ( $is_ccat ) {

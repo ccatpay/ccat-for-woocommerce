@@ -38,29 +38,41 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 
 	/**
 	 * Adds custom query variables to the list of public query variables.
+	 * 使用專屬前綴變數 ccat711_action，避免污染 WordPress 全域 WP_Query 的通用 'action' 參數.
 	 *
 	 * @param array $vars An array of public query variables.
 	 *
 	 * @return array The modified array of public query variables.
 	 */
-	public function ccat711_add_query_vars( array $vars ): array {
-		$vars[] = 'action';
+	public static function ccat711_add_query_vars( array $vars ): array {
+		$vars[] = 'ccat711_action';
 
 		return $vars;
 	}
 
 	/**
 	 * Adds a custom rewrite rule to handle specific URL patterns and map them to a query action.
+	 * 僅在外掛版本更新或首次安裝時執行一次 flush_rewrite_rules()，避免每次 init 重建固定網址造成效能與多語系外掛衝突.
 	 *
 	 * @return void
 	 */
-	public function ccat711_add_rewrite_rules() {
+	public static function ccat711_add_rewrite_rules() {
 		add_rewrite_rule(
-			'^cvs-callback/?$',
-			'index.php?action=ccat711_store_callback',
+			'^ccat-cvs-callback/?$',
+			'index.php?ccat711_action=ccat711_store_callback',
 			'top'
 		);
-		flush_rewrite_rules();
+		add_rewrite_rule(
+			'^cvs-callback/?$',
+			'index.php?ccat711_action=ccat711_store_callback',
+			'top'
+		);
+
+		$flushed_version = get_option( CCATPAYMENTS_PREFIX . '_rewrite_rules_flushed_ver', '' );
+		if ( CCATPAYMENTS_VERSION !== $flushed_version ) {
+			flush_rewrite_rules( false );
+			update_option( CCATPAYMENTS_PREFIX . '_rewrite_rules_flushed_ver', CCATPAYMENTS_VERSION, true );
+		}
 	}
 
 	/**
@@ -128,14 +140,30 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	}
 
 	/**
+	 * 初始化全域 Hooks（AJAX、重寫規則、回呼等）
+	 * 確保在 admin-ajax.php 或一般請求時即使尚未註冊 Block 也能正確處理選店與回呼。
+	 *
+	 * @return void
+	 */
+	public static function init(): void {
+		static $initialized = false;
+		if ( $initialized ) {
+			return;
+		}
+		$initialized = true;
+
+		add_action( 'wp_ajax_' . CCATPAYMENTS_PREFIX . '_711_store_selection_url', array( __CLASS__, 'ajax_get_711_store_selection_url' ) );
+		add_action( 'wp_ajax_nopriv_' . CCATPAYMENTS_PREFIX . '_711_store_selection_url', array( __CLASS__, 'ajax_get_711_store_selection_url' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'handle_store_callback' ) );
+		add_action( 'init', array( __CLASS__, 'ccat711_add_rewrite_rules' ) );
+		add_filter( 'query_vars', array( __CLASS__, 'ccat711_add_query_vars' ) );
+	}
+
+	/**
 	 * Constructor for the integration.
 	 */
 	public function __construct() {
-		add_action( 'wp_ajax_'.CCATPAYMENTS_PREFIX.'_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
-		add_action( 'wp_ajax_nopriv_'.CCATPAYMENTS_PREFIX.'_711_store_selection_url', array( $this, 'ajax_get_711_store_selection_url' ) );
-		add_action( 'template_redirect', array( $this, 'handle_store_callback' ) );
-		add_action( 'init', array( $this, 'ccat711_add_rewrite_rules' ) );
-		add_filter( 'query_vars', array( $this, 'ccat711_add_query_vars' ) );
+		self::init();
 	}
 
 	/**
@@ -183,8 +211,28 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 			);
 		}
 
-		// 如果無法使用 WC_Gateway_CCat_Abstract 獲取 token，拋出異常.
-		throw new Exception( esc_html__( '無法獲取 API token，請確認已啟用 CCat 支付閘道', 'ccat-for-woocommerce') );
+		// 備用方案：若未在 WooCommerce 啟用 CCat 支付閘道但啟用了黑貓物流，直接透過抽象類別取得 Token.
+		if ( class_exists( 'CCATPAY_Gateway_Abstract' ) ) {
+			$temp_gateway = new class extends CCATPAY_Gateway_Abstract {
+				public function __construct() {
+					$this->id = 'ccat_shipping_temp';
+				}
+			};
+			$token      = $temp_gateway->get_payment_api_token( $force_refresh );
+			$url        = $temp_gateway->get_base_url();
+			$service_id = $temp_gateway->get_account();
+
+			if ( ! empty( $token ) && ! empty( $url ) && ! empty( $service_id ) ) {
+				return array(
+					$token,
+					$url,
+					$service_id,
+				);
+			}
+		}
+
+		// 如果無法獲取 token，拋出異常.
+		throw new Exception( esc_html__( '無法獲取 API token，請確認已設定黑貓特店代號與金鑰', 'ccat-for-woocommerce') );
 	}
 
 	/**
@@ -197,13 +245,14 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	 * @return void Outputs JSON response containing the URL or error details.
 	 * @throws Exception Exception.
 	 */
-	public function ajax_get_711_store_selection_url() {
+	public static function ajax_get_711_store_selection_url() {
 		// 驗證 nonce.
 		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'ccat711_store_selection_nonce' ) ) {
 			wp_send_json_error(
 				array(
 					'message' => esc_html__( '安全驗證失敗', 'ccat-for-woocommerce'),
-				)
+				),
+				400
 			);
 			wp_die();
 		}
@@ -291,8 +340,10 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 	/**
 	 * 處理從門市選擇頁面返回的回調
 	 */
-	public function handle_store_callback() {
-		if ( ! isset( $_GET['action'] ) || 'ccat711_store_callback' !== $_GET['action'] ) {  // phpcs:ignore WordPress
+	public static function handle_store_callback() {
+		$query_action = get_query_var( 'ccat711_action', '' );
+		$get_action   = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'ccat711_store_callback' !== $query_action && 'ccat711_store_callback' !== $get_action ) {
 			return;
 		}
 		$temp_var = isset( $_POST['TempVar'] ) ? sanitize_text_field( wp_unslash( $_POST['TempVar'] ) ) : '';  // phpcs:ignore WordPress
@@ -346,28 +397,31 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 					var storeDataEl = document.getElementById("ccat-selected-store-data");
 					var storeData = storeDataEl ? JSON.parse(storeDataEl.getAttribute("data-store")) : {};
 					
-					// 嘗試將門市資料存儲到 localStorage 以防止資料丟失
+					// 嘗試將門市資料存儲到 localStorage 以防止資料丟失 (同時寫入具前綴與舊版 key 確保相容)
 					try {
-						localStorage.setItem("selectedCvsStore", JSON.stringify(storeData));
+						var serialized = JSON.stringify(storeData);
+						localStorage.setItem("ccatSelectedCvsStore", serialized);
+						localStorage.setItem("selectedCvsStore", serialized);
 					} catch(e) {
 						console.error("無法保存門市資料到 localStorage:", e);
 					}
 					
 					if (window.opener && !window.opener.closed) {
 						try {
-							// 向下相容搜尋父視窗、頂層視窗或其 iframe 內的 setSelectedCvsStore 回調函數
-							var callbackFn = null;
-							if (typeof window.opener.setSelectedCvsStore === "function") {
-								callbackFn = window.opener.setSelectedCvsStore;
-							} else if (window.opener.top && typeof window.opener.top.setSelectedCvsStore === "function") {
-								callbackFn = window.opener.top.setSelectedCvsStore;
-							} else if (window.opener.frames && window.opener.frames.length > 0) {
+							// 優先尋找具黑貓前綴的 ccatSetSelectedCvsStore，並向下相容 setSelectedCvsStore
+							var findCallback = function(win) {
+								if (!win) return null;
+								if (typeof win.ccatSetSelectedCvsStore === "function") return win.ccatSetSelectedCvsStore;
+								if (typeof win.setSelectedCvsStore === "function") return win.setSelectedCvsStore;
+								return null;
+							};
+
+							var callbackFn = findCallback(window.opener) || (window.opener.top ? findCallback(window.opener.top) : null);
+							if (!callbackFn && window.opener.frames && window.opener.frames.length > 0) {
 								for (var i = 0; i < window.opener.frames.length; i++) {
 									try {
-										if (typeof window.opener.frames[i].setSelectedCvsStore === "function") {
-											callbackFn = window.opener.frames[i].setSelectedCvsStore;
-											break;
-										}
+										callbackFn = findCallback(window.opener.frames[i]);
+										if (callbackFn) break;
 									} catch(fe) {}
 								}
 							}
@@ -380,7 +434,7 @@ class CCATPAY_711_Blocks_Integration implements IntegrationInterface {
 									window.close();
 								}, 1000);
 							} else {
-								throw new Error("找不到 setSelectedCvsStore 回調函數");
+								throw new Error("找不到 ccatSetSelectedCvsStore 回調函數");
 							}
 						} catch(e) {
 							console.error("調用父窗口函數失敗，已存入 localStorage 由結帳頁自動取回:", e);

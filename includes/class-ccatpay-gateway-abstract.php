@@ -193,11 +193,11 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 			wp_cache_delete( $transient_key, 'transient' );
 			wp_cache_delete( $transient_key, 'site-transient' );
 		}
-		delete_transient( 'api_access_token' );
-		delete_site_transient( 'api_access_token' );
+		// Avoid deleting generic unprefixed 'api_access_token' transient that may belong to other plugins.
+
 		if ( function_exists( 'wp_cache_delete' ) ) {
-			wp_cache_delete( 'api_access_token', 'transient' );
-			wp_cache_delete( 'api_access_token', 'site-transient' );
+
+
 		}
 	}
 
@@ -386,7 +386,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 			$shipping_method_id = $shipping_method->get_method_id();
 			break; // 只取第一個運送方法.
 		}
-		if ( false !== stripos( $shipping_method_id, 'ccat' ) ) {
+		if ( false !== stripos( $shipping_method_id, 'ccatpay_shipping_' ) ) {
 			$phone = $wc_order->get_billing_phone();
 
 			// 沒有billing_phone就改用shipping_phone
@@ -405,7 +405,7 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 			}
 		}
 
-		if ( false === stripos( $shipping_method_id, '711' ) ) {
+		if ( false === stripos( $shipping_method_id, 'ccatpay_shipping_711' ) ) {
 			return null;
 		}
 		$raw_data   = file_get_contents( 'php://input' );
@@ -413,6 +413,9 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 		$store_info = $post_data['extensions']['ccat_711_store_info'] ?? array();
 
 		if ( empty( $store_info ) || empty( $store_info['storeId'] ) ) {
+			if ( ! empty( $wc_order->get_meta( self::META_STORE_ID ) ) ) {
+				return null;
+			}
 			throw new Exception( esc_html__( '請選取超商門市', 'ccat-for-woocommerce') );
 		}
 		// 將超商資訊儲存到訂單中.

@@ -42,7 +42,7 @@ async function updateStoreShippingAddress(storeInfo, targetRateId = null, packag
     let effectiveTargetRateId = targetRateId;
     if (!effectiveTargetRateId) {
         try {
-            effectiveTargetRateId = localStorage.getItem('selected711ShippingRate');
+            effectiveTargetRateId = localStorage.getItem('ccatSelected711ShippingRate') || localStorage.getItem('selected711ShippingRate');
         } catch (e) {}
     }
 
@@ -582,7 +582,8 @@ function getPostcodeByAddress(city, district) {
 
 const cvsInterceptor = async (resource, config) => {
     // 檢查是否是結帳請求
-    if (resource.includes('/wc/store/v1/checkout') && config.body && stateRef.showBlock && stateRef.storeInfo.storeName) {
+    const resourceUrl = typeof resource === 'string' ? resource : (resource?.url || '');
+    if (resourceUrl.includes('/wc/store/v1/checkout') && config.body && stateRef.showBlock && stateRef.storeInfo.storeName) {
         try {
             // 修改請求資料
             const body = JSON.parse(config.body);
@@ -662,7 +663,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
 
         for (let i = 0; i < activeRates.length; i++) {
             const rate = activeRates[i];
-            if (rate?.rate_id && rate.rate_id.includes('711')) {
+            if (rate?.rate_id && rate.rate_id.includes('ccatpay_shipping_711')) {
                 if (rate.selected) {
                     is711Selected = true;
                     current711RateId = rate.rate_id;
@@ -673,6 +674,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
         if (is711Selected) {
             selected711RateIdRef.current = current711RateId;
             try {
+                localStorage.setItem('ccatSelected711ShippingRate', current711RateId);
                 localStorage.setItem('selected711ShippingRate', current711RateId);
             } catch (e) {}
             setShowBlock(true);
@@ -681,7 +683,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
             // 如果目前 state 沒有門市資訊，嘗試從 localStorage 還原
             if (!storeInfo.storeId) {
                 try {
-                    const savedStore = localStorage.getItem('selectedCvsStore');
+                    const savedStore = localStorage.getItem('ccatSelectedCvsStore') || localStorage.getItem('selectedCvsStore');
                     if (savedStore) {
                         const parsed = JSON.parse(savedStore);
                         if (parsed && parsed.storeName && parsed.storeId) {
@@ -697,8 +699,9 @@ export const Block = ({checkoutExtensionData, extensions}) => {
             let saved711Rate = '';
             let savedStore = '';
             try {
-                saved711Rate = localStorage.getItem('selected711ShippingRate');
-                savedStore = localStorage.getItem('selectedCvsStore');
+
+                saved711Rate = localStorage.getItem('ccatSelected711ShippingRate') || localStorage.getItem('selected711ShippingRate');
+                savedStore = localStorage.getItem('ccatSelectedCvsStore') || localStorage.getItem('selectedCvsStore');
             } catch (e) {}
 
             // 若尚未執行過初始還原，且 localStorage 有保存的 711 運送方式與門市資料（如重新整理頁面後）
@@ -707,7 +710,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                     const parsedStore = JSON.parse(savedStore);
                     if (parsedStore && parsedStore.storeId) {
                         // 在可用費率中尋找匹配的 711 運送方式
-                        const targetRateObj = activeRates.find(r => r.rate_id === saved711Rate || (r.rate_id && r.rate_id.includes('711')));
+                        const targetRateObj = activeRates.find(r => r.rate_id === saved711Rate || (r.rate_id && r.rate_id.includes('ccatpay_shipping_711')));
                         if (targetRateObj) {
                             hasAttemptedRestoreRef.current = true;
                             const dispatch = wp.data.dispatch(cartStore);
@@ -728,6 +731,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
             // 若使用者已載入完成後手動切換至其他物流方式，清空 saved711Rate
             if (hasAttemptedRestoreRef.current) {
                 try {
+                    localStorage.removeItem('ccatSelected711ShippingRate');
                     localStorage.removeItem('selected711ShippingRate');
                 } catch (e) {}
             }
@@ -740,7 +744,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
     // 在組件初始化時檢查 localStorage 中是否有保存的門市資訊
     useEffect(() => {
         try {
-            const savedStore = localStorage.getItem('selectedCvsStore');
+            const savedStore = localStorage.getItem('ccatSelectedCvsStore') || localStorage.getItem('selectedCvsStore');
             if (savedStore) {
                 const storeData = JSON.parse(savedStore);
                 if (storeData && storeData.storeName && storeData.storeId) {
@@ -767,7 +771,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
 
         // 尋找當前選中的運送方式
         for (let i = 0; i < activeRates.length; i++) {
-            if (activeRates[i].selected && activeRates[i].rate_id.includes('711')) {
+            if (activeRates[i].selected && activeRates[i].rate_id.includes('ccatpay_shipping_711')) {
                 selectedShippingMethod = activeRates[i].rate_id;
                 selected711RateIdRef.current = selectedShippingMethod;
 
@@ -869,6 +873,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                         };
 
                         try {
+                            localStorage.setItem('ccatSelectedCvsStore', JSON.stringify(selectedStoreInfo));
                             localStorage.setItem('selectedCvsStore', JSON.stringify(selectedStoreInfo));
                         } catch (e) {
                             console.error('無法將門市資訊儲存到 localStorage:', e);
@@ -880,6 +885,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                         const targetRate = selected711RateIdRef.current || selectedShippingMethod;
                         if (targetRate) {
                             try {
+                                localStorage.setItem('ccatSelected711ShippingRate', targetRate);
                                 localStorage.setItem('selected711ShippingRate', targetRate);
                             } catch (e) {}
                         }
@@ -900,10 +906,16 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                         }
                     };
 
+                    currentWin.ccatSetSelectedCvsStore = handleCallback;
                     currentWin.setSelectedCvsStore = handleCallback;
+                    currentWin.ccatSetSelectedCvsStore = handleCallback;
+                    currentWin.ccatSetSelectedCvsStore = handleCallback;
+                    currentWin.setSelectedCvsStore = handleCallback;
+                    window.ccatSetSelectedCvsStore = handleCallback;
                     window.setSelectedCvsStore = handleCallback;
                     try {
                         if (window.top && window.top !== window) {
+                            window.top.ccatSetSelectedCvsStore = handleCallback;
                             window.top.setSelectedCvsStore = handleCallback;
                         }
                     } catch (e) {}
@@ -916,7 +928,7 @@ export const Block = ({checkoutExtensionData, extensions}) => {
                             // 檢查 localStorage 是否有保存的數據
                             setTimeout(() => {
                                 try {
-                                    const savedStore = localStorage.getItem('selectedCvsStore');
+                                    const savedStore = localStorage.getItem('ccatSelectedCvsStore') || localStorage.getItem('selectedCvsStore');
                                     if (savedStore) {
                                         const storeData = JSON.parse(savedStore);
                                         if (storeData && storeData.storeId && (!storeInfo.storeId || storeInfo.storeId !== storeData.storeId)) {

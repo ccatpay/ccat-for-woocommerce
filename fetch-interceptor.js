@@ -1,9 +1,22 @@
 // fetch-interceptor.js
-// 使用 IIFE 和閉包來實現單例模式
+// 使用 IIFE 和閉包來實現單例模式，並安全支援 Request / URL 物件以避免與其他外掛衝突
 const fetchInterceptor = (function () {
+    function getResourceUrl(resource) {
+        if (typeof resource === 'string') {
+            return resource;
+        }
+        if (resource && typeof resource.url === 'string') {
+            return resource.url;
+        }
+        if (resource && typeof resource.toString === 'function') {
+            return resource.toString();
+        }
+        return '';
+    }
+
     function createInterceptor() {
         // 原始的 fetch 函數
-        const originalFetch = window.fetch;
+        const originalFetch = window.fetch.bind(window);
 
         // 攔截器列表
         const interceptors = [];
@@ -21,17 +34,17 @@ const fetchInterceptor = (function () {
                     const result = await interceptor(resource, config);
                     if (result) {
                         [resource, config] = result;
-                    } else {
                     }
                 } catch (error) {
                     console.error('執行攔截器時發生錯誤:', error);
                 }
             }
 
-            // 如果是 checkout 請求，記錄最終請求內容
-            if (resource.includes('/wc/store/v1/checkout') && config.body) {
+            // 如果是 checkout 請求，驗證最終請求內容
+            const resourceUrl = getResourceUrl(resource);
+            if (resourceUrl.includes('/wc/store/v1/checkout') && config && config.body && typeof config.body === 'string') {
                 try {
-                    const bodyObj = JSON.parse(config.body);
+                    JSON.parse(config.body);
                 } catch (e) {
                     console.error('無法解析請求體:', e);
                 }
@@ -62,7 +75,9 @@ const fetchInterceptor = (function () {
                     return;
                 }
 
-                interceptors.push(interceptor);
+                if (!interceptors.includes(interceptor)) {
+                    interceptors.push(interceptor);
+                }
             },
 
             // 取消註冊攔截器
@@ -74,6 +89,8 @@ const fetchInterceptor = (function () {
                 }
                 return false;
             },
+
+            getResourceUrl: getResourceUrl,
         };
     }
 
@@ -90,4 +107,8 @@ const fetchInterceptor = (function () {
     };
 })();
 
-window.fetchInterceptor = fetchInterceptor.getInstance();
+window.ccatFetchInterceptor = fetchInterceptor.getInstance();
+if (!window.fetchInterceptor) {
+    window.fetchInterceptor = window.ccatFetchInterceptor;
+}
+export default window.ccatFetchInterceptor;

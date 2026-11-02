@@ -176,7 +176,7 @@ abstract class CCATPAY_Shipping_Abstract extends WC_Shipping_Method {
         $has_coupon = $this->has_coupon();
 
         $total = WC()->cart->get_displayed_subtotal();
-        if ('incl' === WC()->cart->get_tax_price_display_mode) {
+        if ('incl' === WC()->cart->get_tax_price_display_mode()) {
             $total = round($total - (WC()->cart->get_cart_discount_total() + WC()->cart->get_cart_discount_tax_total()), wc_get_price_decimals());
         } else {
             $total = round($total - WC()->cart->get_cart_discount_total(), wc_get_price_decimals());

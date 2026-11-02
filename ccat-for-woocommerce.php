@@ -136,8 +136,36 @@ class CCATPAY_Payments {
 
 	/**
 	 * 檢查並新增台灣物流區域以及相關物流方法
+	 * 僅針對尚未自動註冊過的黑貓物流方法進行首次新增，避免覆蓋管理員手動移除的設定，並減少每次請求的資料庫查詢。
 	 */
 	public static function check_and_add_taiwan_shipping_zone(): void {
+		// 定義所有需要添加的物流方法.
+		$shipping_methods = array(
+			'ccatpay_shipping_cod',
+			'ccatpay_shipping_711_cod',
+			'ccatpay_shipping_prepaid',
+			'ccatpay_shipping_711_prepaid',
+			'ccatpay_shipping_cod_refrigerated',
+			'ccatpay_shipping_cod_frozen',
+			'ccatpay_shipping_prepaid_refrigerated',
+			'ccatpay_shipping_prepaid_frozen',
+			'ccatpay_shipping_711_cod_refrigerated',
+			'ccatpay_shipping_711_cod_frozen',
+			'ccatpay_shipping_711_prepaid_refrigerated',
+			'ccatpay_shipping_711_prepaid_frozen',
+		);
+
+		$initialized_methods = get_option( CCATPAYMENTS_PREFIX . '_initialized_shipping_methods', array() );
+		if ( ! is_array( $initialized_methods ) ) {
+			$initialized_methods = array();
+		}
+
+		// 若所有物流方法皆已初始化過，直接返回，避免每次請求重複查詢與重建.
+		$uninitialized_methods = array_diff( $shipping_methods, $initialized_methods );
+		if ( empty( $uninitialized_methods ) ) {
+			return;
+		}
+
 		// 檢查台灣區域是否存在.
 		$taiwan_zone_exists = false;
 		$taiwan_zone_id     = null;
@@ -163,22 +191,6 @@ class CCATPAY_Payments {
 			}
 		}
 
-		// 定義所有需要添加的物流方法.
-		$shipping_methods = array(
-			'ccatpay_shipping_cod',
-			'ccatpay_shipping_711_cod',
-			'ccatpay_shipping_prepaid',
-			'ccatpay_shipping_711_prepaid',
-			'ccatpay_shipping_cod_refrigerated',
-			'ccatpay_shipping_cod_frozen',
-			'ccatpay_shipping_prepaid_refrigerated',
-			'ccatpay_shipping_prepaid_frozen',
-			'ccatpay_shipping_711_cod_refrigerated',
-			'ccatpay_shipping_711_cod_frozen',
-			'ccatpay_shipping_711_prepaid_refrigerated',
-			'ccatpay_shipping_711_prepaid_frozen',
-		);
-
 		if ( $taiwan_zone_exists ) {
 			// 如果台灣區域已存在，獲取該區域.
 			$zone = new WC_Shipping_Zone( $taiwan_zone_id );
@@ -192,8 +204,8 @@ class CCATPAY_Payments {
 				$existing_method_ids[] = $existing_method->id;
 			}
 
-			// 添加尚未存在的物流方法.
-			foreach ( $shipping_methods as $method_id ) {
+			// 僅添加尚未初始化過且尚未存在的物流方法.
+			foreach ( $uninitialized_methods as $method_id ) {
 				if ( ! in_array( $method_id, $existing_method_ids, true ) ) {
 					$zone->add_shipping_method( $method_id );
 				}
@@ -210,6 +222,8 @@ class CCATPAY_Payments {
 				$zone->add_shipping_method( $method_id );
 			}
 		}
+
+		update_option( CCATPAYMENTS_PREFIX . '_initialized_shipping_methods', $shipping_methods, true );
 	}
 
 	/**
@@ -276,6 +290,7 @@ class CCATPAY_Payments {
 		}
 		if ( self::is_shipping_enabled() ) {
 			require_once '711-checkout-block/class-ccatpay-711-blocks-integration.php';
+			CCATPAY_711_Blocks_Integration::init();
 			add_action(
 				'woocommerce_blocks_checkout_block_registration',
 				function ( $integration_registry ) {
@@ -294,8 +309,12 @@ class CCATPAY_Payments {
 		require_once 'includes/class-ccatpay-analytics-orders-export.php';
 		CCATPAY_Analytics_Orders_Export::init();
 
-		if ( class_exists( 'WC_Payment_Gateway' ) && self::is_ccat_enabled() ) {
+		// 確保基礎閘道抽象類別載入，供物流 API 授權與門市常數使用.
+		if ( class_exists( 'WC_Payment_Gateway' ) && ( self::is_ccat_enabled() || self::is_shipping_enabled() ) ) {
 			require_once 'includes/class-ccatpay-gateway-abstract.php';
+		}
+
+		if ( class_exists( 'WC_Payment_Gateway' ) && self::is_ccat_enabled() ) {
 			require_once 'includes/class-ccatpay-gateway-cvs-abstract.php';
 			// require_once 'includes/class-ccatpay-gateway-credit-card.php';
 			require_once 'includes/class-ccatpay-gateway-chinatrust.php';
