@@ -185,6 +185,7 @@ Features:
 = 2.10 =
 * 新增： WooCommerce 後台「分析 (Analytics) > 訂單 (Orders)」下載 CSV 功能增加黑貓物流資訊。
 * 新增： 後台「黑貓Pay」設定新增 ATM / ibon 繳款期限天數自訂欄位，支援設定 0 天（當天有效）且預設為 7 天。
+* 改進： 改善程式碼變數名稱的獨特性，避免跟其他外掛有衝突。
 
 
 == Third-party Resources ==
