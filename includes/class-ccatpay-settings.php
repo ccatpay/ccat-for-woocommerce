@@ -138,6 +138,13 @@ class CCATPAY_Settings {
 				'default'     => '',
 			),
 			array(
+				'name'    => __( '信任反向代理 / WAF 標頭', 'ccat-for-woocommerce' ),
+				'type'    => 'checkbox',
+				'desc'    => __( '若網站有使用 Cloudflare 或其他 WAF / 反向代理，請勾選此項以從代理標頭 (CF-Connecting-IP / X-Real-IP / X-Forwarded-For) 取得真實來源 IP。預設不勾選（僅檢查 REMOTE_ADDR）。', 'ccat-for-woocommerce' ),
+				'id'      => CCATPAYMENTS_PREFIX . '_trust_proxy_headers',
+				'default' => 'no',
+			),
+			array(
 				'name' => __( '寄件人姓名', 'ccat-for-woocommerce'),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人姓名', 'ccat-for-woocommerce'),

@@ -812,7 +812,80 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 
 
 	/**
-	 * 驗證 APN 來源 IP 是否在白名單內
+	 * 檢查 IP 是否匹配指定 IP 或 CIDR 網段（支援 IPv4 與 IPv6）
+	 *
+	 * @param string $ip 待檢查的 IP.
+	 * @param string $cidr 單一 IP 或 CIDR 網段.
+	 * @return bool
+	 */
+	public function ip_in_cidr( string $ip, string $cidr ): bool {
+		if ( false === strpos( $cidr, '/' ) ) {
+			return $ip === $cidr;
+		}
+		list( $subnet, $bits ) = explode( '/', $cidr, 2 );
+		$ip_bin     = @inet_pton( $ip );
+		$subnet_bin = @inet_pton( $subnet );
+		if ( false === $ip_bin || false === $subnet_bin || strlen( $ip_bin ) !== strlen( $subnet_bin ) ) {
+			return false;
+		}
+		$bits     = (int) $bits;
+		$max_bits = strlen( $ip_bin ) * 8;
+		if ( $bits < 0 || $bits > $max_bits ) {
+			return false;
+		}
+		$bytes     = intdiv( $bits, 8 );
+		$remainder = $bits % 8;
+		if ( $bytes > 0 && substr( $ip_bin, 0, $bytes ) !== substr( $subnet_bin, 0, $bytes ) ) {
+			return false;
+		}
+		if ( $remainder > 0 ) {
+			$mask = ( 0xFF << ( 8 - $remainder ) ) & 0xFF;
+			if ( ( ord( $ip_bin[ $bytes ] ) & $mask ) !== ( ord( $subnet_bin[ $bytes ] ) & $mask ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 取得 APN 請求之客戶端真實 IP（若啟用信任代理標頭，則依序檢查代理標頭）
+	 *
+	 * @return string
+	 */
+	public function get_apn_client_ip(): string {
+		$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? trim( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) ) : '';
+		$client_ip   = $remote_addr;
+
+		if ( 'yes' === get_option( CCATPAYMENTS_PREFIX . '_trust_proxy_headers', 'no' ) ) {
+			$headers = array(
+				'HTTP_CF_CONNECTING_IP',
+				'HTTP_X_REAL_IP',
+				'HTTP_X_FORWARDED_FOR',
+			);
+
+			foreach ( $headers as $header ) {
+				if ( ! empty( $_SERVER[ $header ] ) ) {
+					$raw_value = trim( sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) ) );
+					if ( 'HTTP_X_FORWARDED_FOR' === $header ) {
+						$parts        = explode( ',', $raw_value );
+						$candidate_ip = trim( $parts[0] );
+					} else {
+						$candidate_ip = $raw_value;
+					}
+
+					if ( filter_var( $candidate_ip, FILTER_VALIDATE_IP ) ) {
+						$client_ip = $candidate_ip;
+						break;
+					}
+				}
+			}
+		}
+
+		return (string) apply_filters( 'ccatpay_apn_client_ip', $client_ip, $this );
+	}
+
+	/**
+	 * 驗證 APN 來源 IP 是否在白名單內（支援單一 IP 與 CIDR 網段）
 	 *
 	 * @return ?WP_Error
 	 */
@@ -823,16 +896,21 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 		}
 
 		$allowed_ips = array_filter( array_map( 'trim', explode( ',', (string) $allowed_ips_raw ) ) );
+		$client_ip   = $this->get_apn_client_ip();
 
-		$client_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$client_ip = (string) apply_filters( 'ccatpay_apn_client_ip', $client_ip, $this );
-
-		if ( '' === $client_ip || ! in_array( $client_ip, $allowed_ips, true ) ) {
-			CCATPAY_Payments::log( 'APN rejected: unauthorized source IP ' . $client_ip );
+		if ( '' === $client_ip ) {
+			CCATPAY_Payments::log( 'APN rejected: unauthorized source IP (empty)' );
 			return new WP_Error( 403, 'Forbidden IP' );
 		}
 
-		return null;
+		foreach ( $allowed_ips as $allowed_ip ) {
+			if ( $this->ip_in_cidr( $client_ip, $allowed_ip ) ) {
+				return null;
+			}
+		}
+
+		CCATPAY_Payments::log( 'APN rejected: unauthorized source IP ' . $client_ip );
+		return new WP_Error( 403, 'Forbidden IP' );
 	}
 
 	/**
