@@ -131,6 +131,13 @@ class CCATPAY_Settings {
 				),
 			),
 			array(
+				'name'        => __( '允許的付款通知(APN)來源IP', 'ccat-for-woocommerce' ),
+				'type'        => 'text',
+				'desc'        => __( '設定允許接收黑貓Pay付款通知 (APN Callback) 的來源 IP 白名單，多個 IP 請以半形逗號 (,) 分隔（例如：20.212.231.61）。預設留空表示不阻擋來源 IP。', 'ccat-for-woocommerce' ),
+				'id'          => CCATPAYMENTS_PREFIX . '_allowed_apn_ips',
+				'default'     => '',
+			),
+			array(
 				'name' => __( '寄件人姓名', 'ccat-for-woocommerce'),
 				'type' => 'text',
 				'desc' => __( '請輸入寄件人姓名', 'ccat-for-woocommerce'),

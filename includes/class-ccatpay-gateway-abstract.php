@@ -671,11 +671,18 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 
 		$data  = json_decode( $request->get_body(), true );
 		$order = $this->get_order( $data['order_no'] );
+		if ( ! $order ) {
+			return new WP_REST_Response( 'Order not found', 404 );
+		}
 		$this->add_apn_notification( $order, $data );
 		$status = strtoupper( $data['status'] );
 
 		switch ( $status ) {
 			case 'B':
+				if ( $order->is_paid() ) {
+					$note = esc_html__( '重複收到授權完成通知，略過狀態變更', 'ccat-for-woocommerce' );
+					break;
+				}
 				$note = esc_html__( '授權完成', 'ccat-for-woocommerce');
 				$order->set_payment_method( $this );
 				$order->update_meta_data( self::ORDER_NO, $data['order_no'] );
@@ -805,6 +812,30 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 
 
 	/**
+	 * 驗證 APN 來源 IP 是否在白名單內
+	 *
+	 * @return ?WP_Error
+	 */
+	public function verify_apn_source_ip(): ?WP_Error {
+		$allowed_ips_raw = get_option( CCATPAYMENTS_PREFIX . '_allowed_apn_ips', '' );
+		if ( trim( (string) $allowed_ips_raw ) === '' ) {
+			return null;
+		}
+
+		$allowed_ips = array_filter( array_map( 'trim', explode( ',', (string) $allowed_ips_raw ) ) );
+
+		$client_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$client_ip = (string) apply_filters( 'ccatpay_apn_client_ip', $client_ip, $this );
+
+		if ( '' === $client_ip || ! in_array( $client_ip, $allowed_ips, true ) ) {
+			CCATPAY_Payments::log( 'APN rejected: unauthorized source IP ' . $client_ip );
+			return new WP_Error( 403, 'Forbidden IP' );
+		}
+
+		return null;
+	}
+
+	/**
 	 * Extracts and validates the request data.
 	 *
 	 * @param WP_REST_Request $request .
@@ -812,6 +843,11 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 	 * @return null|WP_Error
 	 */
 	protected function handle_payment_validation( WP_REST_Request $request ): ?WP_Error {
+		$ip_error = $this->verify_apn_source_ip();
+		if ( $ip_error instanceof WP_Error ) {
+			return $ip_error;
+		}
+
 		$body = $request->get_body();
 		$data = json_decode( $body, true );
 
@@ -822,10 +858,10 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 			return new WP_Error( 400, 'Invalid JSON' );
 		}
 
-		$required_fields = array( 'api_id', 'trans_id', 'amount', 'status', 'nonce', 'checksum' );
+		$required_fields = array( 'api_id', 'trans_id', 'order_no', 'amount', 'status', 'nonce', 'checksum' );
 
 		foreach ( $required_fields as $field ) {
-			if ( empty( $data[ $field ] ) ) {
+			if ( ! isset( $data[ $field ] ) || '' === trim( (string) $data[ $field ] ) ) {
 				return new WP_Error( 400, "Missing field: $field" );
 			}
 		}
@@ -838,8 +874,46 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 			$data['nonce']
 		);
 
-		if ( $calculated_checksum !== $data['checksum'] ) {
+		if ( ! hash_equals( $calculated_checksum, (string) $data['checksum'] ) ) {
+			CCATPAY_Payments::log( 'APN rejected: checksum verification failed' );
 			return new WP_Error( 400, 'Checksum verification failed' );
+		}
+
+		// 防線 1（核對商店代號 api_id）.
+		$expected_account = trim( (string) $this->get_account() );
+		if ( empty( $expected_account ) || ! hash_equals( $expected_account, trim( (string) $data['api_id'] ) ) ) {
+			CCATPAY_Payments::log( 'APN rejected: merchant ID mismatch' );
+			return new WP_Error( 400, 'Merchant ID mismatch' );
+		}
+
+		// 防線 4（核對訂單存在與建單紀錄）.
+		$order = $this->get_order( (string) $data['order_no'] );
+		if ( ! $order ) {
+			CCATPAY_Payments::log( 'APN rejected: order not found for ' . $data['order_no'] );
+			return new WP_Error( 404, 'Order not found' );
+		}
+
+		if ( empty( $order->get_meta( self::META_RESPONSE_DATA ) ) ) {
+			CCATPAY_Payments::log( 'APN rejected: order has no payment initialization record for order #' . $order->get_id() );
+			return new WP_Error( 400, 'Order has no payment initialization record' );
+		}
+
+		// 防線 2（核對訂單金額 amount 與 pay_amount）.
+		$status = strtoupper( trim( (string) $data['status'] ) );
+		if ( 'J' !== $status ) {
+			$expected_amount = (int) round( (float) $order->get_total() );
+			$received_amount = (int) round( (float) $data['amount'] );
+			if ( ! is_numeric( $data['amount'] ) || $received_amount <= 0 || $received_amount !== $expected_amount ) {
+				CCATPAY_Payments::log( 'APN rejected: order amount mismatch for order #' . $order->get_id() );
+				return new WP_Error( 400, 'Order amount mismatch' );
+			}
+
+			if ( isset( $data['pay_amount'] ) && '' !== trim( (string) $data['pay_amount'] ) ) {
+				if ( ! is_numeric( $data['pay_amount'] ) || (int) round( (float) $data['pay_amount'] ) !== $expected_amount ) {
+					CCATPAY_Payments::log( 'APN rejected: paid amount mismatch for order #' . $order->get_id() );
+					return new WP_Error( 400, 'Paid amount mismatch' );
+				}
+			}
 		}
 
 		return null;
@@ -886,11 +960,17 @@ abstract class CCATPAY_Gateway_Abstract extends WC_Payment_Gateway {
 
 		$datetime = new DateTime( 'now', new DateTimeZone( 'Asia/Taipei' ) );
 
+		$chars       = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$random_code = '';
+		for ( $i = 0; $i < 4; $i++ ) {
+			$random_code .= $chars[ wp_rand( 0, 35 ) ];
+		}
+
 		return sprintf(
-			'CCAT%s%06d%02d',
-			$datetime->format( 'Ymd' ),
+			'CCAT%s%06d%s',
+			$datetime->format( 'ymd' ),
 			$order->get_id(),
-			$attempt
+			$random_code
 		);
 	}
 

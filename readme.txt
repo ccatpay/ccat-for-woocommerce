@@ -7,7 +7,7 @@ Tested up to: 7.1
 Requires PHP: 8.3
 WC requires at least: 9.8
 WC tested up to: 11.0
-Stable tag: 2.10
+Stable tag: 2.11
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -186,6 +186,11 @@ Features:
 * 新增： WooCommerce 後台「分析 (Analytics) > 訂單 (Orders)」下載 CSV 功能增加黑貓物流資訊。
 * 新增： 後台「黑貓Pay」設定新增 ATM / ibon 繳款期限天數自訂欄位，支援設定 0 天（當天有效）且預設為 7 天。
 * 改進： 改善程式碼變數名稱的獨特性，避免跟其他外掛有衝突。
+
+= 2.11 =
+* 修正： 強化付款通知 (APN Callback) 安全性驗證，強制核對商店代號 (api_id)、訂單金額 (amount / pay_amount) 與建單紀錄。
+* 修正： 訂單編號 (order_no) 加入隨機碼防止外部推算，並防止已付款訂單被退回未付款或重複觸發完成付款。
+* 新增： 後台「黑貓Pay」設定新增「允許的付款通知(APN)來源IP」白名單欄位（預設空白不阻擋來源 IP）。
 
 
 == Third-party Resources ==

@@ -141,6 +141,11 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 	 * @return WP_Error|null Returns an instance of WP_Error if validation fails; otherwise, null.
 	 */
 	protected function handle_payment_validation( WP_REST_Request $request ): ?WP_Error {
+		$ip_error = $this->verify_apn_source_ip();
+		if ( $ip_error instanceof WP_Error ) {
+			return $ip_error;
+		}
+
 		$body = $request->get_body();
 		$data = json_decode( $body, true );
 
@@ -170,7 +175,10 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 			}
 		}
 
-		$hash_base = $this->get_chk_code();
+		$hash_base = trim( (string) $this->get_chk_code() );
+		if ( empty( $hash_base ) ) {
+			return new WP_Error( 400, 'Missing check code configuration' );
+		}
 
 		// 組合檢核字串.
 		$check_string = implode(
@@ -190,7 +198,7 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 
 		$calculated_chk = md5( $check_string );
 
-		if ( $calculated_chk !== $data['chk'] ) {
+		if ( ! hash_equals( $calculated_chk, (string) $data['chk'] ) ) {
 			CCATPAY_Payments::log( 'Checksum verification failed. Expected: ' . $calculated_chk . ', Received: ' . $data['chk'] );
 
 			return new WP_Error( 400, 'Checksum verification failed' );
@@ -198,6 +206,18 @@ abstract class CCATPAY_Gateway_App_Abstract extends CCATPAY_Gateway_Abstract {
 
 		if ( 'OK' !== $data['ret'] ) {
 			return new WP_Error( 400, 'Transaction not successful' );
+		}
+
+		$order = $this->get_order( (string) $data['cust_order_no'] );
+		if ( ! $order ) {
+			CCATPAY_Payments::log( 'APN rejected: order not found for ' . $data['cust_order_no'] );
+			return new WP_Error( 404, 'Order not found' );
+		}
+		$expected_amount = (int) round( (float) $order->get_total() );
+		$received_amount = (int) round( (float) $data['order_amount'] );
+		if ( ! is_numeric( $data['order_amount'] ) || $received_amount <= 0 || $received_amount !== $expected_amount ) {
+			CCATPAY_Payments::log( 'APN rejected: order_amount mismatch for order #' . $order->get_id() );
+			return new WP_Error( 400, 'Order amount mismatch' );
 		}
 
 		return null;

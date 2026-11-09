@@ -222,19 +222,30 @@ abstract class CCATPAY_Gateway_Cvs_Abstract extends CCATPAY_Gateway_Abstract {
 
 		$data  = json_decode( $request->get_body(), true );
 		$order = $this->get_order( $data['order_no'] );
+		if ( ! $order ) {
+			return new WP_REST_Response( 'Order not found', 404 );
+		}
 		$this->add_apn_notification( $order, $data );
 		$status = strtoupper( $data['status'] );
 
 		switch ( $status ) {
 			case 'A':
-				$note = __( '等待繳款人繳納', 'ccat-for-woocommerce');
-				$order->update_status( 'pending' );
+				if ( $order->is_paid() ) {
+					$note = __( '收到等待繳款通知，但訂單已付款完成，略過狀態變更', 'ccat-for-woocommerce' );
+				} else {
+					$note = __( '等待繳款人繳納', 'ccat-for-woocommerce' );
+					$order->update_status( 'pending' );
+				}
 				break;
 
 			case 'B':
-				$note = __( '繳款人已繳納', 'ccat-for-woocommerce');
-				$order->set_payment_method( $this );
-				$order->payment_complete();
+				if ( $order->is_paid() ) {
+					$note = __( '重複收到已繳納通知，略過狀態變更', 'ccat-for-woocommerce' );
+				} else {
+					$note = __( '繳款人已繳納', 'ccat-for-woocommerce' );
+					$order->set_payment_method( $this );
+					$order->payment_complete();
+				}
 				break;
 
 			case 'C':
